@@ -22,10 +22,10 @@ public class CoralService {
     
     public CoralDTO getCoralById(Long id) {
         try {
-            String url = speciesServiceUrl + "/api/corals/" + id;
+            String url = speciesServiceUrl + "/api/species/corals/" + id;
             return restTemplate.getForObject(url, CoralDTO.class);
         } catch (HttpClientErrorException.NotFound e) {
-            throw new ResourceNotFoundException("Coral not found with id: " + id);
+            throw new ResourceNotFoundException("Corallo non trovato con id: " + id);
         }
     }
 }

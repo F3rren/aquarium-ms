@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class FishDTO {
-    private int id;
+    private Long id;
     private String commonName;
     private String scientificName;
     private String family;

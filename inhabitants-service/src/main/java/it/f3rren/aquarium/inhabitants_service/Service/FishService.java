@@ -22,10 +22,10 @@ public class FishService {
     
     public FishDTO getFishById(Long id) {
         try {
-            String url = speciesServiceUrl + "/api/fish/" + id;
+            String url = speciesServiceUrl + "/api/species/fishs/" + id;
             return restTemplate.getForObject(url, FishDTO.class);
         } catch (HttpClientErrorException.NotFound e) {
-            throw new ResourceNotFoundException("Fish not found with id: " + id);
+            throw new ResourceNotFoundException("Pesce non trovato con id: " + id);
         }
     }
 }
