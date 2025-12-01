@@ -1,13 +1,13 @@
-package it.f3rren.aquarium.water_parameters_service;
+package it.f3rren.aquarium.parameters_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class WaterParametersServiceApplication {
+public class ParametersServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(WaterParametersServiceApplication.class, args);
+		SpringApplication.run(ParametersServiceApplication.class, args);
 	}
 
 }

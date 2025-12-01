@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.water_parameters_service.Controller;
+package it.f3rren.aquarium.parameters_service.Controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import it.f3rren.aquarium.water_parameters_service.Model.Parameter;
-import it.f3rren.aquarium.water_parameters_service.Service.ParameterService;
+import it.f3rren.aquarium.parameters_service.Model.Parameter;
+import it.f3rren.aquarium.parameters_service.Service.ParameterService;
 
 @RestController
 @RequestMapping("/api/water-parameters")
