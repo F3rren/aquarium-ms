@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>it.f3rren.aquarium</groupId>
-	<artifactId>aquariums-service</artifactId>
+	<artifactId>inhabitants-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>aquariums-service</name>
-	<description>Aquariums service for aquarium microservice</description>
+	<name>inhabitants-service</name>
+	<description>Inhabitantsservice for aquarium microservice</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -38,6 +38,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
