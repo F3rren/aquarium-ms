@@ -1,0 +1,160 @@
+services:
+  # Core Services
+  aquariums-service:
+    build:
+      context: ./core/aquariums-service
+      dockerfile: Dockerfile
+    container_name: aquariums-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8081
+    ports:
+      - "8081:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - aquarium-network
+
+  # Inhabitants Services
+  inhabitants-service:
+    build:
+      context: ./inhabitants/inhabitants-service
+      dockerfile: Dockerfile
+    container_name: inhabitants-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8082
+      SPECIES_SERVICE_URL: http://species-service:8083
+    ports:
+      - "8082:8082"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - aquarium-network
+
+  species-service:
+    build:
+      context: ./inhabitants/species-service
+      dockerfile: Dockerfile
+    container_name: species-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8083
+    ports:
+      - "8083:8083"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - aquarium-network
+
+  # Maintenance Service
+  maintenance-service:
+    build:
+      context: ./maintenance/maintenance-service
+      dockerfile: Dockerfile
+    container_name: maintenance-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8084
+      SERVICES_WATER_PARAMETERS_URL: http://parameters-service:8085/api
+      SERVICES_MANUAL_PARAMETERS_URL: http://manual-parameters-service:8086/api
+      SERVICES_TARGET_PARAMETERS_URL: http://target-parameters-service:8087/api
+    ports:
+      - "8084:8084"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - aquarium-network
+
+  # Parameters Services
+  parameters-service:
+    build:
+      context: ./parameters/parameters-service
+      dockerfile: Dockerfile
+    container_name: parameters-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8085
+    ports:
+      - "8085:8085"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - aquarium-network
+
+  manual-parameters-service:
+    build:
+      context: ./parameters/manual_parameters-service
+      dockerfile: Dockerfile
+    container_name: manual-parameters-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8086
+    ports:
+      - "8086:8086"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - aquarium-network
+
+  target-parameters-service:
+    build:
+      context: ./parameters/target_parameter-service
+      dockerfile: Dockerfile
+    container_name: target-parameters-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8087
+    ports:
+      - "8087:8087"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - aquarium-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./gateway/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    environment:
+      SERVER_PORT: 8080
+      AQUARIUMS_SERVICE_URL: http://aquariums-service:8081
+      INHABITANTS_SERVICE_URL: http://inhabitants-service:8082
+      SPECIES_SERVICE_URL: http://species-service:8083
+      MAINTENANCE_SERVICE_URL: http://maintenance-service:8084
+      PARAMETERS_SERVICE_URL: http://parameters-service:8085
+      MANUAL_PARAMETERS_SERVICE_URL: http://manual-parameters-service:8086
+      TARGET_PARAMETERS_SERVICE_URL: http://target-parameters-service:8087
+    ports:
+      - "8080:8080"
+    depends_on:
+      - aquariums-service
+      - inhabitants-service
+      - species-service
+      - maintenance-service
+      - parameters-service
+      - manual-parameters-service
+      - target-parameters-service
+    networks:
+      - aquarium-network
+
+networks:
+  aquarium-network:
+    driver: bridge
+
