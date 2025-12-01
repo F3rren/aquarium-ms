@@ -1,4 +1,22 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive",
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.project.sourcePaths": [
+        "core/aquariums-service/src/main/java",
+        "inhabitants/inhabitants-service/src/main/java",
+        "inhabitants/species-service/src/main/java",
+        "maintenance/maintenance-service/src/main/java",
+        "parameters/manual_parameters-service/src/main/java",
+        "parameters/target_parameter-service/src/main/java",
+        "parameters/water_parameters-service/src/main/java"
+    ],
+    "java.project.referencedLibraries": [
+        "core/aquariums-service/target/**/*.jar",
+        "inhabitants/inhabitants-service/target/**/*.jar",
+        "inhabitants/species-service/target/**/*.jar",
+        "maintenance/maintenance-service/target/**/*.jar",
+        "parameters/manual_parameters-service/target/**/*.jar",
+        "parameters/target_parameter-service/target/**/*.jar",
+        "parameters/water_parameters-service/target/**/*.jar"
+    ]
 }
