@@ -11,10 +11,10 @@ import lombok.*;
 public class InhabitantDetailsDTO {
 
     private Long id;
-    private String type; // "fish" o "coral"
+    private String type;
     private String commonName;
     private String scientificName;
     private Integer quantity;
     private LocalDateTime addedDate;
-    private Object details; // Fish o Coral completo
+    private Object details;
 }
