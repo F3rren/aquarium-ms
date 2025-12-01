@@ -18,5 +18,6 @@
         "parameters/manual_parameters-service/target/**/*.jar",
         "parameters/target_parameter-service/target/**/*.jar",
         "parameters/water_parameters-service/target/**/*.jar"
-    ]
+    ],
+    "java.debug.settings.onBuildFailureProceed": true
 }
