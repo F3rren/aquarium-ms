@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import it.f3rren.aquarium.aquariums_service.Model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.Service.AquariumService;
 
@@ -41,41 +42,40 @@ public class AquariumController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
+
     @PostMapping
     public ResponseEntity<?> createAquarium(@RequestBody Aquarium aquarium) {
-        Aquarium created = aquariumService.createAquarium(aquarium);
-        
+        Aquarium savedAquarium = aquariumService.createAquarium(aquarium);
+
         Map<String, Object> response = Map.of(
-            "success", true,
-            "message", "Acquario creato con successo",
-            "data", created
-        );
-        
+                "success", true,
+                "message", "Acquario creato con successo",
+                "data", savedAquarium);
+
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateAquarium(@PathVariable Long id, @RequestBody Aquarium aquarium) {
-        Aquarium updated = aquariumService.updateAquarium(id, aquarium);
-        
+        Aquarium updatedAquarium = aquariumService.updateAquarium(id, aquarium);
+
         Map<String, Object> response = Map.of(
-            "success", true,
-            "message", "Acquario aggiornato con successo",
-            "data", updated
-        );
-        
+                "success", true,
+                "message", "Acquario modificato con successo",
+                "data", updatedAquarium);
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAquarium(@PathVariable Long id) {
         aquariumService.deleteAquarium(id);
-        
+
         Map<String, Object> response = Map.of(
-            "success", true,
-            "message", "Acquario eliminato con successo"
-        );
-        
+                "success", true,
+                "message", "Acquario eliminato con successo");
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }
