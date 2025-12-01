@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.water_parameters_service.Model;
+package it.f3rren.aquarium.parameters_service.Model;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "water_parameters")
+@Table(name = "parameters")
 public class Parameter {
     
     @Id

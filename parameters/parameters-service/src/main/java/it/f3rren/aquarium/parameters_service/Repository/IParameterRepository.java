@@ -1,11 +1,11 @@
-package it.f3rren.aquarium.water_parameters_service.Repository;
+package it.f3rren.aquarium.parameters_service.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import it.f3rren.aquarium.water_parameters_service.Model.Parameter;
+import it.f3rren.aquarium.parameters_service.Model.Parameter;
 
 public interface IParameterRepository extends JpaRepository<Parameter, Long> {
     
