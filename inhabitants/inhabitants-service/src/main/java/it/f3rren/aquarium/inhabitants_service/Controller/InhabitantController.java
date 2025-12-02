@@ -21,7 +21,7 @@ import it.f3rren.aquarium.inhabitants_service.Model.Inhabitant;
 import it.f3rren.aquarium.inhabitants_service.Service.InhabitantService;
 
 @RestController
-@RequestMapping("api/aquariums")
+@RequestMapping("/aquariums")
 @Tag(name = "Inhabitant", description = "API for managing inhabitants")
 public class InhabitantController {
 

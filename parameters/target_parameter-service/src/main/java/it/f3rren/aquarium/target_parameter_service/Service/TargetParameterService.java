@@ -25,11 +25,7 @@ public class TargetParameterService {
             existing.setPh(targetParameter.getPh());
             existing.setSalinity(targetParameter.getSalinity());
             existing.setOrp(targetParameter.getOrp());
-            existing.setCalcium(targetParameter.getCalcium());
-            existing.setMagnesium(targetParameter.getMagnesium());
-            existing.setKh(targetParameter.getKh());
-            existing.setNitrate(targetParameter.getNitrate());
-            existing.setPhosphate(targetParameter.getPhosphate());
+            
             return targetParameterRepository.save(existing);
         } else {
             // Crea nuovi parametri target

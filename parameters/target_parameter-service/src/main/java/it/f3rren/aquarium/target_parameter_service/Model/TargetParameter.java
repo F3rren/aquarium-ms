@@ -30,19 +30,4 @@ public class TargetParameter {
     
     @Column(name = "orp")
     private Double orp;
-    
-    @Column(name = "calcium")
-    private Double calcium;
-    
-    @Column(name = "magnesium")
-    private Double magnesium;
-    
-    @Column(name = "kh")
-    private Double kh;
-    
-    @Column(name = "nitrate")
-    private Double nitrate;
-    
-    @Column(name = "phosphate")
-    private Double phosphate;
 }
