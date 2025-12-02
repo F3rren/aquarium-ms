@@ -15,7 +15,7 @@ import it.f3rren.aquarium.parameters_service.Model.Parameter;
 import it.f3rren.aquarium.parameters_service.Service.ParameterService;
 
 @RestController
-@RequestMapping("/api/water-parameters")
+@RequestMapping("/aquariums/{id}/parameters")
 @Tag(name = "WaterParameter", description = "API for managing water parameters")
 public class WaterParameterController {
     
@@ -24,8 +24,8 @@ public class WaterParameterController {
 
     @PostMapping
     @Operation(summary = "Add a new water parameter", description = "Add a new water parameter for a specific aquarium")
-    public ResponseEntity<?> addParameter(@RequestBody Parameter parameter) {
-        Parameter saved = parameterService.saveParameter(parameter.getAquariumId(), parameter);
+    public ResponseEntity<?> addParameter(@PathVariable Long id, @RequestBody Parameter parameter) {
+        Parameter saved = parameterService.saveParameter(id, parameter);
         
         Map<String, Object> response = Map.of(
             "success", true,
@@ -36,20 +36,20 @@ public class WaterParameterController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/aquarium/{aquariumId}")
+    @GetMapping
     @Operation(summary = "Get water parameters for an aquarium", description = "Retrieve water parameters for a specific aquarium with an optional limit")
     public ResponseEntity<?> getParametersByAquarium(
-            @PathVariable Long aquariumId,
+            @PathVariable Long id,
             @RequestParam(required = false, defaultValue = "10") Integer limit) {
         
-        List<Parameter> parameters = parameterService.getParametersByAquariumId(aquariumId, limit);
+        List<Parameter> parameters = parameterService.getParametersByAquariumId(id, limit);
 
         Map<String, Object> response = Map.of(
             "success", true,
             "message", "Parameters retrieved successfully",
             "data", parameters,
             "metadata", Map.of(
-                "aquariumId", aquariumId,
+                "aquariumId", id,
                 "count", parameters.size(),
                 "limit", limit
             )
@@ -58,10 +58,10 @@ public class WaterParameterController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/aquarium/{aquariumId}/latest")
+    @GetMapping("/latest")
     @Operation(summary = "Get the latest water parameter for an aquarium", description = "Retrieve the most recent water parameter for a specific aquarium")
-    public ResponseEntity<?> getLatestParameter(@PathVariable Long aquariumId) {
-        Parameter latest = parameterService.getLatestParameter(aquariumId);
+    public ResponseEntity<?> getLatestParameter(@PathVariable Long id) {
+        Parameter latest = parameterService.getLatestParameter(id);
         
         Map<String, Object> response = Map.of(
             "success", true,
@@ -72,10 +72,10 @@ public class WaterParameterController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
-    @GetMapping("/aquarium/{aquariumId}/history")
+    @GetMapping("/history")
     @Operation(summary = "Get water parameters history for an aquarium", description = "Retrieve water parameters history for a specific aquarium based on period or date range")
     public ResponseEntity<?> getParametersHistory(
-            @PathVariable Long aquariumId,
+            @PathVariable Long id,
             @RequestParam(required = false) String period,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
@@ -83,13 +83,13 @@ public class WaterParameterController {
         List<Parameter> parameters;
         
         if (period != null) {
-            parameters = parameterService.getParametersByPeriod(aquariumId, period);
+            parameters = parameterService.getParametersByPeriod(id, period);
         } else if (from != null && to != null) {
             LocalDateTime fromDate = LocalDateTime.parse(from);
             LocalDateTime toDate = LocalDateTime.parse(to);
-            parameters = parameterService.getParametersHistory(aquariumId, fromDate, toDate);
+            parameters = parameterService.getParametersHistory(id, fromDate, toDate);
         } else {
-            parameters = parameterService.getParametersByPeriod(aquariumId, "week");
+            parameters = parameterService.getParametersByPeriod(id, "week");
         }
 
         Map<String, Object> response = Map.of(

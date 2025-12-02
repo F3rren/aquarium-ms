@@ -17,7 +17,7 @@ import it.f3rren.aquarium.species.Model.Coral;
 import it.f3rren.aquarium.species.Service.CoralService;
 
 @RestController
-@RequestMapping("api/species/corals")
+@RequestMapping("/species/corals")
 @Tag(name = "Coral", description = "API for managing corals")
 public class CoralController {
  
