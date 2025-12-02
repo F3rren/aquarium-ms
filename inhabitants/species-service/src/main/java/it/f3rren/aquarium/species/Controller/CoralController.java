@@ -11,17 +11,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.species.Model.Coral;
 import it.f3rren.aquarium.species.Service.CoralService;
 
 @RestController
 @RequestMapping("api/species/corals")
+@Tag(name = "Coral", description = "API for managing corals")
 public class CoralController {
  
     @Autowired
     public CoralService coralService;
 
     @GetMapping
+    @Operation(summary = "Get all corals", description = "Retrieve a list of all corals")
     public ResponseEntity<?> getAllCorals() {
         List<Coral> corals = coralService.getAllCorals();
         
@@ -35,6 +39,7 @@ public class CoralController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get a coral by ID", description = "Retrieve details of a specific coral by its ID")
     public ResponseEntity<?> getCoralById(@PathVariable Long id) {
         Coral coral = coralService.getCoralById(id);
         
