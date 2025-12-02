@@ -7,47 +7,47 @@ spring:
   cloud:
     gateway:
       routes:
-        # Aquariums Service
-        - id: aquariums-service
-          uri: http://aquariums-service:8081
+        # Maintenance Service - must be before aquariums-service for specific path matching
+        - id: maintenance-service
+          uri: http://maintenance-service:8084
           predicates:
-            - Path=/api/aquariums/**
-          
-        # Inhabitants Service
+            - Path=/aquariums/*/tasks/**
+            
+        # Inhabitants Service - must be before aquariums-service for specific path matching
         - id: inhabitants-service
           uri: http://inhabitants-service:8082
           predicates:
-            - Path=/api/aquariums/*/inhabitants/**
+            - Path=/aquariums/*/inhabitants/**
+            
+        # Water Parameters Service - must be before aquariums-service for specific path matching
+        - id: water-parameters-service
+          uri: http://parameters-service:8085
+          predicates:
+            - Path=/aquariums/*/parameters/**
+            
+        # Aquariums Service - must be after more specific routes
+        - id: aquariums-service
+          uri: http://aquariums-service:8081
+          predicates:
+            - Path=/aquariums/**
             
         # Species Service
         - id: species-service
           uri: http://species-service:8083
           predicates:
-            - Path=/api/species/**
-            
-        # Maintenance Service
-        - id: maintenance-service
-          uri: http://maintenance-service:8084
-          predicates:
-            - Path=/api/aquariums/*/maintenance/**
-            
-        # Water Parameters Service
-        - id: water-parameters-service
-          uri: http://parameters-service:8085
-          predicates:
-            - Path=/api/water-parameters/**
+            - Path=/species/**
             
         # Manual Parameters Service
         - id: manual-parameters-service
           uri: http://manual-parameters-service:8086
           predicates:
-            - Path=/api/manual-parameters/**
+            - Path=/manual-parameters/**
             
         # Target Parameters Service
         - id: target-parameters-service
           uri: http://target-parameters-service:8087
           predicates:
-            - Path=/api/target-parameters/**
+            - Path=/target-parameters/**
       
       # Configurazione CORS globale
       globalcors:
