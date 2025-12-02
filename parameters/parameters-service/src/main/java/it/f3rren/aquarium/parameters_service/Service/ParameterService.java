@@ -33,7 +33,7 @@ public class ParameterService {
         }
         
         if (parameters.isEmpty()) {
-            throw new ResourceNotFoundException("Nessun parametro trovato per l'acquario con ID: " + aquariumId);
+            throw new ResourceNotFoundException("No parameter found for aquarium with ID: " + aquariumId);
         }
         return parameters;
     }
@@ -41,7 +41,7 @@ public class ParameterService {
     public Parameter getLatestParameter(Long aquariumId) {
         Parameter parameter = parameterRepository.findFirstByAquariumIdOrderByMeasuredAtDesc(aquariumId);
         if (parameter == null) {
-            throw new ResourceNotFoundException("Nessun parametro trovato per l'acquario con ID: " + aquariumId);
+            throw new ResourceNotFoundException("No parameter found for aquarium with ID: " + aquariumId);
         }
         return parameter;
     }
