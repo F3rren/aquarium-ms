@@ -20,6 +20,6 @@ public class FishService {
     }
 
     public Fish getFishById(Long id) {
-        return fishRepository.findById(id.intValue()).orElseThrow(() -> new ResourceNotFoundException("Pesce non trovato con ID: " + id));
+        return fishRepository.findById(id.intValue()).orElseThrow(() -> new ResourceNotFoundException("Fish not found with ID: " + id));
     }
 }

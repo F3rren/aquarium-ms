@@ -25,21 +25,21 @@ public class AquariumService {
     
     public Aquarium getAquariumById(Long id) {
         return aquariumRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Acquario non trovato con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Aquarium not found with ID: " + id));
     }
 
     public Aquarium updateAquarium(Long id, Aquarium aquarium) {
-        // Verifica che l'acquario esista
+        // Verify that the aquarium exists
         if (!aquariumRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Acquario non trovato con ID: " + id);
+            throw new ResourceNotFoundException("Aquarium not found with ID: " + id);
         }
-        aquarium.setId(id);  // Imposta l'ID per l'update
+        aquarium.setId(id);  // Set the ID for the update
         return aquariumRepository.save(aquarium);
     }
     
     public void deleteAquarium(Long id) {
         if (!aquariumRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Acquario non trovato con ID: " + id);
+            throw new ResourceNotFoundException("Aquarium not found with ID: " + id);
         }
         aquariumRepository.deleteById(id);
     }

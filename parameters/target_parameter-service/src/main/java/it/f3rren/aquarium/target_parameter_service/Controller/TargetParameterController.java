@@ -7,24 +7,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.target_parameter_service.Model.TargetParameter;
 import it.f3rren.aquarium.target_parameter_service.Service.TargetParameterService;
 
 @RestController
 @RequestMapping("/api/target-parameters")
+@Tag(name = "TargetParameter", description = "API for managing target parameters")
 public class TargetParameterController {
     
     @Autowired
     private TargetParameterService targetParameterService;
 
     @GetMapping("/aquarium/{aquariumId}")
+    @Operation(summary = "Get target parameters for an aquarium", description = "Retrieve target parameters for a specific aquarium")
     public ResponseEntity<?> getTargetParameters(@PathVariable Long aquariumId) {
         TargetParameter targets = targetParameterService.getTargetParameters(aquariumId);
         
         if (targets == null) {
             Map<String, Object> response = Map.of(
                 "success", true,
-                "message", "Nessun parametro target personalizzato trovato",
+                "message", "No custom target parameter found",
                 "data", (Object) null
             );
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -32,7 +36,7 @@ public class TargetParameterController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Parametri target recuperati con successo",
+            "message", "Target parameters retrieved successfully",
             "data", targets
         );
 
@@ -40,6 +44,7 @@ public class TargetParameterController {
     }
 
     @PostMapping("/aquarium/{aquariumId}")
+    @Operation(summary = "Save target parameters for an aquarium", description = "Save or update target parameters for a specific aquarium")
     public ResponseEntity<?> saveTargetParameters(
             @PathVariable Long aquariumId,
             @RequestBody TargetParameter targetParameter) {
@@ -48,7 +53,7 @@ public class TargetParameterController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Parametri target salvati con successo",
+            "message", "Target parameters saved successfully",
             "data", saved
         );
         
