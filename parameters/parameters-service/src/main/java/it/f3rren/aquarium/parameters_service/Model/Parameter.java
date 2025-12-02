@@ -12,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "parameters")
+@Table(name = "water_parameters")
 public class Parameter {
     
     @Id

@@ -15,7 +15,7 @@ import it.f3rren.aquarium.maintenance_service.Service.MaintenanceTaskService;
 
 
 @RestController
-@RequestMapping("api/aquariums")
+@RequestMapping("/aquariums/{id}/tasks")
 @Tag(name = "MaintenanceTask", description = "API for managing maintenance tasks")
 public class MaintenanceTaskController {
     
@@ -23,7 +23,7 @@ public class MaintenanceTaskController {
     private MaintenanceTaskService taskService;
     
     // GET - Lista tutti i task di un acquario
-    @GetMapping("/{id}/tasks")
+    @GetMapping
     @Operation(summary = "Get all maintenance tasks for an aquarium", description = "Retrieve a list of all maintenance tasks for a specific aquarium, optionally filtered by status")
     public ResponseEntity<?> getAllTasks(
             @PathVariable Long id,
@@ -53,7 +53,7 @@ public class MaintenanceTaskController {
     }
     
     // POST - Create a new task
-    @PostMapping("/{id}/tasks")
+    @PostMapping
     @Operation(summary = "Create a new maintenance task for an aquarium", description = "Create a new maintenance task for a specific aquarium")
     public ResponseEntity<?> createTask(
             @PathVariable Long id,
@@ -71,7 +71,7 @@ public class MaintenanceTaskController {
     }
     
     // PUT - Update an existing task
-    @PutMapping("/{id}/tasks/{taskId}")
+    @PutMapping("/{taskId}")
     @Operation(summary = "Update an existing maintenance task for an aquarium", description = "Update details of a specific maintenance task for a specific aquarium")
     public ResponseEntity<?> updateTask(
             @PathVariable Long id,
@@ -90,7 +90,7 @@ public class MaintenanceTaskController {
     }
     
     // DELETE - Delete a task
-    @DeleteMapping("/{id}/tasks/{taskId}")
+    @DeleteMapping("/{taskId}")
     @Operation(summary = "Delete a maintenance task for an aquarium", description = "Delete a specific maintenance task for a specific aquarium")
     public ResponseEntity<?> deleteTask(
             @PathVariable Long id,
@@ -107,7 +107,7 @@ public class MaintenanceTaskController {
     }
     
     // POST - Mark a task as completed
-    @PostMapping("/{id}/tasks/{taskId}/complete")
+    @PostMapping("/{taskId}/complete")
     @Operation(summary = "Mark a maintenance task as completed for an aquarium", description = "Mark a specific maintenance task as completed for a specific aquarium")
     public ResponseEntity<?> completeTask(
             @PathVariable Long id,

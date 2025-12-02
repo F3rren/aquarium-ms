@@ -17,7 +17,7 @@ import it.f3rren.aquarium.species.Model.Fish;
 import it.f3rren.aquarium.species.Service.FishService;
 
 @RestController
-@RequestMapping("api/species/fishs")
+@RequestMapping("/species/fish")
 @Tag(name = "Fish", description = "API for managing fish")
 public class FishController {
     
