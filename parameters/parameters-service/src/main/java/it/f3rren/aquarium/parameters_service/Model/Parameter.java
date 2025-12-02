@@ -12,11 +12,11 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "parameters")
+@Table(name = "water_parameters")
 public class Parameter {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
     

@@ -28,7 +28,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
       SERVER_PORT: 8082
-      SPECIES_SERVICE_URL: http://species-service:8083
+      SPECIES_SERVICE_URL: http://species-service:8083/species
     ports:
       - "8082:8082"
     extra_hosts:
