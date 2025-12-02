@@ -1,107 +1,159 @@
-# Aquarium Microservices 🐠
+# Aquarium Microservices
 
-Sistema di microservizi per la gestione di acquari con Spring Boot e PostgreSQL.
+![Java 21](https://img.shields.io/badge/java-21-blue.svg)
+![Spring Boot 3.x](https://img.shields.io/badge/spring--boot-3.x-green.svg)
+![Microservices](https://img.shields.io/badge/architecture-microservices-blue.svg)
+![Dockerized](https://img.shields.io/badge/docker-ready-blue.svg)
+![PostgreSQL](https://img.shields.io/badge/database-PostgreSQL-336791.svg)
+![MIT License](https://img.shields.io/badge/license-MIT-green.svg)
 
-## Architettura
+A **microservice-based backend** for comprehensive aquarium management—tanks, inhabitants, species, maintenance tasks, and water parameters.  
+**Built with Java 21, Spring Boot, Spring Cloud Gateway, Hibernate and PostgreSQL 16. Fully dockerized via Docker Compose to run all services and the database together.**
 
-L'applicazione è composta da 8 servizi:
+---
 
-### Gateway (porta 8080)
-- **api-gateway**: Punto di ingresso unico per tutti i microservizi
+> **Note:** This backend is designed to work alongside the [Aquarium Interface](https://github.com/F3rren/Aquarium-interface) frontend.  
+> *It is not intended as a public/general-purpose open API.*
+
+---
+
+## Project Status
+
+- **Architecture:** 8 Spring Boot microservices + API Gateway + PostgreSQL (3 schemas: `core`, `inhabitants`, `parameters`).  
+- **Use case:** Single-user/private usage for now (no authentication yet).  
+- **Frontend:** Designed to be consumed by a Flutter UI (mobile/desktop/web).  
+- **Evolution:** Refactored from the previous monolithic project [`aquarium-monitor`](https://github.com/F3rren/aquarium-monitor) into domain-focused microservices.  
+- **Stack:** Java 21, Spring Boot 3.x, Spring Cloud Gateway, Docker, PostgreSQL 16.
+
+---
+
+## Key Features
+
+- **Aquarium Management:** CRUD operations on tanks (name, type, volume, etc.).  
+- **Inhabitants & Species:** Link inhabitants to tanks and manage a reusable catalog of fish and corals.  
+- **Water Parameters:** Store, query and compare water parameters across time and against target ranges.  
+- **Maintenance:** Schedule, track and review maintenance tasks per aquarium.  
+- **Microservice architecture:** Clear separation into core, inhabitants and parameters domains, exposed via an API Gateway.  
+- **Database isolation:** PostgreSQL schemas per domain to keep boundaries explicit and maintainable. [attached_file:2]
+
+---
+
+## Frontend & Usage
+
+This backend is designed to be consumed primarily by a **Flutter-based frontend** that offers a cross‑platform interface (desktop/mobile) for aquarium monitoring and control.  
+All HTTP traffic goes through the **API Gateway**, which exposes a single REST entrypoint suitable for web, mobile or desktop clients.
+
+---
+
+## Architecture
+
+The system is split into multiple microservices, each responsible for a specific domain, exposed through a single API Gateway.
+
+### Gateway (port 8080)
+
+- `api-gateway`: Single entrypoint for all microservices, with path‑based routing and centralized CORS configuration.
 
 ### Core Services
-- **aquariums-service** (8081): Gestione acquari
-- **maintenance-service** (8084): Gestione manutenzioni
+
+- `aquariums-service` (8081): Aquarium management (CRUD, core tank data).  
+- `maintenance-service` (8084): Maintenance tasks per aquarium (scheduling and history).
 
 ### Inhabitants Services
-- **inhabitants-service** (8082): Gestione abitanti degli acquari
-- **species-service** (8083): Gestione specie (pesci e coralli)
+
+- `inhabitants-service` (8082): Inhabitants assigned to each aquarium.  
+- `species-service` (8083): Shared species catalog (fish and corals).
 
 ### Parameters Services
-- **parameters-service** (8085): Parametri dell'acqua
-- **manual-parameters-service** (8086): Parametri manuali
-- **target-parameters-service** (8087): Parametri target
+
+- `parameters-service` (8085): Water parameter readings and history.  
+- `manual-parameters-service` (8086): Manually entered measurements.  
+- `target-parameters-service` (8087): Target parameter ranges for comparison and alerts.
 
 ### Database
-- **PostgreSQL** (5432): Database con 3 schemi (core, inhabitants, parameters)
 
-## 🚀 Avvio con Docker
+- **PostgreSQL 16** (5432) with 3 logical schemas:  
+  - `core`: aquariums, maintenance.  
+  - `inhabitants`: inhabitants and species.  
+  - `parameters`: water, manual and target parameters.
 
-### Prerequisiti
-- Docker Desktop installato e in esecuzione
-- Docker Compose
+### Design & Technical Decisions
 
-### Build e avvio completo
+- Each domain group (`core`, `inhabitants`, `parameters`) uses its own PostgreSQL schema to keep boundaries clear.  
+- The API Gateway exposes a unified HTTP surface, simplifying integration for web/mobile clients.  
+- All services are stateless and use Spring Data JPA with Hibernate, with `ddl-auto=update` for fast local development (a migration tool should replace this in a real production setup). [attached_file:2]
+
+---
+
+## Quick Start (Docker)
+
+### Prerequisites
+
+- Docker Desktop running  
+- Docker Compose installed
+
+
+### Build and Run All Services
+
 
 ```bash
-# Build di tutti i servizi
+#Build all services
 docker-compose build
 
-# Avvio di tutti i servizi
+#Start all services
 docker-compose up -d
 
-# Visualizza i log
+#Tail logs
 docker-compose logs -f
 
-# Visualizza lo stato
+#Check running containers
 docker-compose ps
 ```
 
-### Comandi utili
+### Useful Commands
 
 ```bash
-# Ferma tutti i servizi
+#Stop all services
 docker-compose down
 
-# Rimuovi anche i volumi (attenzione: cancella i dati!)
+#Stop and remove volumes (WARNING: deletes data)
 docker-compose down -v
 
-# Riavvia un singolo servizio
+#Restart a single service
 docker-compose restart api-gateway
 
-# Rebuild di un singolo servizio
+#Rebuild a single service
 docker-compose build aquariums-service
 docker-compose up -d aquariums-service
 
-# Visualizza i log di un servizio specifico
+#Logs for a specific service
 docker-compose logs -f api-gateway
 ```
 
-## 📡 Endpoints
+---
 
-Tutti gli endpoint sono accessibili tramite il gateway su `http://localhost:8080`:
+## Main API Endpoints (via Gateway `http://localhost:8080`)
 
-### Acquari
-- `GET/POST http://localhost:8080/api/aquariums`
-- `GET/PUT/DELETE http://localhost:8080/api/aquariums/{id}`
+| Area              | Method & Path                                                                 |
+|-------------------|-------------------------------------------------------------------------------|
+| Aquariums         | GET/POST `/api/aquariums`, GET/PUT/DELETE `/api/aquariums/{id}`              |
+| Water Parameters  | GET/POST `/api/water-parameters`                                             |
+| Maintenance Tasks | GET/POST `/api/aquariums/{id}/maintenance`, PUT/DELETE `/api/aquariums/{aquariumId}/maintenance/{id}` |
+| Inhabitants       | GET/POST `/api/aquariums/{id}/inhabitants`, GET/PUT/DELETE `/api/aquariums/{aquariumId}/inhabitants/{id}` |
+| Species           | GET/POST `/api/species/fishs`, `/api/species/corals`, GET/PUT/DELETE `/api/species/fishs/{id}`, `/api/species/corals/{id}` |
 
-### Abitanti
-- `GET/POST http://localhost:8080/api/aquariums/{id}/inhabitants`
-- `GET/PUT/DELETE http://localhost:8080/api/aquariums/{aquariumId}/inhabitants/{id}`
+---
 
-### Specie
-- `GET/POST http://localhost:8080/api/species/fishs`
-- `GET/PUT/DELETE http://localhost:8080/api/species/fishs/{id}`
-- `GET/POST http://localhost:8080/api/species/corals`
-- `GET/PUT/DELETE http://localhost:8080/api/species/corals/{id}`
+## 🛠️ Local Development (without Docker)
 
-### Manutenzione
-- `GET/POST http://localhost:8080/api/aquariums/{id}/maintenance`
-- `GET/PUT/DELETE http://localhost:8080/api/aquariums/{aquariumId}/maintenance/{id}`
+### Prerequisites
 
-### Parametri
-- `GET/POST http://localhost:8080/api/water-parameters`
-- `GET/POST http://localhost:8080/api/manual-parameters`
-- `GET/POST http://localhost:8080/api/target-parameters`
-
-## 🛠️ Sviluppo locale (senza Docker)
-
-### Prerequisiti
-- Java 21
-- Maven 3.x
+- Java 21  
+- Maven 3.x  
 - PostgreSQL 16
 
 ### Setup database
+
+
 
 ```sql
 CREATE DATABASE aquarium_ms;
@@ -110,9 +162,9 @@ CREATE SCHEMA inhabitants;
 CREATE SCHEMA parameters;
 ```
 
-### Avvio servizi
+### Run Services from Source
 
-In terminali separati:
+In separate terminals:
 
 ```bash
 # Gateway
@@ -144,34 +196,72 @@ cd parameters/manual_parameters-service
 cd parameters/target_parameter-service
 ./mvnw spring-boot:run
 ```
+---
 
-## 🔧 Tecnologie
+## API Documentation (Swagger / OpenAPI)
 
-- **Spring Boot 4.0.0**
-- **Spring Cloud Gateway**
-- **Spring Data JPA**
-- **PostgreSQL 16**
-- **Docker & Docker Compose**
-- **Java 21**
-- **Lombok**
+Each microservice exposes its own Swagger UI for interactive API exploration and testing:
 
-## 📊 Monitoraggio
+- Aquariums: http://localhost:8081/swagger-ui/index.html  
+- Inhabitants: http://localhost:8082/swagger-ui/index.html  
+- Species: http://localhost:8083/swagger-ui/index.html  
+- Maintenance: http://localhost:8084/swagger-ui/index.html  
+- Water Parameters: http://localhost:8085/swagger-ui/index.html  
+- Manual Parameters: http://localhost:8086/swagger-ui/index.html  
+- Target Parameters: http://localhost:8087/swagger-ui/index.html  
 
-Accedi ai singoli servizi direttamente (utile per debug):
+These UIs are useful during development to inspect models, test endpoints, and keep the API contract explicit for each bounded context.
 
-- Gateway: http://localhost:8080
-- Aquariums: http://localhost:8081
-- Inhabitants: http://localhost:8082
-- Species: http://localhost:8083
-- Maintenance: http://localhost:8084
-- Water Parameters: http://localhost:8085
-- Manual Parameters: http://localhost:8086
-- Target Parameters: http://localhost:8087
-- PostgreSQL: localhost:5432
+---
 
-## 📝 Note
+## Tech Stack
 
-- Il gateway usa routing basato su path matching
-- CORS è abilitato globalmente sul gateway
-- Il database PostgreSQL usa schemi separati per organizzare le tabelle
-- Tutti i servizi usano Hibernate con `ddl-auto=update`
+- Java 21  
+- Spring Boot 3.x  
+- Spring Cloud Gateway  
+- Spring Data JPA (Hibernate)  
+- PostgreSQL 16  
+- Docker & Docker Compose  
+- Lombok
+
+---
+
+## Monitoring & Ports
+
+Direct access to services (useful for debugging during development):
+
+- Gateway: http://localhost:8080  
+- Aquariums: http://localhost:8081  
+- Inhabitants: http://localhost:8082  
+- Species: http://localhost:8083  
+- Maintenance: http://localhost:8084  
+- Water Parameters: http://localhost:8085  
+- Manual Parameters: http://localhost:8086  
+- Target Parameters: http://localhost:8087  
+- PostgreSQL: `localhost:5432`
+
+---
+
+## Previous Monolithic Version
+
+This project is the **microservice evolution** of a previous monolithic backend:
+
+- Previous version (monolith): https://github.com/F3rren/aquarium-monitor  
+
+The original project was built as a single Spring Boot application with PostgreSQL and Docker, then refactored into multiple domain‑focused microservices to improve modularity, scalability, and long‑term maintainability.
+
+---
+
+## Roadmap
+
+- [ ] Add authentication and multi-user support  
+- [ ] Centralized logging and observability (e.g. Prometheus/Grafana)  
+- [X] Hardware integration for real sensor readings (temperature, salinity, etc.)  
+- [ ] API documentation consolidation at gateway level (single Swagger entrypoint)
+- [X] Enhanced error handling & validation
+- [X] Automated API tests & integration with frontend
+---
+
+## License
+
+MIT © F3rren
