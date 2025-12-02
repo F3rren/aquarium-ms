@@ -41,7 +41,7 @@ public class MaintenanceTaskController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Task recuperati con successo",
+            "message", "Tasks retrieved successfully",
             "data", tasks,
             "metadata", Map.of(
                 "aquariumId", id,
@@ -52,7 +52,7 @@ public class MaintenanceTaskController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
-    // POST - Crea un nuovo task
+    // POST - Create a new task
     @PostMapping("/{id}/tasks")
     @Operation(summary = "Create a new maintenance task for an aquarium", description = "Create a new maintenance task for a specific aquarium")
     public ResponseEntity<?> createTask(
@@ -63,14 +63,14 @@ public class MaintenanceTaskController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Task creato con successo",
+            "message", "Task created successfully",
             "data", created
         );
         
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
     
-    // PUT - Aggiorna un task esistente
+    // PUT - Update an existing task
     @PutMapping("/{id}/tasks/{taskId}")
     @Operation(summary = "Update an existing maintenance task for an aquarium", description = "Update details of a specific maintenance task for a specific aquarium")
     public ResponseEntity<?> updateTask(
@@ -82,14 +82,14 @@ public class MaintenanceTaskController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Task aggiornato con successo",
+            "message", "Task updated successfully",
             "data", updated
         );
         
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
-    // DELETE - Elimina un task
+    // DELETE - Delete a task
     @DeleteMapping("/{id}/tasks/{taskId}")
     @Operation(summary = "Delete a maintenance task for an aquarium", description = "Delete a specific maintenance task for a specific aquarium")
     public ResponseEntity<?> deleteTask(
@@ -100,13 +100,13 @@ public class MaintenanceTaskController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Task eliminato con successo"
+            "message", "Task deleted successfully"
         );
         
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
-    // POST - Marca un task come completato
+    // POST - Mark a task as completed
     @PostMapping("/{id}/tasks/{taskId}/complete")
     @Operation(summary = "Mark a maintenance task as completed for an aquarium", description = "Mark a specific maintenance task as completed for a specific aquarium")
     public ResponseEntity<?> completeTask(
@@ -117,7 +117,7 @@ public class MaintenanceTaskController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Task completato con successo",
+            "message", "Task completed successfully",
             "data", completed
         );
         

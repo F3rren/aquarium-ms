@@ -29,7 +29,7 @@ public class WaterParameterController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Parametro salvato con successo",
+            "message", "Parameter saved successfully",
             "data", saved
         );
         
@@ -46,7 +46,7 @@ public class WaterParameterController {
 
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Parametri recuperati con successo",
+            "message", "Parameters retrieved successfully",
             "data", parameters,
             "metadata", Map.of(
                 "aquariumId", aquariumId,
@@ -65,7 +65,7 @@ public class WaterParameterController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Ultimo parametro recuperato con successo",
+            "message", "Latest parameter retrieved successfully",
             "data", latest
         );
 
@@ -94,7 +94,7 @@ public class WaterParameterController {
 
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Storico parametri recuperato con successo",
+            "message", "Parameters history retrieved successfully",
             "data", parameters
         );
 

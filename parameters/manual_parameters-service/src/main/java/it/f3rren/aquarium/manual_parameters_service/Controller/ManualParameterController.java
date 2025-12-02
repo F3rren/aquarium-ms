@@ -29,7 +29,7 @@ public class ManualParameterController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Parametro manuale salvato con successo",
+            "message", "Manual parameter saved successfully",
             "data", saved
         );
         
@@ -43,7 +43,7 @@ public class ManualParameterController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Ultimo parametro manuale recuperato con successo",
+            "message", "Latest manual parameter retrieved successfully",
             "data", latest
         );
 
@@ -57,7 +57,7 @@ public class ManualParameterController {
 
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Parametri manuali recuperati con successo",
+            "message", "Manual parameters retrieved successfully",
             "data", parameters,
             "metadata", Map.of(
                 "aquariumId", aquariumId,
@@ -84,7 +84,7 @@ public class ManualParameterController {
 
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Storico parametri manuali recuperato con successo",
+            "message", "Manual parameters history retrieved successfully",
             "data", parameters
         );
 

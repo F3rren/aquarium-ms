@@ -49,8 +49,8 @@ public class InhabitantService {
                     dto.setDetails(coral);
                 }
             } catch (ResourceNotFoundException e) {
-                // Se l'abitante non viene trovato (es. cancellato), lo ignoriamo o mettiamo dettagli null
-                // In questo caso lasciamo i dettagli null ma includiamo la relazione
+                // If the inhabitant is not found (e.g., deleted), we ignore it or set details to null
+                // In this case we leave the details null but include the relation
             }
             
             result.add(dto);
@@ -60,21 +60,21 @@ public class InhabitantService {
     }
     
     public Inhabitant addInhabitant(Inhabitant inhabitant) {
-        // Validazione
+        // Validation
         if (inhabitant.getInhabitantType() == null || inhabitant.getInhabitantId() == null) {
-            throw new IllegalArgumentException("inhabitantType e inhabitantId sono obbligatori");
+            throw new IllegalArgumentException("inhabitantType and inhabitantId are required");
         }
         
-        // Verifica che il pesce o corallo esista
+        // Verify that the fish or coral exists
         if ("fish".equals(inhabitant.getInhabitantType())) {
             fishService.getFishById(inhabitant.getInhabitantId());
         } else if ("coral".equals(inhabitant.getInhabitantType())) {
             coralService.getCoralById(inhabitant.getInhabitantId());
         } else {
-            throw new IllegalArgumentException("inhabitantType deve essere 'fish' o 'coral'");
+            throw new IllegalArgumentException("inhabitantType must be 'fish' or 'coral'");
         }
         
-        // Imposta quantity a 1 se null
+        // Set quantity to 1 if null
         if (inhabitant.getQuantity() == null) {
             inhabitant.setQuantity(1);
         }
@@ -84,7 +84,7 @@ public class InhabitantService {
     
     public void removeInhabitant(Long id) {
         if (!inhabitantRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Abitante non trovato con ID: " + id);
+            throw new ResourceNotFoundException("Inhabitant not found with ID: " + id);
         }
         inhabitantRepository.deleteById(id);
     }

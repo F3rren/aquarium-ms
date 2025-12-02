@@ -31,7 +31,7 @@ public class FishController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Pesci recuperati con successo",
+            "message", "Fishs retrieved successfully",
             "data", fishs
         );
 
@@ -45,7 +45,7 @@ public class FishController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Pesce recuperato con successo",
+            "message", "Fish retrieved successfully",
             "data", fish
         );
 

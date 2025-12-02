@@ -43,7 +43,7 @@ public class MaintenanceTaskService {
     
     public MaintenanceTask updateTask(Long taskId, MaintenanceTask updatedTask) {
         MaintenanceTask task = taskRepository.findById(taskId)
-            .orElseThrow(() -> new ResourceNotFoundException("Task non trovato con ID: " + taskId));
+            .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
 
         if (updatedTask.getTitle() != null) task.setTitle(updatedTask.getTitle());
         if (updatedTask.getDescription() != null) task.setDescription(updatedTask.getDescription());
@@ -57,7 +57,7 @@ public class MaintenanceTaskService {
     
     public MaintenanceTask completeTask(Long taskId) {
         MaintenanceTask task = taskRepository.findById(taskId)
-            .orElseThrow(() -> new ResourceNotFoundException("Task non trovato con ID: " + taskId));
+            .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
 
         task.setIsCompleted(true);
         task.setCompletedAt(LocalDateTime.now());
@@ -66,7 +66,7 @@ public class MaintenanceTaskService {
     
     public void deleteTask(Long taskId) {
         if (!taskRepository.existsById(taskId)) {
-            throw new ResourceNotFoundException("Task non trovato con ID: " + taskId);
+            throw new ResourceNotFoundException("Task not found with ID: " + taskId);
         }
         taskRepository.deleteById(taskId);
     }

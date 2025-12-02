@@ -36,7 +36,7 @@ public class AquariumController {
 
         Map<String, Object> response = Map.of(
                 "success", true,
-                "message", "Acquari recuperati con successo",
+                "message", "Aquariums retrieved successfully",
                 "data", aquariums);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -49,7 +49,7 @@ public class AquariumController {
 
         Map<String, Object> response = Map.of(
                 "success", true,
-                "message", "Acquario recuperato con successo",
+                "message", "Aquarium retrieved successfully",
                 "data", aquarium);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -63,7 +63,7 @@ public class AquariumController {
 
         Map<String, Object> response = Map.of(
                 "success", true,
-                "message", "Acquario creato con successo",
+                "message", "Aquarium created successfully",
                 "data", savedAquarium);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -76,7 +76,7 @@ public class AquariumController {
 
         Map<String, Object> response = Map.of(
                 "success", true,
-                "message", "Acquario modificato con successo",
+                "message", "Aquarium updated successfully",
                 "data", updatedAquarium);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -89,7 +89,7 @@ public class AquariumController {
 
         Map<String, Object> response = Map.of(
                 "success", true,
-                "message", "Acquario eliminato con successo");
+                "message", "Aquarium deleted successfully");
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

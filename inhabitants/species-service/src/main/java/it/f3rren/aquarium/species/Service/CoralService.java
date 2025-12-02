@@ -20,6 +20,6 @@ public class CoralService {
     }
 
     public Coral getCoralById(Long id) {
-        return coralRepository.findById(id.intValue()).orElseThrow(() -> new ResourceNotFoundException("Corallo non trovato con ID: " + id));
+        return coralRepository.findById(id.intValue()).orElseThrow(() -> new ResourceNotFoundException("Coral not found with ID: " + id));
     }
 }
