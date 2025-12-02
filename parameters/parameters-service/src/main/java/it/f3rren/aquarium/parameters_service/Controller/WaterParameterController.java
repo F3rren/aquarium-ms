@@ -9,23 +9,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.parameters_service.Model.Parameter;
 import it.f3rren.aquarium.parameters_service.Service.ParameterService;
 
 @RestController
 @RequestMapping("/api/water-parameters")
+@Tag(name = "WaterParameter", description = "API for managing water parameters")
 public class WaterParameterController {
     
     @Autowired
     private ParameterService parameterService;
 
     @PostMapping
+    @Operation(summary = "Add a new water parameter", description = "Add a new water parameter for a specific aquarium")
     public ResponseEntity<?> addParameter(@RequestBody Parameter parameter) {
         Parameter saved = parameterService.saveParameter(parameter.getAquariumId(), parameter);
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Parametro salvato con successo",
+            "message", "Parameter saved successfully",
             "data", saved
         );
         
@@ -33,6 +37,7 @@ public class WaterParameterController {
     }
 
     @GetMapping("/aquarium/{aquariumId}")
+    @Operation(summary = "Get water parameters for an aquarium", description = "Retrieve water parameters for a specific aquarium with an optional limit")
     public ResponseEntity<?> getParametersByAquarium(
             @PathVariable Long aquariumId,
             @RequestParam(required = false, defaultValue = "10") Integer limit) {
@@ -41,7 +46,7 @@ public class WaterParameterController {
 
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Parametri recuperati con successo",
+            "message", "Parameters retrieved successfully",
             "data", parameters,
             "metadata", Map.of(
                 "aquariumId", aquariumId,
@@ -54,12 +59,13 @@ public class WaterParameterController {
     }
 
     @GetMapping("/aquarium/{aquariumId}/latest")
+    @Operation(summary = "Get the latest water parameter for an aquarium", description = "Retrieve the most recent water parameter for a specific aquarium")
     public ResponseEntity<?> getLatestParameter(@PathVariable Long aquariumId) {
         Parameter latest = parameterService.getLatestParameter(aquariumId);
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Ultimo parametro recuperato con successo",
+            "message", "Latest parameter retrieved successfully",
             "data", latest
         );
 
@@ -67,6 +73,7 @@ public class WaterParameterController {
     }
     
     @GetMapping("/aquarium/{aquariumId}/history")
+    @Operation(summary = "Get water parameters history for an aquarium", description = "Retrieve water parameters history for a specific aquarium based on period or date range")
     public ResponseEntity<?> getParametersHistory(
             @PathVariable Long aquariumId,
             @RequestParam(required = false) String period,
@@ -87,7 +94,7 @@ public class WaterParameterController {
 
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Storico parametri recuperato con successo",
+            "message", "Parameters history retrieved successfully",
             "data", parameters
         );
 
