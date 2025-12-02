@@ -31,7 +31,7 @@ public class CoralController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Coralli recuperati con successo",
+            "message", "Corals retrieved successfully",
             "data", corals
         );
 
@@ -45,7 +45,7 @@ public class CoralController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Corallo recuperato con successo",
+            "message", "Coral retrieved successfully",
             "data", coral
         );
 

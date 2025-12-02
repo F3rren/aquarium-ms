@@ -35,7 +35,7 @@ public class InhabitantController {
 
         Map<String, Object> response = Map.of(
                 "success", true,
-                "message", "Abitanti recuperati con successo",
+                "message", "Inhabitants retrieved successfully",
                 "data", inhabitants,
                 "metadata", Map.of(
                         "aquariumId", id,
@@ -57,7 +57,7 @@ public class InhabitantController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Abitante aggiunto con successo",
+            "message", "Inhabitant added successfully",
             "data", saved
         );
         
@@ -74,7 +74,7 @@ public class InhabitantController {
         
         Map<String, Object> response = Map.of(
             "success", true,
-            "message", "Abitante rimosso con successo"
+            "message", "Inhabitant removed successfully"
         );
         
         return new ResponseEntity<>(response, HttpStatus.OK);

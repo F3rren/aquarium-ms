@@ -24,7 +24,7 @@ public class ManualParameterService {
     public ManualParameter getLatestManualParameter(Long aquariumId) {
         ManualParameter parameter = manualParameterRepository.findFirstByAquariumIdOrderByMeasuredAtDesc(aquariumId);
         if (parameter == null) {
-            throw new ResourceNotFoundException("Nessun parametro manuale trovato per l'acquario con ID: " + aquariumId);
+            throw new ResourceNotFoundException("No manual parameter found for aquarium with ID: " + aquariumId);
         }
         return parameter;
     }

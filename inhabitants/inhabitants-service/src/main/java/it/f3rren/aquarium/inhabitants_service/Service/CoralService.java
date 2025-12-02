@@ -25,7 +25,7 @@ public class CoralService {
             String url = speciesServiceUrl + "/api/species/corals/" + id;
             return restTemplate.getForObject(url, CoralDTO.class);
         } catch (HttpClientErrorException.NotFound e) {
-            throw new ResourceNotFoundException("Corallo non trovato con id: " + id);
+            throw new ResourceNotFoundException("Coral not found with id: " + id);
         }
     }
 }
