@@ -67,7 +67,7 @@ public class InhabitantController {
     @DeleteMapping("/{aquariumId}/inhabitants/{inhabitantId}")
     @Operation(summary = "Remove an inhabitant from an aquarium", description = "Remove an inhabitant from a specific aquarium")
     public ResponseEntity<?> removeInhabitantFromAquarium(
-            @PathVariable Long id,
+            @PathVariable Long aquariumId,
             @PathVariable Long inhabitantId) {
         
         inhabitantService.removeInhabitant(inhabitantId);
