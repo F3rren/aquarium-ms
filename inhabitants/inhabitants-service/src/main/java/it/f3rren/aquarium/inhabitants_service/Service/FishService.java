@@ -24,7 +24,7 @@ public class FishService {
     
     public FishDTO getFishById(Long id) {
         try {
-            String url = speciesServiceUrl + "/fish/" + id;
+            String url = speciesServiceUrl + "/fishs/" + id;
             
             @SuppressWarnings("unchecked")
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
