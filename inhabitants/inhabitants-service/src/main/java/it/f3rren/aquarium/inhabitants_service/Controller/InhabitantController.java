@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.inhabitants_service.Controller;
+package it.f3rren.aquarium.inhabitants_service.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.f3rren.aquarium.inhabitants_service.DTO.InhabitantDetailsDTO;
-import it.f3rren.aquarium.inhabitants_service.Model.Inhabitant;
-import it.f3rren.aquarium.inhabitants_service.Service.InhabitantService;
+import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
+import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
+import it.f3rren.aquarium.inhabitants_service.service.InhabitantService;
 
 @RestController
 @RequestMapping("/aquariums")

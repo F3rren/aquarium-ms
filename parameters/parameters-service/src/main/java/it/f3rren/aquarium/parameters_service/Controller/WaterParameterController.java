@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.parameters_service.Controller;
+package it.f3rren.aquarium.parameters_service.controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.f3rren.aquarium.parameters_service.Model.Parameter;
-import it.f3rren.aquarium.parameters_service.Service.ParameterService;
+import it.f3rren.aquarium.parameters_service.model.Parameter;
+import it.f3rren.aquarium.parameters_service.service.ParameterService;
 
 @RestController
 @RequestMapping("/aquariums/{id}/parameters")

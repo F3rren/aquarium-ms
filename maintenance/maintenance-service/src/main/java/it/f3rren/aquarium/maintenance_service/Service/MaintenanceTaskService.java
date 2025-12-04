@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.maintenance_service.Service;
+package it.f3rren.aquarium.maintenance_service.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.f3rren.aquarium.maintenance_service.Exception.ResourceNotFoundException;
-import it.f3rren.aquarium.maintenance_service.Model.MaintenanceTask;
-import it.f3rren.aquarium.maintenance_service.Repository.IMaintenanceTaskRepository;
+import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
+import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;
 
 
 @Service

@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.species.Controller;
+package it.f3rren.aquarium.species.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.f3rren.aquarium.species.Model.Coral;
-import it.f3rren.aquarium.species.Service.CoralService;
+import it.f3rren.aquarium.species.model.Coral;
+import it.f3rren.aquarium.species.service.CoralService;
 
 @RestController
 @RequestMapping("/species/corals")

@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.manual_parameters_service.Controller;
+package it.f3rren.aquarium.manual_parameters_service.controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.f3rren.aquarium.manual_parameters_service.Model.ManualParameter;
-import it.f3rren.aquarium.manual_parameters_service.Service.ManualParameterService;
+import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
+import it.f3rren.aquarium.manual_parameters_service.service.ManualParameterService;
 
 @RestController
 @RequestMapping("/aquariums/{aquariumId}/parameters/manual")

@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.parameters_service.Model;
+package it.f3rren.aquarium.parameters_service.model;
 
 import java.time.LocalDateTime;
 

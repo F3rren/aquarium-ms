@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.inhabitants_service.DTO;
+package it.f3rren.aquarium.inhabitants_service.dto;
 
 import lombok.Data;
 

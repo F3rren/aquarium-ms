@@ -1,10 +1,10 @@
-package it.f3rren.aquarium.target_parameter_service.Service;
+package it.f3rren.aquarium.target_parameter_service.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.f3rren.aquarium.target_parameter_service.Model.TargetParameter;
-import it.f3rren.aquarium.target_parameter_service.Repository.ITargetParameterRepository;
+import it.f3rren.aquarium.target_parameter_service.model.TargetParameter;
+import it.f3rren.aquarium.target_parameter_service.repository.ITargetParameterRepository;
 
 @Service
 public class TargetParameterService {

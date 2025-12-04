@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.inhabitants_service.Model;
+package it.f3rren.aquarium.inhabitants_service.model;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;

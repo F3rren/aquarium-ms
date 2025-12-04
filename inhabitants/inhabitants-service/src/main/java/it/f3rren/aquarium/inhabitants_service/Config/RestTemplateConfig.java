@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.inhabitants_service.Config;
+package it.f3rren.aquarium.inhabitants_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

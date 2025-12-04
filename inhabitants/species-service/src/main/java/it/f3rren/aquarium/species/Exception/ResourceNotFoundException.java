@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.species.Exception;
+package it.f3rren.aquarium.species.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     

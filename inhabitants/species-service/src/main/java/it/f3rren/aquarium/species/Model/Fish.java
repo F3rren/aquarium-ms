@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.species.Model;
+package it.f3rren.aquarium.species.model;
 
 import jakarta.persistence.*;
 import lombok.*;
