@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.aquariums_service.DTO;
+package it.f3rren.aquarium.aquariums_service.dto;
 
 import java.time.LocalDateTime;
 import lombok.*;

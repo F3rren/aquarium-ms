@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.maintenance_service.Model;
+package it.f3rren.aquarium.maintenance_service.model;
 
 import java.time.LocalDateTime;
 

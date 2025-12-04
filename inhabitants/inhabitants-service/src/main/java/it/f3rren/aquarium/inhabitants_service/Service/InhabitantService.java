@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.inhabitants_service.Service;
+package it.f3rren.aquarium.inhabitants_service.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,12 +6,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.f3rren.aquarium.inhabitants_service.DTO.CoralDTO;
-import it.f3rren.aquarium.inhabitants_service.DTO.FishDTO;
-import it.f3rren.aquarium.inhabitants_service.DTO.InhabitantDetailsDTO;
-import it.f3rren.aquarium.inhabitants_service.Exception.ResourceNotFoundException;
-import it.f3rren.aquarium.inhabitants_service.Model.Inhabitant;
-import it.f3rren.aquarium.inhabitants_service.Repository.IInhabitantRepository;
+import it.f3rren.aquarium.inhabitants_service.dto.CoralDTO;
+import it.f3rren.aquarium.inhabitants_service.dto.FishDTO;
+import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
+import it.f3rren.aquarium.inhabitants_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
+import it.f3rren.aquarium.inhabitants_service.repository.IInhabitantRepository;
 
 @Service
 public class InhabitantService {

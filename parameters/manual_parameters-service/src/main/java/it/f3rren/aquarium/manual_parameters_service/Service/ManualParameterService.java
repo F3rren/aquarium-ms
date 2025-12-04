@@ -1,13 +1,13 @@
-package it.f3rren.aquarium.manual_parameters_service.Service;
+package it.f3rren.aquarium.manual_parameters_service.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.f3rren.aquarium.manual_parameters_service.Exception.ResourceNotFoundException;
-import it.f3rren.aquarium.manual_parameters_service.Model.ManualParameter;
-import it.f3rren.aquarium.manual_parameters_service.Repository.IManualParameterRepository;
+import it.f3rren.aquarium.manual_parameters_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
+import it.f3rren.aquarium.manual_parameters_service.repository.IManualParameterRepository;
 
 
 @Service
