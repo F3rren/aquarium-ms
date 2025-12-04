@@ -38,13 +38,6 @@ A **microservice-based backend** for comprehensive aquarium management—tanks, 
 
 ---
 
-## Frontend & Usage
-
-This backend is designed to be consumed primarily by a **Flutter-based frontend** that offers a cross‑platform interface (desktop/mobile) for aquarium monitoring and control.  
-All HTTP traffic goes through the **API Gateway**, which exposes a single REST entrypoint suitable for web, mobile or desktop clients.
-
----
-
 ## Architecture
 
 The system is split into multiple microservices, each responsible for a specific domain, exposed through a single API Gateway.
