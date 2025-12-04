@@ -7,6 +7,56 @@ spring:
   cloud:
     gateway:
       routes:
+        # OpenAPI docs routes for Swagger aggregation
+        - id: aquariums-service-openapi
+          uri: http://aquariums-service:8081
+          predicates:
+            - Path=/aquariums-service/v3/api-docs
+          filters:
+            - RewritePath=/aquariums-service/v3/api-docs, /v3/api-docs
+            
+        - id: inhabitants-service-openapi
+          uri: http://inhabitants-service:8082
+          predicates:
+            - Path=/inhabitants-service/v3/api-docs
+          filters:
+            - RewritePath=/inhabitants-service/v3/api-docs, /v3/api-docs
+            
+        - id: species-service-openapi
+          uri: http://species-service:8083
+          predicates:
+            - Path=/species-service/v3/api-docs
+          filters:
+            - RewritePath=/species-service/v3/api-docs, /v3/api-docs
+            
+        - id: maintenance-service-openapi
+          uri: http://maintenance-service:8084
+          predicates:
+            - Path=/maintenance-service/v3/api-docs
+          filters:
+            - RewritePath=/maintenance-service/v3/api-docs, /v3/api-docs
+            
+        - id: parameters-service-openapi
+          uri: http://parameters-service:8085
+          predicates:
+            - Path=/parameters-service/v3/api-docs
+          filters:
+            - RewritePath=/parameters-service/v3/api-docs, /v3/api-docs
+            
+        - id: manual-parameters-service-openapi
+          uri: http://manual-parameters-service:8086
+          predicates:
+            - Path=/manual-parameters-service/v3/api-docs
+          filters:
+            - RewritePath=/manual-parameters-service/v3/api-docs, /v3/api-docs
+            
+        - id: target-parameters-service-openapi
+          uri: http://target-parameters-service:8087
+          predicates:
+            - Path=/target-parameters-service/v3/api-docs
+          filters:
+            - RewritePath=/target-parameters-service/v3/api-docs, /v3/api-docs
+      
         # Maintenance Service - must be before aquariums-service for specific path matching
         - id: maintenance-service
           uri: http://maintenance-service:8084
@@ -62,8 +112,28 @@ spring:
               - PATCH
               - OPTIONS
             allowedHeaders: "*"
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: aquariums-service
+        url: /aquariums-service/v3/api-docs
+      - name: inhabitants-service
+        url: /inhabitants-service/v3/api-docs
+      - name: species-service
+        url: /species-service/v3/api-docs
+      - name: maintenance-service
+        url: /maintenance-service/v3/api-docs
+      - name: parameters-service
+        url: /parameters-service/v3/api-docs
+      - name: manual-parameters-service
+        url: /manual-parameters-service/v3/api-docs
+      - name: target-parameters-service
+        url: /target-parameters-service/v3/api-docs
             
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty.http.client: DEBUG
+
