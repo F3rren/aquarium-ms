@@ -257,7 +257,7 @@ The original project was built as a single Spring Boot application with PostgreS
 - [ ] Add authentication and multi-user support  
 - [ ] Centralized logging and observability (e.g. Prometheus/Grafana)  
 - [X] Hardware integration for real sensor readings (temperature, salinity, etc.)  
-- [ ] API documentation consolidation at gateway level (single Swagger entrypoint)
+- [X] API documentation consolidation at gateway level (single Swagger entrypoint)
 - [X] Enhanced error handling & validation
 - [X] Automated API tests & integration with frontend
 ---
