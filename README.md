@@ -200,17 +200,27 @@ cd parameters/target_parameter-service
 
 ## API Documentation (Swagger / OpenAPI)
 
-Each microservice exposes its own Swagger UI for interactive API exploration and testing:
+**All API documentation is centralized through the API Gateway:**
 
-- Aquariums: http://localhost:8081/swagger-ui/index.html  
-- Inhabitants: http://localhost:8082/swagger-ui/index.html  
-- Species: http://localhost:8083/swagger-ui/index.html  
-- Maintenance: http://localhost:8084/swagger-ui/index.html  
-- Water Parameters: http://localhost:8085/swagger-ui/index.html  
-- Manual Parameters: http://localhost:8086/swagger-ui/index.html  
-- Target Parameters: http://localhost:8087/swagger-ui/index.html  
+- **Unified Swagger UI:** http://localhost:8080/swagger-ui.html
 
-These UIs are useful during development to inspect models, test endpoints, and keep the API contract explicit for each bounded context.
+The gateway aggregates OpenAPI documentation from all microservices into a single interface. Use the dropdown menu in the Swagger UI to switch between different services:
+
+- `aquariums-service`: Aquarium management  
+- `inhabitants-service`: Inhabitants management  
+- `species-service`: Species catalog  
+- `maintenance-service`: Maintenance tasks  
+- `parameters-service`: Water parameters  
+- `manual-parameters-service`: Manual measurements  
+- `target-parameters-service`: Target ranges  
+
+This centralized approach:
+- Eliminates CORS issues  
+- Provides a single entrypoint for API exploration  
+- Mirrors the production routing through the gateway  
+- Simplifies API testing and documentation access
+
+> **Note:** Individual services still expose their own Swagger UIs on their respective ports (8081-8087) for development purposes, but the recommended approach is to use the centralized gateway interface.
 
 ---
 
@@ -257,9 +267,9 @@ The original project was built as a single Spring Boot application with PostgreS
 - [ ] Add authentication and multi-user support  
 - [ ] Centralized logging and observability (e.g. Prometheus/Grafana)  
 - [X] Hardware integration for real sensor readings (temperature, salinity, etc.)  
-- [X] API documentation consolidation at gateway level (single Swagger entrypoint)
-- [X] Enhanced error handling & validation
-- [X] Automated API tests & integration with frontend
+- [x] API documentation consolidation at gateway level (single Swagger entrypoint)
+- [x] Enhanced error handling & validation
+- [x] Automated API tests & integration with frontend
 ---
 
 ## License
