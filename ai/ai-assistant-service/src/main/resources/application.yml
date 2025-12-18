@@ -9,8 +9,9 @@ spring:
       base-url: http://ollama:11434
       chat:
         options:
-          model: llama3.2
+          model: llama3.2:1b
           temperature: 0.7
+          num-predict: 500
 
 # URLs degli altri microservizi
 services:
