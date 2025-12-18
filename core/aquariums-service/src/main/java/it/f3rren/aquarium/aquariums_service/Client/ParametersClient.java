@@ -1,14 +1,14 @@
-package it.f3rren.aquarium.aquariums_service.Client;
+package it.f3rren.aquarium.aquariums_service.client;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import it.f3rren.aquarium.aquariums_service.DTO.ApiResponseDTO;
-import it.f3rren.aquarium.aquariums_service.DTO.WaterParameterDTO;
-import it.f3rren.aquarium.aquariums_service.DTO.ManualParameterDTO;
-import it.f3rren.aquarium.aquariums_service.DTO.TargetParameterDTO;
+import it.f3rren.aquarium.aquariums_service.dto.ApiResponseDTO;
+import it.f3rren.aquarium.aquariums_service.dto.ManualParameterDTO;
+import it.f3rren.aquarium.aquariums_service.dto.TargetParameterDTO;
+import it.f3rren.aquarium.aquariums_service.dto.WaterParameterDTO;
 
 import java.util.List;
 

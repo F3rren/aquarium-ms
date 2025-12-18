@@ -1,13 +1,13 @@
-package it.f3rren.aquarium.species.Service;
+package it.f3rren.aquarium.species.service;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.f3rren.aquarium.species.Model.Fish;
-import it.f3rren.aquarium.species.Repository.IFishRepository;
-import it.f3rren.aquarium.species.Exception.ResourceNotFoundException;
+import it.f3rren.aquarium.species.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.species.model.Fish;
+import it.f3rren.aquarium.species.repository.IFishRepository;
 
 @Service
 public class FishService {

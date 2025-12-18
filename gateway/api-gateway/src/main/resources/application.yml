@@ -57,6 +57,12 @@ spring:
           filters:
             - RewritePath=/target-parameters-service/v3/api-docs, /v3/api-docs
       
+        # Maintenance Service - Products
+        - id: maintenance-service-products
+          uri: http://maintenance-service:8084
+          predicates:
+            - Path=/products/**
+      
         # Maintenance Service - must be before aquariums-service for specific path matching
         - id: maintenance-service
           uri: http://maintenance-service:8084

@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.parameters_service.Service;
+package it.f3rren.aquarium.parameters_service.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.f3rren.aquarium.parameters_service.Exception.ResourceNotFoundException;
-import it.f3rren.aquarium.parameters_service.Model.Parameter;
-import it.f3rren.aquarium.parameters_service.Repository.IParameterRepository;
+import it.f3rren.aquarium.parameters_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.parameters_service.model.Parameter;
+import it.f3rren.aquarium.parameters_service.repository.IParameterRepository;
 
 @Service
 public class ParameterService {
