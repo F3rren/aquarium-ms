@@ -1,4 +1,24 @@
 services:
+  # AI Infrastructure
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - aquarium-network
+    restart: unless-stopped
+    # Per GPU support (opzionale, rimuovi se non hai GPU NVIDIA)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
   # Core Services
   aquariums-service:
     build:
@@ -126,6 +146,30 @@ services:
     networks:
       - aquarium-network
 
+  # AI Services
+  ai-assistant-service:
+    build:
+      context: ./ai/ai-assistant-service
+      dockerfile: Dockerfile
+    container_name: ai-assistant-service
+    environment:
+      SERVER_PORT: 8090
+      SPRING_AI_OLLAMA_BASE_URL: http://ollama:11434
+      SERVICES_AQUARIUMS_URL: http://aquariums-service:8081
+      SERVICES_INHABITANTS_URL: http://inhabitants-service:8082
+      SERVICES_PARAMETERS_URL: http://parameters-service:8085
+      SERVICES_MAINTENANCE_URL: http://maintenance-service:8084
+    ports:
+      - "8090:8090"
+    depends_on:
+      - ollama
+      - aquariums-service
+      - inhabitants-service
+      - parameters-service
+      - maintenance-service
+    networks:
+      - aquarium-network
+
   # API Gateway
   api-gateway:
     build:
@@ -141,6 +185,7 @@ services:
       PARAMETERS_SERVICE_URL: http://parameters-service:8085
       MANUAL_PARAMETERS_SERVICE_URL: http://manual-parameters-service:8086
       TARGET_PARAMETERS_SERVICE_URL: http://target-parameters-service:8087
+      AI_ASSISTANT_SERVICE_URL: http://ai-assistant-service:8090
     ports:
       - "8080:8080"
     depends_on:
@@ -151,6 +196,7 @@ services:
       - parameters-service
       - manual-parameters-service
       - target-parameters-service
+      - ai-assistant-service
     networks:
       - aquarium-network
 
@@ -158,3 +204,6 @@ networks:
   aquarium-network:
     driver: bridge
 
+volumes:
+  ollama-data:
+    driver: local
