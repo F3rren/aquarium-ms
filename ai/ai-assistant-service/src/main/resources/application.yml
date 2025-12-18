@@ -1,0 +1,35 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: ai-assistant-service
+  ai:
+    ollama:
+      base-url: http://ollama:11434
+      chat:
+        options:
+          model: llama3.2
+          temperature: 0.7
+
+# URLs degli altri microservizi
+services:
+  aquariums:
+    url: http://aquariums-service:8081
+  inhabitants:
+    url: http://inhabitants-service:8082
+  species:
+    url: http://species-service:8083/species
+  maintenance:
+    url: http://maintenance-service:8084
+  parameters:
+    url: http://parameters-service:8085
+  manual-parameters:
+    url: http://manual-parameters-service:8086
+  target-parameters:
+    url: http://target-parameters-service:8087
+
+logging:
+  level:
+    it.f3rren.aquarium.ai: DEBUG
+    org.springframework.ai: DEBUG
