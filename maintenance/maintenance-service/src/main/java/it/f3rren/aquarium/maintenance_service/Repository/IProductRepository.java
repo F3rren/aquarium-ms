@@ -37,6 +37,6 @@ public interface IProductRepository extends JpaRepository<Product, Long> {
     
     // Find products that should be used again based on frequency
     @Query("SELECT p FROM Product p WHERE p.usageFrequency IS NOT NULL AND p.lastUsed IS NOT NULL " +
-           "AND FUNCTION('DATEDIFF', CURRENT_DATE, p.lastUsed) >= p.usageFrequency")
+           "AND (CURRENT_DATE - p.lastUsed) >= p.usageFrequency")
     List<Product> findProductsToUseAgain();
 }
