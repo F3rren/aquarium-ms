@@ -1,9 +1,9 @@
-package it.f3rren.aquarium.maintenance_service.Repository;
+package it.f3rren.aquarium.maintenance_service.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import it.f3rren.aquarium.maintenance_service.Model.MaintenanceTask;
+import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
 
 public interface IMaintenanceTaskRepository extends JpaRepository<MaintenanceTask, Long> {
     

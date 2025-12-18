@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.target_parameter_service.Model;
+package it.f3rren.aquarium.target_parameter_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;

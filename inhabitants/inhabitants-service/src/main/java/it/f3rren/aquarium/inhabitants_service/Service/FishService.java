@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.inhabitants_service.Service;
+package it.f3rren.aquarium.inhabitants_service.service;
 
 import java.util.Map;
 
@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import it.f3rren.aquarium.inhabitants_service.DTO.FishDTO;
-import it.f3rren.aquarium.inhabitants_service.Exception.ResourceNotFoundException;
+import it.f3rren.aquarium.inhabitants_service.dto.FishDTO;
+import it.f3rren.aquarium.inhabitants_service.exception.ResourceNotFoundException;
 
 @Service
 public class FishService {
