@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.inhabitants_service.Controller;
+package it.f3rren.aquarium.inhabitants_service.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -10,15 +10,16 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.f3rren.aquarium.inhabitants_service.DTO.InhabitantDetailsDTO;
-import it.f3rren.aquarium.inhabitants_service.Model.Inhabitant;
-import it.f3rren.aquarium.inhabitants_service.Service.InhabitantService;
+import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
+import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
+import it.f3rren.aquarium.inhabitants_service.service.InhabitantService;
 
 @RestController
 @RequestMapping("/aquariums")
@@ -62,6 +63,24 @@ public class InhabitantController {
         );
         
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{aquariumId}/inhabitants/{inhabitantId}")
+    @Operation(summary = "Update an inhabitant", description = "Update quantity, notes, custom name, current size or custom image of an inhabitant")
+    public ResponseEntity<?> updateInhabitant(
+            @PathVariable Long aquariumId,
+            @PathVariable Long inhabitantId,
+            @RequestBody Inhabitant updates) {
+        
+        Inhabitant updated = inhabitantService.updateInhabitant(inhabitantId, updates);
+        
+        Map<String, Object> response = Map.of(
+            "success", true,
+            "message", "Inhabitant updated successfully",
+            "data", updated
+        );
+        
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/{aquariumId}/inhabitants/{inhabitantId}")

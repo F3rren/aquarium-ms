@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.target_parameter_service.Controller;
+package it.f3rren.aquarium.target_parameter_service.controller;
 
 import java.util.Map;
 
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.f3rren.aquarium.target_parameter_service.Model.TargetParameter;
-import it.f3rren.aquarium.target_parameter_service.Service.TargetParameterService;
+import it.f3rren.aquarium.target_parameter_service.model.TargetParameter;
+import it.f3rren.aquarium.target_parameter_service.service.TargetParameterService;
 
 @RestController
 @RequestMapping("/aquariums/{aquariumId}/settings/targets")

@@ -1,10 +1,10 @@
-package it.f3rren.aquarium.manual_parameters_service.Repository;
+package it.f3rren.aquarium.manual_parameters_service.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import it.f3rren.aquarium.manual_parameters_service.Model.ManualParameter;
+import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
 
 public interface IManualParameterRepository extends JpaRepository<ManualParameter, Long> {
     

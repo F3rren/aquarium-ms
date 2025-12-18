@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.inhabitants_service.Service;
+package it.f3rren.aquarium.inhabitants_service.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,12 +6,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.f3rren.aquarium.inhabitants_service.DTO.CoralDTO;
-import it.f3rren.aquarium.inhabitants_service.DTO.FishDTO;
-import it.f3rren.aquarium.inhabitants_service.DTO.InhabitantDetailsDTO;
-import it.f3rren.aquarium.inhabitants_service.Exception.ResourceNotFoundException;
-import it.f3rren.aquarium.inhabitants_service.Model.Inhabitant;
-import it.f3rren.aquarium.inhabitants_service.Repository.IInhabitantRepository;
+import it.f3rren.aquarium.inhabitants_service.dto.CoralDTO;
+import it.f3rren.aquarium.inhabitants_service.dto.FishDTO;
+import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
+import it.f3rren.aquarium.inhabitants_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
+import it.f3rren.aquarium.inhabitants_service.repository.IInhabitantRepository;
 
 @Service
 public class InhabitantService {
@@ -35,16 +35,26 @@ public class InhabitantService {
             dto.setType(relation.getInhabitantType());
             dto.setQuantity(relation.getQuantity());
             dto.setAddedDate(relation.getAddedDate());
+            dto.setNotes(relation.getNotes());
+            dto.setCustomName(relation.getCustomName());
+            dto.setCurrentSize(relation.getCurrentSize());
+            dto.setCustomDifficulty(relation.getCustomDifficulty());
+            dto.setCustomTemperament(relation.getCustomTemperament());
+            dto.setCustomDiet(relation.getCustomDiet());
+            dto.setIsReefSafe(relation.getIsReefSafe());
+            dto.setCustomMinTankSize(relation.getCustomMinTankSize());
             
             try {
                 if ("fish".equals(relation.getInhabitantType())) {
                     FishDTO fish = fishService.getFishById(relation.getInhabitantId());
-                    dto.setCommonName(fish.getCommonName());
+                    // Use custom name if set, otherwise use species name
+                    dto.setCommonName(relation.getCustomName() != null ? relation.getCustomName() : fish.getCommonName());
                     dto.setScientificName(fish.getScientificName());
                     dto.setDetails(fish);
                 } else if ("coral".equals(relation.getInhabitantType())) {
                     CoralDTO coral = coralService.getCoralById(relation.getInhabitantId());
-                    dto.setCommonName(coral.getCommonName());
+                    // Use custom name if set, otherwise use species name
+                    dto.setCommonName(relation.getCustomName() != null ? relation.getCustomName() : coral.getCommonName());
                     dto.setScientificName(coral.getScientificName());
                     dto.setDetails(coral);
                 }
@@ -87,5 +97,41 @@ public class InhabitantService {
             throw new ResourceNotFoundException("Inhabitant not found with ID: " + id);
         }
         inhabitantRepository.deleteById(id);
+    }
+    
+    public Inhabitant updateInhabitant(Long id, Inhabitant updates) {
+        Inhabitant existing = inhabitantRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Inhabitant not found with ID: " + id));
+        
+        // Update only the fields that can be modified
+        if (updates.getQuantity() != null) {
+            existing.setQuantity(updates.getQuantity());
+        }
+        if (updates.getNotes() != null) {
+            existing.setNotes(updates.getNotes());
+        }
+        if (updates.getCustomName() != null) {
+            existing.setCustomName(updates.getCustomName());
+        }
+        if (updates.getCurrentSize() != null) {
+            existing.setCurrentSize(updates.getCurrentSize());
+        }
+        if (updates.getCustomDifficulty() != null) {
+            existing.setCustomDifficulty(updates.getCustomDifficulty());
+        }
+        if (updates.getCustomTemperament() != null) {
+            existing.setCustomTemperament(updates.getCustomTemperament());
+        }
+        if (updates.getCustomDiet() != null) {
+            existing.setCustomDiet(updates.getCustomDiet());
+        }
+        if (updates.getIsReefSafe() != null) {
+            existing.setIsReefSafe(updates.getIsReefSafe());
+        }
+        if (updates.getCustomMinTankSize() != null) {
+            existing.setCustomMinTankSize(updates.getCustomMinTankSize());
+        }
+        
+        return inhabitantRepository.save(existing);
     }
 }
