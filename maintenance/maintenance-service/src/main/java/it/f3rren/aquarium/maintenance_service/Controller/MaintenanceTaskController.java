@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.maintenance_service.Controller;
+package it.f3rren.aquarium.maintenance_service.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import it.f3rren.aquarium.maintenance_service.Model.MaintenanceTask;
-import it.f3rren.aquarium.maintenance_service.Service.MaintenanceTaskService;
+import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
+import it.f3rren.aquarium.maintenance_service.service.MaintenanceTaskService;
 
 
 @RestController

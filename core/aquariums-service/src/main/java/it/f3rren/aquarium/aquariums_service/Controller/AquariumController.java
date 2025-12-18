@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.aquariums_service.Controller;
+package it.f3rren.aquarium.aquariums_service.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -8,9 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import it.f3rren.aquarium.aquariums_service.Model.Aquarium;
-import it.f3rren.aquarium.aquariums_service.Service.AquariumService;
-
+import it.f3rren.aquarium.aquariums_service.model.Aquarium;
+import it.f3rren.aquarium.aquariums_service.service.AquariumService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
