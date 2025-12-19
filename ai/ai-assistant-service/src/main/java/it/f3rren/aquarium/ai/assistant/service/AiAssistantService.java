@@ -81,23 +81,12 @@ public class AiAssistantService {
 
     private String buildSystemPrompt(String aquariumData) {
         return """
-            Sei un assistente AI esperto in acquariologia e gestione di acquari.
+            Sei un assistente AI esperto in acquariologia. Rispondi in italiano in modo conciso e chiaro.
             
-            Il tuo compito è aiutare l'utente a:
-            - Analizzare i dati dei suoi acquari
-            - Rispondere a domande sui parametri dell'acqua
-            - Fornire consigli sulla manutenzione
-            - Suggerire compatibilità tra pesci e coralli
-            - Identificare problemi e proporre soluzioni
-            
-            Rispondi sempre in modo chiaro, professionale e in italiano.
-            Basa le tue risposte sui dati reali forniti di seguito.
-            Se i dati non sono sufficienti per rispondere, dillo chiaramente.
-            
-            DATI DISPONIBILI:
+            DATI ACQUARI:
             %s
             
-            Rispondi alle domande dell'utente in modo preciso e utile.
+            Usa questi dati per rispondere. Sii breve e diretto.
             """.formatted(aquariumData);
     }
 

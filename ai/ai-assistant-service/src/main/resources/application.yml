@@ -9,9 +9,10 @@ spring:
       base-url: http://ollama:11434
       chat:
         options:
-          model: llama3.2:1b
+          model: tinyllama  # Modello molto più veloce e leggero
           temperature: 0.7
-          num-predict: 500
+          num-predict: 100
+          timeout: 30s
 
 # URLs degli altri microservizi
 services:
