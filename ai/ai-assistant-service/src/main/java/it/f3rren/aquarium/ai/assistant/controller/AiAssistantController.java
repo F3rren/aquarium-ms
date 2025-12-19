@@ -3,6 +3,7 @@ package it.f3rren.aquarium.ai.assistant.controller;
 import it.f3rren.aquarium.ai.assistant.dto.ChatRequest;
 import it.f3rren.aquarium.ai.assistant.dto.ChatResponse;
 import it.f3rren.aquarium.ai.assistant.service.AiAssistantService;
+import it.f3rren.aquarium.ai.assistant.service.AquariumDataService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class AiAssistantController {
 
     private final AiAssistantService aiAssistantService;
+    private final AquariumDataService aquariumDataService;
 
     @PostMapping("/chat")
     public ResponseEntity<ChatResponse> chat(@RequestBody ChatRequest request) {
@@ -28,6 +30,13 @@ public class AiAssistantController {
         log.info("Eliminazione conversazione: {}", conversationId);
         aiAssistantService.clearConversation(conversationId);
         return ResponseEntity.noContent().build();
+    }
+    
+    @PostMapping("/cache/clear")
+    public ResponseEntity<String> clearCache() {
+        log.info("Richiesta di pulizia della cache");
+        aquariumDataService.clearCache();
+        return ResponseEntity.ok("Cache svuotata con successo. I dati saranno ricaricati alla prossima richiesta.");
     }
 
     @GetMapping("/health")
