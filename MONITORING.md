@@ -1,273 +1,153 @@
-# Monitoring & Logging - Aquarium Microservices
+﻿## Stack di Monitoring e Logging - Aquarium Microservices
 
-Questo documento descrive il sistema di monitoring e logging implementato per il progetto Aquarium Microservices.
+### Panoramica
 
-## Stack di Monitoring e Logging
+Lo stack di monitoring e logging è composto da:
+- **ELK Stack**: Elasticsearch (8.11.3), Logstash, Kibana (8.11.3) per log aggregation e visualization
+- **Prometheus**: Time-series database per metrics collection  
+- **Grafana**: Dashboard e visualization per metrics
 
-### ELK Stack (Logging)
-- **Elasticsearch** (porta 9200): Storage dei log
-- **Logstash** (porta 5000, 12201): Elaborazione e aggregazione log
-- **Kibana** (porta 5601): Visualizzazione e analisi log
-
-### Prometheus & Grafana (Metrics)
-- **Prometheus** (porta 9090): Raccolta metriche
-- **Grafana** (porta 3000): Dashboard e visualizzazione metriche
-
----
-
-## Quick Start
-
-### 1. Avviare l'infrastruttura completa
-
-```bash
-docker-compose up -d
-```
-
-Questo avvierà tutti i servizi inclusi ELK, Prometheus e Grafana.
-
-### 2. Accedere alle interfacce web
+### URLs dei Servizi
 
 - **Kibana**: http://localhost:5601
 - **Grafana**: http://localhost:3000 (admin/admin)
 - **Prometheus**: http://localhost:9090
+- **Elasticsearch**: http://localhost:9200
 
----
+### Setup Completato 
 
-## Configurazione Servizi
+Tutti i servizi sono configurati e operativi:
 
-### Prerequisiti per ogni microservizio
+#### Prometheus Targets (9/9 UP)
+-  ai-assistant-service:8090
+-  api-gateway:8080
+-  aquariums-service:8081
+-  inhabitants-service:8082
+-  species-service:8083
+-  maintenance-service:8084
+-  parameters-service:8085
+-  manual-parameters-service:8086
+-  target-parameters-service:8087
 
-Per abilitare monitoring e logging su tutti i servizi, aggiungi al `pom.xml`:
+### ✅ Log Collection Configurato
 
-```xml
-<!-- Monitoring & Metrics -->
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
-<dependency>
-    <groupId>io.micrometer</groupId>
-    <artifactId>micrometer-registry-prometheus</artifactId>
-</dependency>
+**Filebeat** è configurato e attivo per raccogliere automaticamente i log Docker da tutti i microservizi.
 
-<!-- Logging -->
-<dependency>
-    <groupId>net.logstash.logback</groupId>
-    <artifactId>logstash-logback-encoder</artifactId>
-    <version>7.4</version>
-</dependency>
+Gli indici Elasticsearch vengono creati automaticamente con il pattern: `aquarium-logs-YYYY.MM.DD`
+
+### Configurazione Kibana
+
+**NOTA**: Gli indici sono già stati creati! Ora puoi configurare Kibana.
+
+1. **Apri Kibana**: http://localhost:5601
+
+2. **Crea Data View per i Log**:
+   - Vai su **Menu** (☰) → **Management** → **Stack Management** → **Data Views**
+   - Clicca **Create data view**
+   - Compila i campi:
+     - **Name**: `Aquarium Logs`
+     - **Index pattern**: `aquarium-logs-*`
+     - **Timestamp field**: `@timestamp`
+   - Clicca **Save data view to Kibana**
+
+3. **Visualizza i Log**:
+   - Vai su **Menu** (☰) → **Analytics** → **Discover**
+   - Seleziona il data view **Aquarium Logs** appena creato
+   - Dovresti vedere i log JSON dei microservizi con i campi:
+     - `@timestamp`: Timestamp del log
+     - `container.name`: Nome del container Docker
+     - `service`: Nome del microservizio (da logback)
+     - `level`: Livello di log (INFO, DEBUG, ERROR, WARN)
+     - `message`: Messaggio del log
+     - `logger`: Logger class
+     - `thread`: Thread name
+
+4. **Filtra i Log**:
+   - Per servizio: `service: "aquariums-service"`
+   - Per livello: `level: "ERROR"`
+   - Per messaggio: cerca nel campo message
+
+### Grafana - Dashboard Predefinita
+
+1. **Login a Grafana**: http://localhost:3000
+   - Username: `admin`
+   - Password: `admin` (cambiarla al primo accesso)
+
+2. **Dashboard Disponibile**:
+   - Nome: **Aquarium Microservices - Overview**
+   - Path: **Dashboards**  **Aquarium Microservices - Overview**
+   - Pannelli inclusi:
+     - HTTP Request Rate
+     - HTTP Request Latency (p99)
+     - HTTP Success Rate (%)
+     - JVM Memory Usage
+     - Thread Count
+
+3. **Datasources Preconfigurati**:
+   - Prometheus (http://prometheus:9090)
+   - Elasticsearch (http://elasticsearch:9200)
+
+### Metriche Disponibili
+
+Ogni microservizio espone metriche su `/actuator/prometheus`:
+
+#### HTTP Metrics
+- `http_server_requests_seconds`: Latency delle richieste HTTP
+- `http_server_requests_seconds_count`: Conteggio richieste HTTP
+- `http_server_requests_seconds_sum`: Somma latenze
+
+Tag disponibili:
+- `application`: Nome del servizio
+- `uri`: Endpoint HTTP
+- `method`: HTTP method (GET, POST, etc.)
+- `status`: HTTP status code
+
+#### JVM Metrics
+- `jvm_memory_used_bytes`: Memoria JVM usata
+- `jvm_memory_max_bytes`: Memoria JVM massima
+- `jvm_threads_live_threads`: Thread attivi
+- `jvm_gc_pause_seconds`: Garbage collection pause
+
+#### Database Metrics (HikariCP)
+- `hikaricp_connections_active`: Connessioni attive al database
+- `hikaricp_connections_idle`: Connessioni idle
+- `hikaricp_connections_pending`: Connessioni in attesa
+- `hikaricp_connections_timeout_total`: Timeout connessioni
+
+### Troubleshooting
+
+#### Prometheus target DOWN
+```bash
+# Verifica lo stato del servizio
+docker-compose ps <service-name>
+
+# Controlla i log del servizio
+docker logs <service-name> --tail 100
+
+# Verifica l'endpoint Actuator
+curl http://localhost:<port>/actuator/prometheus
 ```
 
-### Configurazione application.properties
+#### Kibana non mostra log
+```bash
+# Verifica che Logstash stia ricevendo log
+docker logs logstash --tail 100
 
-Aggiungi al `application.properties` di ogni servizio:
+# Verifica indici Elasticsearch
+curl http://localhost:9200/_cat/indices?v
 
-```properties
-# Actuator Configuration
-management.endpoints.web.exposure.include=health,info,metrics,prometheus,loggers
-management.endpoint.health.show-details=always
-management.endpoint.prometheus.enabled=true
-management.metrics.export.prometheus.enabled=true
-management.metrics.tags.application=${spring.application.name}
-
-# Logging Configuration
-logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} - %msg%n
-logging.level.it.f3rren.aquarium=INFO
-logging.level.org.springframework.web=INFO
+# Dovrebbe mostrare indici: aquarium-logs-YYYY.MM.DD
 ```
 
-### Configurazione Logback
+#### Grafana non mostra metriche
+- Verifica che i Prometheus targets siano UP: http://localhost:9090/targets
+- Controlla la datasource Prometheus in Grafana: Configuration  Data sources  Prometheus
+- Testa la query: `up{job=~".*-service"}`
 
-Copia il file `logback-spring.xml` nella cartella `src/main/resources` di ogni servizio.
+### Next Steps
 
----
-
-## Utilizzo
-
-### Kibana - Visualizzazione Log
-
-1. Accedi a Kibana: http://localhost:5601
-2. Vai su **Management** > **Index Patterns**
-3. Crea un index pattern: `aquarium-logs-*`
-4. Seleziona `@timestamp` come campo temporale
-5. Vai su **Discover** per visualizzare i log in tempo reale
-
-**Esempi di query utili:**
-- Tutti gli errori: `level: "ERROR"`
-- Log di un servizio specifico: `service: "aquariums-service"`
-- Errori di un servizio: `service: "aquariums-service" AND level: "ERROR"`
-
-### Grafana - Dashboard Metriche
-
-1. Accedi a Grafana: http://localhost:3000 (admin/admin)
-2. La dashboard "Aquarium Microservices Overview" è già pre-configurata
-3. Visualizza:
-   - Request rate per servizio
-   - Response time (p99)
-   - Success rate
-   - Utilizzo memoria JVM
-   - Thread attivi
-
-**Dashboard disponibili:**
-- **Aquarium Microservices Overview**: Vista generale di tutti i servizi
-- Puoi creare dashboard personalizzate usando il datasource Prometheus
-
-### Prometheus - Metriche Raw
-
-Accedi a Prometheus: http://localhost:9090
-
-**Query utili:**
-```promql
-# Request rate
-rate(http_server_requests_seconds_count[1m])
-
-# Response time p99
-histogram_quantile(0.99, rate(http_server_requests_seconds_bucket[1m]))
-
-# Memory usage
-jvm_memory_used_bytes
-
-# CPU usage
-process_cpu_usage
-
-# Active connections
-hikaricp_connections_active
-```
-
----
-
-## Metriche Esposte
-
-Ogni servizio espone metriche su:
-- `http://localhost:808X/actuator/prometheus`
-
-### Metriche principali:
-
-1. **HTTP Requests**
-   - `http_server_requests_seconds_count`: Conteggio richieste
-   - `http_server_requests_seconds_sum`: Tempo totale richieste
-   - `http_server_requests_seconds_bucket`: Istogramma tempi di risposta
-
-2. **JVM**
-   - `jvm_memory_used_bytes`: Memoria utilizzata
-   - `jvm_memory_max_bytes`: Memoria massima
-   - `jvm_threads_live_threads`: Thread attivi
-   - `jvm_gc_*`: Statistiche Garbage Collection
-
-3. **Database (HikariCP)**
-   - `hikaricp_connections_active`: Connessioni attive
-   - `hikaricp_connections_idle`: Connessioni idle
-   - `hikaricp_connections_pending`: Connessioni in attesa
-
-4. **System**
-   - `process_cpu_usage`: Utilizzo CPU
-   - `system_cpu_usage`: CPU sistema
-   - `process_uptime_seconds`: Uptime del processo
-
----
-
-## Troubleshooting
-
-### Elasticsearch non parte
-- Verifica memoria disponibile (richiede almeno 512MB)
-- Controlla i log: `docker logs elasticsearch`
-
-### Logstash non riceve log
-- Verifica che i servizi abbiano la configurazione logback-spring.xml
-- Controlla che logstash sia in ascolto: `docker logs logstash`
-
-### Prometheus non raccoglie metriche
-- Verifica che l'endpoint actuator/prometheus sia accessibile
-- Controlla i targets in Prometheus: http://localhost:9090/targets
-- Assicurati che i servizi abbiano le dipendenze actuator e micrometer
-
-### Grafana non mostra dati
-- Verifica che il datasource Prometheus sia configurato correttamente
-- Controlla che i servizi siano in esecuzione
-- Attendi qualche minuto per la raccolta iniziale dei dati
-
----
-
-## Struttura File
-
-```
-.
-├── docker-compose.yml              # Configurazione container
-├── logstash/
-│   ├── Dockerfile                  # Build Logstash custom
-│   └── logstash.conf               # Pipeline configuration
-├── prometheus/
-│   └── prometheus.yml              # Scrape configuration
-└── grafana/
-    └── provisioning/
-        ├── datasources/
-        │   └── datasources.yml     # Auto-configured datasources
-        └── dashboards/
-            ├── dashboard.yml       # Dashboard provisioning
-            └── aquarium-overview.json  # Pre-built dashboard
-```
-
----
-
-## Best Practices
-
-1. **Logging**
-   - Usa livelli di log appropriati (DEBUG, INFO, WARN, ERROR)
-   - Includi contesto utile nei log (IDs, parametri rilevanti)
-   - Evita log eccessivi in produzione
-
-2. **Metriche**
-   - Monitora sempre: request rate, latency, error rate
-   - Imposta alert per metriche critiche
-   - Usa tag per categorizzare metriche (service, domain, etc.)
-
-3. **Dashboard**
-   - Crea dashboard per dominio (core, inhabitants, parameters)
-   - Monitora risorse (CPU, memoria, connessioni DB)
-   - Imposta time range appropriati (5m, 1h, 24h)
-
-4. **Performance**
-   - Limita retention dei log (attualmente 7 giorni)
-   - Configura rollover degli indici Elasticsearch
-   - Monitora l'utilizzo disco dei volumi Docker
-
----
-
-## Prossimi Passi
-
-1. **Alerting**: Configura Alertmanager per notifiche via email/Slack
-2. **Distributed Tracing**: Aggiungi Zipkin/Jaeger per tracciamento distribuito
-3. **Advanced Dashboards**: Crea dashboard specifiche per business metrics
-4. **Security**: Abilita autenticazione su Elasticsearch e Prometheus
-5. **Backup**: Implementa backup automatico dei dati Elasticsearch e Grafana
-
----
-
-## Servizi e Porte
-
-| Servizio | Porta | Descrizione |
-|----------|-------|-------------|
-| Elasticsearch | 9200, 9300 | Storage log |
-| Logstash | 5000, 12201 | Ingestion log |
-| Kibana | 5601 | UI log analysis |
-| Prometheus | 9090 | Metrics storage |
-| Grafana | 3000 | Metrics visualization |
-| API Gateway | 8080 | Entry point |
-| Aquariums Service | 8081 | Core service |
-| Inhabitants Service | 8082 | Inhabitants |
-| Species Service | 8083 | Species catalog |
-| Maintenance Service | 8084 | Maintenance tasks |
-| Parameters Service | 8085 | Water parameters |
-| Manual Parameters | 8086 | Manual readings |
-| Target Parameters | 8087 | Target ranges |
-| AI Assistant | 8090 | AI service |
-
----
-
-## Supporto
-
-Per problemi o domande:
-1. Controlla i log dei container: `docker logs <container-name>`
-2. Verifica lo stato dei servizi: `docker-compose ps`
-3. Riavvia un servizio specifico: `docker-compose restart <service-name>`
-
+1.  Verificare che tutti i target Prometheus siano UP
+2.  **Configurare Kibana Data View** (vedi sezione sopra) 
+3.  Accedere a Grafana e visualizzare la dashboard
+4. Creare alert personalizzati in Prometheus/Grafana
+5. Configurare retention policy per log e metriche
