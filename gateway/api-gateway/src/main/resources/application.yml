@@ -56,6 +56,13 @@ spring:
             - Path=/target-parameters-service/v3/api-docs
           filters:
             - RewritePath=/target-parameters-service/v3/api-docs, /v3/api-docs
+            
+        - id: ai-assistant-service-openapi
+          uri: http://ai-assistant-service:8090
+          predicates:
+            - Path=/ai-assistant-service/v3/api-docs
+          filters:
+            - RewritePath=/ai-assistant-service/v3/api-docs, /v3/api-docs
       
         # Maintenance Service - Products
         - id: maintenance-service-products
@@ -104,6 +111,12 @@ spring:
           uri: http://target-parameters-service:8087
           predicates:
             - Path=/target-parameters/**
+            
+        # AI Assistant Service
+        - id: ai-assistant-service
+          uri: http://ai-assistant-service:8090
+          predicates:
+            - Path=/api/ai/**
       
       # Configurazione CORS globale
       globalcors:
@@ -137,9 +150,38 @@ springdoc:
         url: /manual-parameters-service/v3/api-docs
       - name: target-parameters-service
         url: /target-parameters-service/v3/api-docs
+      - name: ai-assistant-service
+        url: /ai-assistant-service/v3/api-docs
             
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping: TRACE
     reactor.netty.http.client: DEBUG
+    reactor.netty.http.server: DEBUG
+
+# Actuator Configuration for Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+      enabled: true
+    info:
+      enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+    loggers:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
 
