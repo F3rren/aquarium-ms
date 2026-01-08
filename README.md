@@ -1,14 +1,15 @@
 # Aquarium Microservices
 
 ![Java 21](https://img.shields.io/badge/java-21-blue.svg)
-![Spring Boot 3.x](https://img.shields.io/badge/spring--boot-3.x-green.svg)
+![Spring Boot 4.x](https://img.shields.io/badge/spring--boot-4.x-green.svg)
 ![Microservices](https://img.shields.io/badge/architecture-microservices-blue.svg)
 ![Dockerized](https://img.shields.io/badge/docker-ready-blue.svg)
 ![PostgreSQL](https://img.shields.io/badge/database-PostgreSQL-336791.svg)
+![Monitoring](https://img.shields.io/badge/monitoring-ELK%20%7C%20Prometheus%20%7C%20Grafana-orange.svg)
 ![MIT License](https://img.shields.io/badge/license-MIT-green.svg)
 
 A **microservice-based backend** for comprehensive aquarium management—tanks, inhabitants, species, maintenance tasks, and water parameters.  
-**Built with Java 21, Spring Boot, Spring Cloud Gateway, Hibernate and PostgreSQL 16. Fully dockerized via Docker Compose to run all services and the database together.**
+**Built with Java 21, Spring Boot 4.0, Spring Cloud Gateway, Hibernate and PostgreSQL 16. Fully dockerized via Docker Compose with integrated monitoring and logging stack (ELK, Prometheus, Grafana).**
 
 ---
 
@@ -19,11 +20,13 @@ A **microservice-based backend** for comprehensive aquarium management—tanks, 
 
 ## Project Status
 
-- **Architecture:** 8 Spring Boot microservices + API Gateway + PostgreSQL (3 schemas: `core`, `inhabitants`, `parameters`).  
+- **Architecture:** 8 Spring Boot microservices + API Gateway + AI Assistant + PostgreSQL (3 schemas: `core`, `inhabitants`, `parameters`).  
+- **Monitoring:** Full observability stack with ELK (Elasticsearch, Logstash, Kibana), Prometheus, Grafana and Filebeat.
+- **AI Integration:** AI-powered assistant service using Ollama for aquarium management suggestions.
 - **Use case:** Single-user/private usage for now (no authentication yet).  
 - **Frontend:** Designed to be consumed by a Flutter UI (mobile/desktop/web).  
 - **Evolution:** Refactored from the previous monolithic project [`aquarium-monitor`](https://github.com/F3rren/aquarium-monitor) into domain-focused microservices.  
-- **Stack:** Java 21, Spring Boot 3.x, Spring Cloud Gateway, Docker, PostgreSQL 16.
+- **Stack:** Java 21, Spring Boot 4.0, Spring Cloud Gateway, Docker, PostgreSQL 16, Ollama, ELK Stack, Prometheus, Grafana.
 
 ---
 
@@ -33,8 +36,11 @@ A **microservice-based backend** for comprehensive aquarium management—tanks, 
 - **Inhabitants & Species:** Link inhabitants to tanks and manage a reusable catalog of fish and corals.  
 - **Water Parameters:** Store, query and compare water parameters across time and against target ranges.  
 - **Maintenance:** Schedule, track and review maintenance tasks per aquarium.  
+- **AI Assistant:** Integrated AI service using Ollama for intelligent aquarium management suggestions and assistance.
+- **Full Observability:** Complete monitoring and logging stack with Prometheus, Grafana, Elasticsearch, Kibana and Filebeat.
+- **HTTP Request Logging:** Comprehensive request/response logging through API Gateway with full body capture.
 - **Microservice architecture:** Clear separation into core, inhabitants and parameters domains, exposed via an API Gateway.  
-- **Database isolation:** PostgreSQL schemas per domain to keep boundaries explicit and maintainable. [attached_file:2]
+- **Database isolation:** PostgreSQL schemas per domain to keep boundaries explicit and maintainable.
 
 ---
 
@@ -69,6 +75,20 @@ The system is split into multiple microservices, each responsible for a specific
 - `manual-parameters-service` (8086): Manually entered measurements.  
 - `target-parameters-service` (8087): Target parameter ranges for comparison and alerts.
 
+### AI Services
+
+- `ai-assistant-service` (8090): AI-powered assistant using Ollama for aquarium management guidance.
+
+### Infrastructure & Monitoring
+
+- **Ollama** (11434): Local LLM server for AI assistant functionality.
+- **Elasticsearch** (9200): Log storage and search engine.
+- **Kibana** (5601): Log visualization and exploration UI.
+- **Logstash** (5000, 12201): Log aggregation and processing.
+- **Filebeat**: Automatic Docker log collection and forwarding to Elasticsearch.
+- **Prometheus** (9090): Metrics collection and time-series database.
+- **Grafana** (3000): Metrics visualization and dashboards (admin/admin).
+
 ### Database
 
 - **PostgreSQL 16** (5432) with 3 logical schemas:  
@@ -80,7 +100,10 @@ The system is split into multiple microservices, each responsible for a specific
 
 - Each domain group (`core`, `inhabitants`, `parameters`) uses its own PostgreSQL schema to keep boundaries clear.  
 - The API Gateway exposes a unified HTTP surface, simplifying integration for web/mobile clients.  
-- All services are stateless and use Spring Data JPA with Hibernate, with `ddl-auto=update` for fast local development (a migration tool should replace this in a real production setup). [attached_file:2]
+- All HTTP requests and responses are logged through the gateway for complete request tracing.
+- Comprehensive monitoring with Prometheus metrics exposed via Spring Boot Actuator on all services.
+- Centralized log aggregation with Filebeat collecting Docker logs and forwarding to Elasticsearch.
+- All services are stateless and use Spring Data JPA with Hibernate, with `ddl-auto=update` for fast local development (a migration tool should replace this in a real production setup).
 
 ---
 
@@ -91,23 +114,40 @@ The system is split into multiple microservices, each responsible for a specific
 - Docker Desktop running  
 - Docker Compose installed
 
-
 ### Build and Run All Services
 
-
 ```bash
-#Build all services
+# Build all services (microservices + monitoring stack)
 docker-compose build
 
-#Start all services
+# Start all services (16 containers: 9 microservices + 7 monitoring services)
 docker-compose up -d
 
-#Tail logs
+# Tail logs
 docker-compose logs -f
 
-#Check running containers
+# Check running containers
 docker-compose ps
 ```
+
+### Access Monitoring & Logging
+
+After starting all services, access the monitoring stack:
+
+- **Kibana** (Logs): http://localhost:5601
+  - Create data view with pattern `aquarium-logs-*` 
+  - Explore logs in Discover section
+  - See [MONITORING.md](MONITORING.md) for detailed setup instructions
+
+- **Grafana** (Metrics): http://localhost:3000 (admin/admin)
+  - Pre-configured dashboard: "Aquarium Microservices - Overview"
+  - Datasources: Prometheus and Elasticsearch
+
+- **Prometheus** (Metrics): http://localhost:9090
+  - All 9 microservices exposed on `/actuator/prometheus`
+  - Query metrics and check targets status
+
+For complete monitoring setup and usage guide, see **[MONITORING.md](MONITORING.md)**
 
 ### Useful Commands
 
@@ -227,12 +267,15 @@ This centralized approach:
 ## Tech Stack
 
 - Java 21  
-- Spring Boot 3.x  
+- Spring Boot 4.0
 - Spring Cloud Gateway  
 - Spring Data JPA (Hibernate)  
 - PostgreSQL 16  
 - Docker & Docker Compose  
 - Lombok
+- **Monitoring:** Prometheus, Grafana
+- **Logging:** ELK Stack (Elasticsearch 8.11.3, Logstash, Kibana 8.11.3), Filebeat
+- **AI:** Ollama (TinyLlama model)
 
 ---
 
