@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import it.f3rren.aquarium.species.model.Fish;
 
-public interface IFishRepository extends JpaRepository<Fish, Integer> {
+public interface IFishRepository extends JpaRepository<Fish, Long> {
     
     @Query("SELECT f FROM Fish f ORDER BY f.commonName ASC")
     public List<Fish> findAllSortedByName();

@@ -2,15 +2,16 @@ package it.f3rren.aquarium.manual_parameters_service.controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import it.f3rren.aquarium.manual_parameters_service.dto.ApiResponseDTO;
+import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
 import it.f3rren.aquarium.manual_parameters_service.service.ManualParameterService;
 
@@ -18,48 +19,45 @@ import it.f3rren.aquarium.manual_parameters_service.service.ManualParameterServi
 @RequestMapping("/aquariums/{aquariumId}/parameters/manual")
 @Tag(name = "ManualParameter", description = "API for managing manual parameters")
 public class ManualParameterController {
-    
-    @Autowired
-    private ManualParameterService manualParameterService;
+
+    private final ManualParameterService manualParameterService;
+
+    public ManualParameterController(ManualParameterService manualParameterService) {
+        this.manualParameterService = manualParameterService;
+    }
 
     @PostMapping
     @Operation(summary = "Add a new manual parameter", description = "Add a new manual parameter for a specific aquarium")
-    public ResponseEntity<?> addManualParameter(@PathVariable Long aquariumId, @RequestBody ManualParameter parameter) {
-        parameter.setAquariumId(aquariumId);
-        ManualParameter saved = manualParameterService.saveManualParameter(aquariumId, parameter);
-        
-        Map<String, Object> response = Map.of(
-            "success", true,
-            "message", "Manual parameter saved successfully",
-            "data", saved
-        );
-        
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public ResponseEntity<ApiResponseDTO<ManualParameter>> addManualParameter(
+            @PathVariable Long aquariumId,
+            @Valid @RequestBody CreateManualParameterDTO dto) {
+
+        ManualParameter saved = manualParameterService.saveManualParameter(aquariumId, dto);
+
+        return new ResponseEntity<>(new ApiResponseDTO<>(
+                true, "Manual parameter saved successfully", saved, null), HttpStatus.CREATED);
     }
 
     @GetMapping
-    @Operation(summary = "Get the latest manual parameter for an aquarium", description = "Retrieve the most recent manual parameter for a specific aquarium")
-    public ResponseEntity<?> getLatestManualParameter(@PathVariable Long aquariumId) {
-        ManualParameter latest = manualParameterService.getLatestManualParameter(aquariumId);
-        
-        Map<String, Object> response = Map.of(
-            "success", true,
-            "message", "Latest manual parameter retrieved successfully",
-            "data", latest
-        );
+    @Operation(summary = "Get latest manual parameter", description = "Retrieve the most recent manual parameter")
+    public ResponseEntity<ApiResponseDTO<ManualParameter>> getLatestManualParameter(
+            @PathVariable Long aquariumId) {
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        ManualParameter latest = manualParameterService.getLatestManualParameter(aquariumId);
+
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                true, "Latest manual parameter retrieved successfully", latest, null));
     }
-    
+
     @GetMapping("/history")
-    @Operation(summary = "Get manual parameters history for an aquarium", description = "Retrieve manual parameters for a specific aquarium within a date range")
-    public ResponseEntity<?> getManualParametersHistory(
+    @Operation(summary = "Get manual parameters history", description = "Retrieve manual parameters within a date range")
+    public ResponseEntity<ApiResponseDTO<List<ManualParameter>>> getManualParametersHistory(
             @PathVariable Long aquariumId,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
-        
+
         List<ManualParameter> parameters;
-        
+
         if (from != null && to != null) {
             LocalDateTime fromDate = LocalDateTime.parse(from);
             LocalDateTime toDate = LocalDateTime.parse(to);
@@ -68,12 +66,7 @@ public class ManualParameterController {
             parameters = manualParameterService.getAllManualParameters(aquariumId);
         }
 
-        Map<String, Object> response = Map.of(
-            "success", true,
-            "message", "Manual parameters history retrieved successfully",
-            "data", parameters
-        );
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                true, "Manual parameters history retrieved successfully", parameters, null));
     }
 }
