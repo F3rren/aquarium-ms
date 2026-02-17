@@ -78,6 +78,12 @@
 		<artifactId>micrometer-registry-prometheus</artifactId>
 	</dependency>
 
+	<!-- Validation -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-validation</artifactId>
+	</dependency>
+
 	<!-- Logging -->
 	<dependency>
 		<groupId>net.logstash.logback</groupId>
