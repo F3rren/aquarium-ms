@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import it.f3rren.aquarium.species.model.Coral;
 
-public interface ICoralRepository extends JpaRepository<Coral, Integer> {
+public interface ICoralRepository extends JpaRepository<Coral, Long> {
     
     @Query("SELECT c FROM Coral c ORDER BY c.commonName ASC")
     public List<Coral> findAllSortedByName();
