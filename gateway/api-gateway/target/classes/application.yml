@@ -119,10 +119,11 @@ spring:
             - Path=/api/ai/**
       
       # Configurazione CORS globale
+      # TODO: sostituire "*" con i domini effettivi in produzione
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "*"
+            allowedOrigins: "http://localhost:3000"
             allowedMethods:
               - GET
               - POST
@@ -131,6 +132,7 @@ spring:
               - PATCH
               - OPTIONS
             allowedHeaders: "*"
+            allowCredentials: true
 
 springdoc:
   swagger-ui:
@@ -152,23 +154,23 @@ springdoc:
         url: /target-parameters-service/v3/api-docs
       - name: ai-assistant-service
         url: /ai-assistant-service/v3/api-docs
-            
+
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping: TRACE
-    reactor.netty.http.client: DEBUG
-    reactor.netty.http.server: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping: INFO
+    reactor.netty.http.client: INFO
+    reactor.netty.http.server: INFO
 
 # Actuator Configuration for Monitoring
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info,metrics,prometheus
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
       enabled: true
     info:
       enabled: true
@@ -176,12 +178,11 @@ management:
       enabled: true
     prometheus:
       enabled: true
-    loggers:
-      enabled: true
-  metrics:
-    export:
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: true
+  metrics:
     tags:
       application: ${spring.application.name}
 
