@@ -12,6 +12,8 @@ import lombok.*;
  * The @NoArgsConstructor and @AllArgsConstructor annotations are used to generate constructors.
  * The @Getter and @Setter annotations are used to generate getters and setters.
  * The @Builder annotation is used to generate a builder pattern for this class.
+ * The @Deprecated annotations are used to mark fields as deprecated.
+ * @author F3rren
  */
 @Data
 @NoArgsConstructor
