@@ -36,24 +36,36 @@ public class Aquarium {
     /**
      * Name of the aquarium.
      * Must be provided when creating a new aquarium.
+     * @NotNull annotation ensures that the name is not null.
+     * @Size Must be between 2 and 100 characters.
      * @Column annotation defines the column name in the database.
      */
+    @NotNull
+    @Size(min = 2, max = 100)
     @Column(name = "name")
     private String name;
 
     /**
      * Volume of the aquarium in liters.
      * Must be positive and non-zero.
+     * @NotNull annotation ensures that the volume is not null.
+     * @Min annotation ensures that the volume is at least 1.
      * @Column annotation defines the column name in the database.
      */
+    @NotNull
+    @Min(1)
     @Column(name = "volume")
     private int volume;
 
     /**
      * Type of the aquarium.
      * Can be "saltwater" or "freshwater".
+     * @NotNull annotation ensures that the volume is not null.
+     * @Size Must be between 2 and 50 characters.
      * @Column annotation defines the column name in the database.
      */
+    @NotNull
+    @Size(min = 2, max = 50)
     @Column(name = "type")
     private String type;
 
@@ -70,16 +82,20 @@ public class Aquarium {
     /**
      * Description of the aquarium.
      * Can be used to provide additional information about the aquarium.
+     * @Size annotation ensures that the description is not more than 500 characters.
      * @Column annotation defines the column name in the database.
      */
+    @Size(max = 500)
     @Column(name = "description")
     private String description;
 
     /**
      * URL of the image associated with the aquarium.
      * Can be used to display a visual representation of the aquarium.
+     * @Size annotation ensures that the description is not more than 2000 characters.
      * @Column annotation defines the column name in the database.
      */
+    @Size(max = 2000)
     @Column(name = "image_url")
     private String imageUrl;
 
