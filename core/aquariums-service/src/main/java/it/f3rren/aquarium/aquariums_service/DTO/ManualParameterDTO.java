@@ -6,6 +6,10 @@ import lombok.*;
 /**
  * Data Transfer Object for manual parameters of an aquarium.
  * This class is used to transfer data between the application and the client.
+ * It includes fields for the manual parameters of an aquarium, such as calcium, magnesium, KH, nitrate, phosphate, and the date and time when the measurements were taken.
+ * It also includes optional fields for notes and an ID.
+ * Lombok annotations are used to generate getters, setters, constructors, and other boilerplate code.
+ * @author F3rren
  */
 @Data
 @NoArgsConstructor

@@ -14,13 +14,21 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import it.f3rren.aquarium.aquariums_service.dto.ApiResponseDTO;
 
+/**
+ * Global exception handler for the application.
+ * It handles different exceptions and provides appropriate responses.
+ * It also logs the error details.
+ * @author F3rren
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
-     * 404 - Risorsa non trovata
+     * Handles resource not found exceptions and returns a response with error details.
+     * @param ex The resource not found exception that occurred.
+     * This is typically thrown when a requested resource is not found.
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponseDTO<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
@@ -31,7 +39,9 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 400 - Errori di validazione (@Valid)
+     * Handles validation errors and returns a response with validation details.
+     * @param ex The validation exception that occurred during method argument binding.
+     * This is typically thrown when @Valid is used on method arguments.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponseDTO<Map<String, String>>> handleValidationErrors(
@@ -50,7 +60,9 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 400 - Argomenti illegali (es. tipo non valido nel path)
+     * Handles illegal argument exceptions and returns a response with error details.
+     * @param ex The illegal argument exception that occurred.
+     * This is typically thrown when a method is called with an invalid argument.
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponseDTO<Void>> handleIllegalArgument(IllegalArgumentException ex) {
@@ -61,7 +73,9 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 400 - Tipo parametro non valido (es. "abc" come ID)
+     * Handles type mismatch exceptions and returns a response with error details.
+     * @param ex The type mismatch exception that occurred.
+     * This is typically thrown when a method argument cannot be converted to the required type.
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponseDTO<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
@@ -76,8 +90,9 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 500 - Errore generico non gestito (cattura tutto il resto)
-     * Non espone dettagli interni al client.
+     * Handles generic exceptions and returns a response with error details.
+     * @param ex The generic exception that occurred.
+     * This is typically thrown when an unexpected error occurs during the execution of the application.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponseDTO<Void>> handleGenericException(Exception ex) {
