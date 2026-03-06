@@ -16,17 +16,35 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+/**
+ * Controller for managing aquariums. Provides endpoints for CRUD operations on aquariums.
+ * This controller handles HTTP requests related to aquarium management, including creating, retrieving, updating, and deleting aquariums.
+ * It uses the AquariumService to perform business logic operations on aquariums.
+ * It also uses the AquariumService to perform business logic operations on aquariums.
+ * @author f3rren
+ */
 @RestController
 @RequestMapping("/aquariums")
 @Tag(name = "Aquarium", description = "API for managing aquariums")
 public class AquariumController {
 
+    /**
+     * Service for managing aquariums data.
+     */
     private final AquariumService aquariumService;
 
+    /**
+     * Constructor for AquariumController. Initializes the AquariumService dependency.
+     * @param aquariumService AquariumService instance for aquarium operations
+     */
     public AquariumController(AquariumService aquariumService) {
         this.aquariumService = aquariumService;
     }
 
+    /**
+     * Retrieves all aquariums.
+     * @return ResponseEntity containing a list of aquariums and a success message or an error message if the operation fails.
+     */
     @GetMapping
     @Operation(summary = "Get all aquariums", description = "Retrieve details of all aquariums")
     public ResponseEntity<ApiResponseDTO<List<AquariumResponseDTO>>> getAllAquariums() {
@@ -39,6 +57,11 @@ public class AquariumController {
                 new ApiResponseDTO<>(true, "Aquariums retrieved successfully", aquariums, null));
     }
 
+    /**
+     * Retrieves an aquarium by its ID.
+     * @param id ID of the aquarium to retrieve
+     * @return ResponseEntity containing aquarium details and a success message or an error message if the operation fails.
+     */
     @GetMapping("/{id}")
     @Operation(summary = "Get aquarium by ID", description = "Retrieve details of a specific aquarium")
     public ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> getAquariumById(@PathVariable Long id) {
@@ -49,6 +72,11 @@ public class AquariumController {
                         AquariumResponseDTO.fromEntity(aquarium), null));
     }
 
+    /**
+     * Creates a new aquarium.
+     * @param dto Aquarium details to be created
+     * @return ResponseEntity containing created aquarium details and a success message or an error message if the operation fails.
+     */
     @PostMapping
     @Operation(summary = "Create a new aquarium", description = "Receive and save a new aquarium")
     public ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> createAquarium(
@@ -61,6 +89,12 @@ public class AquariumController {
                 HttpStatus.CREATED);
     }
 
+    /**
+     * Updates an existing aquarium.
+     * @param id ID of the aquarium to update
+     * @param dto Updated aquarium details
+     * @return ResponseEntity containing updated aquarium details and a success message or an error message if the operation fails.
+     */
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing aquarium", description = "Modify details of a specific aquarium")
     public ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> updateAquarium(
@@ -73,6 +107,11 @@ public class AquariumController {
                         AquariumResponseDTO.fromEntity(updatedAquarium), null));
     }
 
+    /**
+     * Deletes an aquarium by its ID.
+     * @param id ID of the aquarium to delete
+     * @return ResponseEntity containing a success message or an error message if the operation fails.
+     */
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an aquarium", description = "Remove a specific aquarium")
     public ResponseEntity<ApiResponseDTO<Void>> deleteAquarium(@PathVariable Long id) {
