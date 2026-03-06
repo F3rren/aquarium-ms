@@ -12,6 +12,14 @@ import it.f3rren.aquarium.aquariums_service.dto.WaterParameterDTO;
 
 import java.util.List;
 
+/**
+ * Client class to interact with the parameters microservice.
+ * It uses WebClient to make HTTP requests to the parameters microservice.
+ * It provides methods to interact with the different endpoints related to water parameters, manual parameters, and target parameters.
+ * The WebClient instances are injected as qualifiers to differentiate between different clients for water parameters, manual parameters, and target parameters.
+ * The methods use the blocking WebClient API to make synchronous requests to the microservice endpoints.
+ * @author F3rren
+ */
 @Component
 public class ParametersClient {
 
@@ -19,6 +27,12 @@ public class ParametersClient {
     private final WebClient manualParametersWebClient;
     private final WebClient targetParametersWebClient;
 
+    /**
+     * Constructor for ParametersClient.
+     * @param waterParametersWebClient WebClient for water parameters microservice
+     * @param manualParametersWebClient WebClient for manual parameters microservice
+     * @param targetParametersWebClient WebClient for target parameters microservice
+     */
     public ParametersClient(
             @Qualifier("waterParametersWebClient") WebClient waterParametersWebClient,
             @Qualifier("manualParametersWebClient") WebClient manualParametersWebClient,
@@ -28,6 +42,11 @@ public class ParametersClient {
         this.targetParametersWebClient = targetParametersWebClient;
     }
 
+    /**
+     * Adds a new water parameter to the microservice.
+     * @param parameter WaterParameterDTO object to be added
+     * @return ApiResponseDTO containing the added water parameter
+     */
     // Water Parameters
     public ApiResponseDTO<WaterParameterDTO> addWaterParameter(WaterParameterDTO parameter) {
         return waterParametersWebClient.post()
@@ -38,6 +57,12 @@ public class ParametersClient {
                 .block();
     }
 
+    /**
+     * Retrieves water parameters for a specific aquarium.
+     * @param aquariumId ID of the aquarium
+     * @param limit Maximum number of parameters to retrieve
+     * @return ApiResponseDTO containing a list of water parameters
+     */
     public ApiResponseDTO<List<WaterParameterDTO>> getWaterParametersByAquarium(Long aquariumId, Integer limit) {
         return waterParametersWebClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -49,6 +74,11 @@ public class ParametersClient {
                 .block();
     }
 
+    /**
+     * Retrieves the latest water parameter for a specific aquarium.
+     * @param aquariumId ID of the aquarium
+     * @return ApiResponseDTO containing the latest water parameter
+     */
     public ApiResponseDTO<WaterParameterDTO> getLatestWaterParameter(Long aquariumId) {
         return waterParametersWebClient.get()
                 .uri("/water-parameters/aquarium/{aquariumId}/latest", aquariumId)
@@ -57,6 +87,14 @@ public class ParametersClient {
                 .block();
     }
 
+    /**
+     * Retrieves water parameters history for a specific aquarium.
+     * @param aquariumId ID of the aquarium
+     * @param period Time period for the history (e.g., "day", "week", "month")
+     * @param from Start date for the history
+     * @param to End date for the history
+     * @return ApiResponseDTO containing a list of water parameters
+     */
     public ApiResponseDTO<List<WaterParameterDTO>> getWaterParametersHistory(Long aquariumId, String period, String from, String to) {
         return waterParametersWebClient.get()
                 .uri(uriBuilder -> {
@@ -74,7 +112,11 @@ public class ParametersClient {
                 .block();
     }
 
-    // Manual Parameters
+    /**
+     * Deletes a water parameter by its ID.
+     * @param parameter ID of the manual parameter
+     * @return ApiResponseDTO containing the deleted manual parameter
+     */
     public ApiResponseDTO<ManualParameterDTO> addManualParameter(ManualParameterDTO parameter) {
         return manualParametersWebClient.post()
                 .uri("/manual-parameters")
@@ -84,6 +126,11 @@ public class ParametersClient {
                 .block();
     }
 
+    /**
+     * Retrieves the latest manual parameter for a specific aquarium.
+     * @param aquariumId ID of the aquarium
+     * @return ApiResponseDTO containing the latest manual parameter
+     */
     public ApiResponseDTO<ManualParameterDTO> getLatestManualParameter(Long aquariumId) {
         return manualParametersWebClient.get()
                 .uri("/manual-parameters/aquarium/{aquariumId}/latest", aquariumId)
@@ -92,6 +139,13 @@ public class ParametersClient {
                 .block();
     }
 
+    /**
+     * Retrieves manual parameters history for a specific aquarium.
+     * @param aquariumId ID of the aquarium
+     * @param from Start date for the history
+     * @param to End date for the history
+     * @return ApiResponseDTO containing a list of manual parameters
+     */
     public ApiResponseDTO<List<ManualParameterDTO>> getAllManualParameters(Long aquariumId) {
         return manualParametersWebClient.get()
                 .uri("/manual-parameters/aquarium/{aquariumId}", aquariumId)
@@ -100,6 +154,13 @@ public class ParametersClient {
                 .block();
     }
 
+    /**
+     * Retrieves manual parameters history for a specific aquarium.
+     * @param aquariumId ID of the aquarium
+     * @param from Start date for the history
+     * @param to End date for the history
+     * @return ApiResponseDTO containing a list of manual parameters
+     */
     public ApiResponseDTO<List<ManualParameterDTO>> getManualParametersHistory(Long aquariumId, String from, String to) {
         return manualParametersWebClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -112,7 +173,11 @@ public class ParametersClient {
                 .block();
     }
 
-    // Target Parameters
+    /**
+     * Adds a new target parameter for a specific aquarium.
+     * @param aquariumId ID of the aquarium
+     * @return ApiResponseDTO containing the added target parameter
+     */
     public ApiResponseDTO<TargetParameterDTO> getTargetParameters(Long aquariumId) {
         return targetParametersWebClient.get()
                 .uri("/target-parameters/aquarium/{aquariumId}", aquariumId)
@@ -121,6 +186,12 @@ public class ParametersClient {
                 .block();
     }
 
+    /**
+     * Saves target parameters for a specific aquarium.
+     * @param aquariumId ID of the aquarium
+     * @param targetParameter Target parameter to be saved
+     * @return ApiResponseDTO containing the saved target parameter
+     */
     public ApiResponseDTO<TargetParameterDTO> saveTargetParameters(Long aquariumId, TargetParameterDTO targetParameter) {
         return targetParametersWebClient.post()
                 .uri("/target-parameters/aquarium/{aquariumId}", aquariumId)
