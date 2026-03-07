@@ -3,7 +3,7 @@ package it.f3rren.aquarium.aquariums_service.client;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 import it.f3rren.aquarium.aquariums_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.aquariums_service.dto.ManualParameterDTO;
@@ -13,47 +13,48 @@ import it.f3rren.aquarium.aquariums_service.dto.WaterParameterDTO;
 import java.util.List;
 
 /**
- * Client class to interact with the parameters microservice.
- * It uses WebClient to make HTTP requests to the parameters microservice.
- * It provides methods to interact with the different endpoints related to water parameters, manual parameters, and target parameters.
- * The WebClient instances are injected as qualifiers to differentiate between different clients for water parameters, manual parameters, and target parameters.
- * The methods use the blocking WebClient API to make synchronous requests to the microservice endpoints.
+ * Client class to interact with the parameters microservices.
+ * Uses Spring RestClient (synchronous) to make HTTP requests to water parameters,
+ * manual parameters, and target parameters microservices.
  * @author F3rren
  */
 @Component
 public class ParametersClient {
 
-    private final WebClient waterParametersWebClient;
-    private final WebClient manualParametersWebClient;
-    private final WebClient targetParametersWebClient;
+    private final RestClient waterParametersRestClient;
+    private final RestClient manualParametersRestClient;
+    private final RestClient targetParametersRestClient;
 
     /**
      * Constructor for ParametersClient.
-     * @param waterParametersWebClient WebClient for water parameters microservice
-     * @param manualParametersWebClient WebClient for manual parameters microservice
-     * @param targetParametersWebClient WebClient for target parameters microservice
+     * @param waterParametersRestClient RestClient for water parameters microservice
+     * @param manualParametersRestClient RestClient for manual parameters microservice
+     * @param targetParametersRestClient RestClient for target parameters microservice
      */
     public ParametersClient(
-            @Qualifier("waterParametersWebClient") WebClient waterParametersWebClient,
-            @Qualifier("manualParametersWebClient") WebClient manualParametersWebClient,
-            @Qualifier("targetParametersWebClient") WebClient targetParametersWebClient) {
-        this.waterParametersWebClient = waterParametersWebClient;
-        this.manualParametersWebClient = manualParametersWebClient;
-        this.targetParametersWebClient = targetParametersWebClient;
+            @Qualifier("waterParametersRestClient") RestClient waterParametersRestClient,
+            @Qualifier("manualParametersRestClient") RestClient manualParametersRestClient,
+            @Qualifier("targetParametersRestClient") RestClient targetParametersRestClient) {
+        this.waterParametersRestClient = waterParametersRestClient;
+        this.manualParametersRestClient = manualParametersRestClient;
+        this.targetParametersRestClient = targetParametersRestClient;
     }
 
+    // ========================
+    // Water Parameters
+    // ========================
+
     /**
-     * Adds a new water parameter to the microservice.
+     * Adds a new water parameter measurement.
      * @param parameter WaterParameterDTO object to be added
      * @return ApiResponseDTO containing the added water parameter
      */
     public ApiResponseDTO<WaterParameterDTO> addWaterParameter(WaterParameterDTO parameter) {
-        return waterParametersWebClient.post()
+        return waterParametersRestClient.post()
                 .uri("/water-parameters")
-                .bodyValue(parameter)
+                .body(parameter)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<WaterParameterDTO>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     /**
@@ -63,14 +64,13 @@ public class ParametersClient {
      * @return ApiResponseDTO containing a list of water parameters
      */
     public ApiResponseDTO<List<WaterParameterDTO>> getWaterParametersByAquarium(Long aquariumId, Integer limit) {
-        return waterParametersWebClient.get()
+        return waterParametersRestClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/water-parameters/aquarium/{aquariumId}")
                         .queryParam("limit", limit)
                         .build(aquariumId))
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<List<WaterParameterDTO>>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     /**
@@ -79,11 +79,10 @@ public class ParametersClient {
      * @return ApiResponseDTO containing the latest water parameter
      */
     public ApiResponseDTO<WaterParameterDTO> getLatestWaterParameter(Long aquariumId) {
-        return waterParametersWebClient.get()
+        return waterParametersRestClient.get()
                 .uri("/water-parameters/aquarium/{aquariumId}/latest", aquariumId)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<WaterParameterDTO>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     /**
@@ -95,7 +94,7 @@ public class ParametersClient {
      * @return ApiResponseDTO containing a list of water parameters
      */
     public ApiResponseDTO<List<WaterParameterDTO>> getWaterParametersHistory(Long aquariumId, String period, String from, String to) {
-        return waterParametersWebClient.get()
+        return waterParametersRestClient.get()
                 .uri(uriBuilder -> {
                     var builder = uriBuilder.path("/water-parameters/aquarium/{aquariumId}/history");
                     if (period != null) {
@@ -107,22 +106,24 @@ public class ParametersClient {
                     return builder.build(aquariumId);
                 })
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<List<WaterParameterDTO>>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
+    // ========================
+    // Manual Parameters
+    // ========================
+
     /**
-     * Deletes a water parameter by its ID.
-     * @param parameter ID of the manual parameter
-     * @return ApiResponseDTO containing the deleted manual parameter
+     * Adds a new manual parameter measurement.
+     * @param parameter ManualParameterDTO object to be added
+     * @return ApiResponseDTO containing the added manual parameter
      */
     public ApiResponseDTO<ManualParameterDTO> addManualParameter(ManualParameterDTO parameter) {
-        return manualParametersWebClient.post()
+        return manualParametersRestClient.post()
                 .uri("/manual-parameters")
-                .bodyValue(parameter)
+                .body(parameter)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<ManualParameterDTO>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     /**
@@ -131,26 +132,22 @@ public class ParametersClient {
      * @return ApiResponseDTO containing the latest manual parameter
      */
     public ApiResponseDTO<ManualParameterDTO> getLatestManualParameter(Long aquariumId) {
-        return manualParametersWebClient.get()
+        return manualParametersRestClient.get()
                 .uri("/manual-parameters/aquarium/{aquariumId}/latest", aquariumId)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<ManualParameterDTO>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     /**
-     * Retrieves manual parameters history for a specific aquarium.
+     * Retrieves all manual parameters for a specific aquarium.
      * @param aquariumId ID of the aquarium
-     * @param from Start date for the history
-     * @param to End date for the history
      * @return ApiResponseDTO containing a list of manual parameters
      */
     public ApiResponseDTO<List<ManualParameterDTO>> getAllManualParameters(Long aquariumId) {
-        return manualParametersWebClient.get()
+        return manualParametersRestClient.get()
                 .uri("/manual-parameters/aquarium/{aquariumId}", aquariumId)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<List<ManualParameterDTO>>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     /**
@@ -161,28 +158,30 @@ public class ParametersClient {
      * @return ApiResponseDTO containing a list of manual parameters
      */
     public ApiResponseDTO<List<ManualParameterDTO>> getManualParametersHistory(Long aquariumId, String from, String to) {
-        return manualParametersWebClient.get()
+        return manualParametersRestClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/manual-parameters/aquarium/{aquariumId}/history")
                         .queryParam("from", from)
                         .queryParam("to", to)
                         .build(aquariumId))
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<List<ManualParameterDTO>>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
+    // ========================
+    // Target Parameters
+    // ========================
+
     /**
-     * Adds a new target parameter for a specific aquarium.
+     * Retrieves target parameters for a specific aquarium.
      * @param aquariumId ID of the aquarium
-     * @return ApiResponseDTO containing the added target parameter
+     * @return ApiResponseDTO containing the target parameters
      */
     public ApiResponseDTO<TargetParameterDTO> getTargetParameters(Long aquariumId) {
-        return targetParametersWebClient.get()
+        return targetParametersRestClient.get()
                 .uri("/target-parameters/aquarium/{aquariumId}", aquariumId)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<TargetParameterDTO>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     /**
@@ -192,11 +191,10 @@ public class ParametersClient {
      * @return ApiResponseDTO containing the saved target parameter
      */
     public ApiResponseDTO<TargetParameterDTO> saveTargetParameters(Long aquariumId, TargetParameterDTO targetParameter) {
-        return targetParametersWebClient.post()
+        return targetParametersRestClient.post()
                 .uri("/target-parameters/aquarium/{aquariumId}", aquariumId)
-                .bodyValue(targetParameter)
+                .body(targetParameter)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ApiResponseDTO<TargetParameterDTO>>() {})
-                .block();
+                .body(new ParameterizedTypeReference<>() {});
     }
 }
