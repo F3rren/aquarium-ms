@@ -16,46 +16,37 @@ import lombok.*;
 public class UpdateAquariumDTO {
 
     /**
-     * Name field, represents the name of the aquarium.
-     * @deprecated This field is deprecated and not used anymore.
+     * Name of the aquarium. Optional for partial updates.
+     * Must be between 1 and 100 characters if provided.
      */
-    @Deprecated
     @Size(min = 1, max = 100, message = "Name must be between 1 and 100 characters")
     private String name;
 
     /**
-     * Volume field, represents the volume of the aquarium.
-     * Must be a positive number.
-     * @deprecated This field is deprecated and not used anymore.
+     * Volume of the aquarium in liters. Optional for partial updates.
+     * Must be a positive number if provided.
      */
-    @Deprecated
     @Positive(message = "Volume must be a positive number")
     private Integer volume;
 
     /**
-     * Type field, represents the type of the aquarium.
-     * Must be at most 50 characters.
-     * @deprecated This field is deprecated and not used anymore.
+     * Type of the aquarium (e.g. "saltwater", "freshwater"). Optional for partial updates.
+     * Must be at most 50 characters if provided.
      */
-    @Deprecated
     @Size(max = 50, message = "Type must be at most 50 characters")
     private String type;
 
     /**
-     * Description field, represents the description of the aquarium.
-     * Must be at most 500 characters.
-     * @deprecated This field is deprecated and not used anymore.
+     * Description of the aquarium. Optional for partial updates.
+     * Must be at most 500 characters if provided.
      */
-    @Deprecated
     @Size(max = 500, message = "Description must be at most 500 characters")
     private String description;
 
     /**
-     * Image URL field, represents the URL of the aquarium image.
-     * Must be at most 500 characters.
-     * @deprecated This field is deprecated and not used anymore.
+     * URL of the aquarium image. Optional for partial updates.
+     * Must be at most 500 characters if provided.
      */
-    @Deprecated
     @Size(max = 500, message = "Image URL must be at most 500 characters")
     private String imageUrl;
 }

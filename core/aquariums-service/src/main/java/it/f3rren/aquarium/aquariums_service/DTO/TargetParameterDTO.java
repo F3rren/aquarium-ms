@@ -4,15 +4,8 @@ import lombok.*;
 
 /**
  * Data Transfer Object for target parameters.
- * This class represents the parameters that are set as targets for an aquarium.
- * It includes fields for each parameter and their respective values.
- * It also includes a constructor for initializing all fields.
- * Additionally, it includes getters, setters, and a no-argument constructor for Lombok to generate.
- * The @Data annotation is used to include all the annotations automatically.
- * The @NoArgsConstructor and @AllArgsConstructor annotations are used to generate constructors.
- * The @Getter and @Setter annotations are used to generate getters and setters.
- * The @Builder annotation is used to generate a builder pattern for this class.
- * The @Deprecated annotations are used to mark fields as deprecated.
+ * Represents the ideal parameter values set as targets for an aquarium.
+ * Used by ParametersClient to communicate with the target-parameters microservice.
  * @author F3rren
  */
 @Data
@@ -22,79 +15,57 @@ import lombok.*;
 public class TargetParameterDTO {
 
     /**
-     * ID field, represents the unique identifier for this target parameter.
-     * @deprecated This field is deprecated and not used anymore.
+     * Unique identifier for this target parameter record.
      */
-    @Deprecated
     private Long id;
 
     /**
-     * Aquarium ID field, represents the ID of the aquarium to which these parameters are associated.
-     * @deprecated This field is deprecated and not used anymore.
+     * ID of the aquarium to which these target parameters are associated.
      */
-    @Deprecated
     private Long aquariumId;
 
     /**
-     * Temperature field, represents the target temperature level for the aquarium.
-     * @deprecated This field is deprecated and not used anymore.
+     * Target temperature level for the aquarium (°C).
      */
-    @Deprecated
     private Double temperature;
 
     /**
-     * Ph field, represents the target pH level for the aquarium.
-     * @deprecated This field is deprecated and not used anymore.
+     * Target pH level for the aquarium.
      */
-    @Deprecated
     private Double ph;
 
     /**
-     * Salinity field, represents the target salinity level for the aquarium.
-     * @deprecated This field is deprecated and not used anymore.
+     * Target salinity level for the aquarium.
      */
-    @Deprecated
     private Double salinity;
 
     /**
-     * Ammonia field, represents the target ammonia level for the aquarium.
-     * @deprecated This field is deprecated and not used anymore.
+     * Target ORP (Oxidation-Reduction Potential) level for the aquarium.
      */
-    @Deprecated
     private Double orp;
 
     /**
-     * Calcium field, represents the target calcium level for the aquarium.
-     * @deprecated This field is deprecated and not used anymore.
+     * Target calcium level for the aquarium (mg/L).
      */
-    @Deprecated
     private Double calcium;
 
     /**
-     * Magnesium field, represents the target magnesium level for the aquarium.
-     * @deprecated This field is deprecated and not used anymore.
+     * Target magnesium level for the aquarium (mg/L).
      */
-    @Deprecated
     private Double magnesium;
 
     /**
-     * KH field, represents the target KH level for the aquarium.
-     * @deprecated This field is deprecated and not used anymore.
+     * Target KH (Carbonate Hardness) level for the aquarium (dKH).
      */
-    @Deprecated
     private Double kh;
 
     /**
-     * Nitrate field, represents the target nitrate level for the aquarium.
-     * @deprecated This field is deprecated and not used anymore.
+     * Target nitrate level for the aquarium (mg/L).
      */
-    @Deprecated
     private Double nitrate;
 
     /**
-     * Phosphate field, not used for now but could be added in the future.
-     * @deprecated This field is deprecated and not used anymore.
+     * Target phosphate level for the aquarium (mg/L).
      */
-    @Deprecated
     private Double phosphate;
 }
