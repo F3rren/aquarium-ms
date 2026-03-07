@@ -47,7 +47,6 @@ public class ParametersClient {
      * @param parameter WaterParameterDTO object to be added
      * @return ApiResponseDTO containing the added water parameter
      */
-    // Water Parameters
     public ApiResponseDTO<WaterParameterDTO> addWaterParameter(WaterParameterDTO parameter) {
         return waterParametersWebClient.post()
                 .uri("/water-parameters")
