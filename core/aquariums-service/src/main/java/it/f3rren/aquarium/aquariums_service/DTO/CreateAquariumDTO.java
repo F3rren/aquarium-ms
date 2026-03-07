@@ -1,5 +1,7 @@
 package it.f3rren.aquarium.aquariums_service.dto;
 
+import org.hibernate.validator.constraints.URL;
+
 import jakarta.validation.constraints.*;
 import lombok.*;
 

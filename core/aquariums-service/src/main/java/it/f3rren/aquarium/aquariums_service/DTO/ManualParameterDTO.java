@@ -1,6 +1,9 @@
 package it.f3rren.aquarium.aquariums_service.dto;
 
 import java.time.LocalDateTime;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 /**
