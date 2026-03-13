@@ -35,6 +35,21 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: sa
+          POSTGRES_PASSWORD: sa
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -46,10 +61,14 @@ jobs:
           distribution: 'temurin'
           cache: maven           # caches ~/.m2 between runs for faster builds
 
-      - name: Run unit tests
+      - name: Run tests
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/testdb
+          DB_USERNAME: sa
+          DB_PASSWORD: sa
         run: |
           chmod +x mvnw
-          ./mvnw test -B -Dmaven.compiler.release=17 -Dexcludes="**/AquariumsServiceApplicationTests.java"
+          ./mvnw test -B -Dmaven.compiler.release=17
         working-directory: core/aquariums-service
 
 # ─────────────────────────────────────────────────────────────────────────────
