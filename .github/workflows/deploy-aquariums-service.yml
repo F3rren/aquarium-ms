@@ -114,11 +114,16 @@ jobs:
           echo "image=$IMAGE_URI" >> $GITHUB_OUTPUT
 
       # ── ECS task definition ───────────────────────────────────────────────
-      # Download the current task definition from AWS so we don't hardcode it
+      # Fetch the task definition ARN from the running service (avoids hardcoding the family name)
       - name: Download current ECS task definition
         run: |
+          TASK_DEF_ARN=$(aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --query 'services[0].taskDefinition' \
+            --output text)
           aws ecs describe-task-definition \
-            --task-definition ${{ env.ECS_SERVICE }} \
+            --task-definition "$TASK_DEF_ARN" \
             --query taskDefinition \
             --output json > /tmp/task-definition.json
 
