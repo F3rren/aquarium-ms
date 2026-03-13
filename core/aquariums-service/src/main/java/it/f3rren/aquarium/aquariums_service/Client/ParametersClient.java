@@ -239,7 +239,7 @@ public class ParametersClient {
 
     private ApiResponseDTO<List<WaterParameterDTO>> fallbackGetWaterParametersByAquarium(Long aquariumId, Integer limit, Throwable t) {
         log.error("Circuit breaker fallback: failed to get water parameters for aquarium {}", aquariumId, t);
-        return new ApiResponseDTO<>(false, "Water parameters service unavailable", List.of(), null);
+        return new ApiResponseDTO<>(false, "Water parameters service unavailable", null, null);
     }
 
     private ApiResponseDTO<WaterParameterDTO> fallbackGetLatestWaterParameter(Long aquariumId, Throwable t) {
@@ -249,7 +249,7 @@ public class ParametersClient {
 
     private ApiResponseDTO<List<WaterParameterDTO>> fallbackGetWaterParametersHistory(Long aquariumId, String period, String from, String to, Throwable t) {
         log.error("Circuit breaker fallback: failed to get water parameters history for aquarium {}", aquariumId, t);
-        return new ApiResponseDTO<>(false, "Water parameters service unavailable", List.of(), null);
+        return new ApiResponseDTO<>(false, "Water parameters service unavailable", null, null);
     }
 
     private ApiResponseDTO<ManualParameterDTO> fallbackAddManualParameter(ManualParameterDTO parameter, Throwable t) {
@@ -264,12 +264,12 @@ public class ParametersClient {
 
     private ApiResponseDTO<List<ManualParameterDTO>> fallbackGetAllManualParameters(Long aquariumId, Throwable t) {
         log.error("Circuit breaker fallback: failed to get manual parameters for aquarium {}", aquariumId, t);
-        return new ApiResponseDTO<>(false, "Manual parameters service unavailable", List.of(), null);
+        return new ApiResponseDTO<>(false, "Manual parameters service unavailable", null, null);
     }
 
     private ApiResponseDTO<List<ManualParameterDTO>> fallbackGetManualParametersHistory(Long aquariumId, String from, String to, Throwable t) {
         log.error("Circuit breaker fallback: failed to get manual parameters history for aquarium {}", aquariumId, t);
-        return new ApiResponseDTO<>(false, "Manual parameters service unavailable", List.of(), null);
+        return new ApiResponseDTO<>(false, "Manual parameters service unavailable", null, null);
     }
 
     private ApiResponseDTO<TargetParameterDTO> fallbackGetTargetParameters(Long aquariumId, Throwable t) {

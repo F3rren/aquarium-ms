@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -72,22 +74,25 @@ class AquariumControllerTest {
     class GetAllAquariums {
 
         @Test
-        @DisplayName("should return list of aquariums")
+        @DisplayName("should return paginated list of aquariums")
         void shouldReturnList() throws Exception {
-            when(aquariumService.getAllAquariums()).thenReturn(List.of(sampleAquarium));
+            when(aquariumService.getAllAquariums(any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of(sampleAquarium)));
 
             mockMvc.perform(get("/aquariums"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data").isArray())
                     .andExpect(jsonPath("$.data[0].name").value("Reef Tank"))
-                    .andExpect(jsonPath("$.data[0].volume").value(200));
+                    .andExpect(jsonPath("$.data[0].volume").value(200))
+                    .andExpect(jsonPath("$.metadata.totalElements").value(1));
         }
 
         @Test
         @DisplayName("should return empty list when no aquariums exist")
         void shouldReturnEmptyList() throws Exception {
-            when(aquariumService.getAllAquariums()).thenReturn(List.of());
+            when(aquariumService.getAllAquariums(any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of()));
 
             mockMvc.perform(get("/aquariums"))
                     .andExpect(status().isOk())
@@ -175,6 +180,21 @@ class AquariumControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
         }
+
+        @Test
+        @DisplayName("should return 400 for invalid type")
+        void shouldReturn400ForInvalidType() throws Exception {
+            CreateAquariumDTO dto = new CreateAquariumDTO();
+            dto.setName("Tank");
+            dto.setVolume(100);
+            dto.setType("invalid-type");
+
+            mockMvc.perform(post("/aquariums")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
     }
 
     // ========================
@@ -226,14 +246,12 @@ class AquariumControllerTest {
     class DeleteAquarium {
 
         @Test
-        @DisplayName("should delete aquarium successfully")
+        @DisplayName("should delete aquarium and return 204 No Content")
         void shouldDelete() throws Exception {
             doNothing().when(aquariumService).deleteAquarium(1L);
 
             mockMvc.perform(delete("/aquariums/1"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.message").value("Aquarium deleted successfully"));
+                    .andExpect(status().isNoContent());
         }
 
         @Test
@@ -244,6 +262,33 @@ class AquariumControllerTest {
 
             mockMvc.perform(delete("/aquariums/99"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+    }
+
+    // ========================
+    // Parameter validation
+    // ========================
+
+    @Nested
+    @DisplayName("Parameter validation")
+    class ParameterValidation {
+
+        @Test
+        @DisplayName("should return 400 when limit exceeds 100")
+        void shouldReturn400ForLimitTooHigh() throws Exception {
+            mockMvc.perform(get("/aquariums/1/water-parameters")
+                            .param("limit", "999"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+
+        @Test
+        @DisplayName("should return 400 for invalid period value")
+        void shouldReturn400ForInvalidPeriod() throws Exception {
+            mockMvc.perform(get("/aquariums/1/water-parameters/history")
+                            .param("period", "year"))
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
         }
     }
