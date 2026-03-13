@@ -7,6 +7,10 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -111,20 +115,24 @@ class AquariumServiceTest {
             second.setVolume(100);
             second.setType("freshwater");
 
-            when(aquariumRepository.findAll()).thenReturn(List.of(sampleAquarium, second));
+            PageRequest pageable = PageRequest.of(0, 20);
+            Page<Aquarium> page = new PageImpl<>(List.of(sampleAquarium, second), pageable, 2);
+            when(aquariumRepository.findAll(pageable)).thenReturn(page);
 
-            List<Aquarium> result = aquariumService.getAllAquariums();
+            Page<Aquarium> result = aquariumService.getAllAquariums(pageable);
 
-            assertEquals(2, result.size());
-            verify(aquariumRepository, times(1)).findAll();
+            assertEquals(2, result.getTotalElements());
+            verify(aquariumRepository, times(1)).findAll(pageable);
         }
 
         @Test
-        @DisplayName("should return empty list when no aquariums exist")
+        @DisplayName("should return empty page when no aquariums exist")
         void shouldReturnEmptyList() {
-            when(aquariumRepository.findAll()).thenReturn(List.of());
+            PageRequest pageable = PageRequest.of(0, 20);
+            Page<Aquarium> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            when(aquariumRepository.findAll(pageable)).thenReturn(emptyPage);
 
-            List<Aquarium> result = aquariumService.getAllAquariums();
+            Page<Aquarium> result = aquariumService.getAllAquariums(pageable);
 
             assertTrue(result.isEmpty());
         }
