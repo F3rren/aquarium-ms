@@ -20,17 +20,13 @@ import lombok.*;
 public class ManualParameterDTO {
 
     /**
-     * Manual parameter ID. This field is required and must be a positive number.
-     * The default value is 0.
+     * Manual parameter ID. Server-generated, populated in responses.
      */
-    @Positive(message = "Manual parameter ID must be a positive number")
     private Long id;
 
     /**
-     * Aquarium ID associated with the manual parameter. This field is required and must be a positive number.
-     * The default value is 0.
+     * Aquarium ID associated with the manual parameter. Provided via path variable, not validated here.
      */
-    @Positive(message = "Aquarium ID must be a positive number")
     private Long aquariumId;
 
     /**

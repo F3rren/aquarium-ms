@@ -13,6 +13,28 @@ import lombok.*;
 public class ApiResponseDTO<T> {
 
     /**
+     * Creates a successful response with data.
+     *
+     * @param message description of the outcome
+     * @param data    response payload
+     * @param <T>     payload type
+     * @return {@link ApiResponseDTO} with {@code success=true}
+     */
+    public static <T> ApiResponseDTO<T> success(String message, T data) {
+        return new ApiResponseDTO<>(true, message, data, null);
+    }
+
+    /**
+     * Creates a successful response with no data (e.g. delete operations).
+     *
+     * @param message description of the outcome
+     * @return {@link ApiResponseDTO} with {@code success=true} and {@code data=null}
+     */
+    public static ApiResponseDTO<Void> success(String message) {
+        return new ApiResponseDTO<>(true, message, null, null);
+    }
+
+    /**
      * Indicates if the operation was successful.
      * true if the operation was successful false otherwise.
      */

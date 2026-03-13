@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import it.f3rren.aquarium.aquariums_service.client.ParametersClient;
 import it.f3rren.aquarium.aquariums_service.dto.*;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
-import it.f3rren.aquarium.aquariums_service.service.AquariumService;
+import it.f3rren.aquarium.aquariums_service.service.IAquariumService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,17 +26,16 @@ import jakarta.validation.Valid;
 @Tag(name = "Aquarium", description = "API for managing aquariums and their parameters")
 public class AquariumController {
 
-    private final AquariumService aquariumService;
+    private final IAquariumService aquariumService;
     private final ParametersClient parametersClient;
 
     /**
      * Constructor for AquariumController.
-     * 
-     * @param aquariumService  AquariumService instance for aquarium operations
-     * @param parametersClient ParametersClient for inter-service parameter
-     *                         operations
+     *
+     * @param aquariumService  service for aquarium CRUD operations
+     * @param parametersClient client for inter-service parameter operations
      */
-    public AquariumController(AquariumService aquariumService, ParametersClient parametersClient) {
+    public AquariumController(IAquariumService aquariumService, ParametersClient parametersClient) {
         this.aquariumService = aquariumService;
         this.parametersClient = parametersClient;
     }
@@ -58,8 +57,7 @@ public class AquariumController {
                 .map(AquariumResponseDTO::fromEntity)
                 .toList();
 
-        return ResponseEntity.ok(
-                new ApiResponseDTO<>(true, "Aquariums retrieved successfully", aquariums, null));
+        return ResponseEntity.ok(ApiResponseDTO.success("Aquariums retrieved successfully", aquariums));
     }
 
     /**
@@ -73,9 +71,8 @@ public class AquariumController {
     public ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> getAquariumById(@PathVariable Long id) {
         Aquarium aquarium = aquariumService.getAquariumById(id);
 
-        return ResponseEntity.ok(
-                new ApiResponseDTO<>(true, "Aquarium retrieved successfully",
-                        AquariumResponseDTO.fromEntity(aquarium), null));
+        return ResponseEntity.ok(ApiResponseDTO.success("Aquarium retrieved successfully",
+                        AquariumResponseDTO.fromEntity(aquarium)));
     }
 
     /**
@@ -90,10 +87,9 @@ public class AquariumController {
             @Valid @RequestBody CreateAquariumDTO dto) {
         Aquarium savedAquarium = aquariumService.createAquarium(dto);
 
-        return new ResponseEntity<>(
-                new ApiResponseDTO<>(true, "Aquarium created successfully",
-                        AquariumResponseDTO.fromEntity(savedAquarium), null),
-                HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponseDTO.success("Aquarium created successfully",
+                        AquariumResponseDTO.fromEntity(savedAquarium)));
     }
 
     /**
@@ -110,9 +106,8 @@ public class AquariumController {
             @Valid @RequestBody UpdateAquariumDTO dto) {
         Aquarium updatedAquarium = aquariumService.updateAquarium(id, dto);
 
-        return ResponseEntity.ok(
-                new ApiResponseDTO<>(true, "Aquarium updated successfully",
-                        AquariumResponseDTO.fromEntity(updatedAquarium), null));
+        return ResponseEntity.ok(ApiResponseDTO.success("Aquarium updated successfully",
+                        AquariumResponseDTO.fromEntity(updatedAquarium)));
     }
 
     /**
@@ -126,8 +121,7 @@ public class AquariumController {
     public ResponseEntity<ApiResponseDTO<Void>> deleteAquarium(@PathVariable Long id) {
         aquariumService.deleteAquarium(id);
 
-        return ResponseEntity.ok(
-                new ApiResponseDTO<>(true, "Aquarium deleted successfully", null, null));
+        return ResponseEntity.ok(ApiResponseDTO.success("Aquarium deleted successfully"));
     }
 
     // ========================

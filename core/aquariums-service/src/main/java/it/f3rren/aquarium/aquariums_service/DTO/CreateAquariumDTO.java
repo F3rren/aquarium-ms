@@ -1,7 +1,5 @@
 package it.f3rren.aquarium.aquariums_service.dto;
 
-import org.hibernate.validator.constraints.URL;
-
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -49,6 +47,6 @@ public class CreateAquariumDTO {
      * The default value is an empty string.
      */
     @Size(max = 500, message = "Image URL must be at most 500 characters")
-    @URL(message = "Image URL must be a valid URL")
+    @Pattern(regexp = "^$|^https?://.*", message = "Image URL must be a valid URL")
     private String imageUrl;
 }

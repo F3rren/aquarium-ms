@@ -1,6 +1,7 @@
 package it.f3rren.aquarium.aquariums_service.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
  * @author F3rren
  */
 @Service
-public class AquariumService {
+public class AquariumService implements IAquariumService {
 
     /**
      * Logger for AquariumService.
@@ -100,22 +101,12 @@ public class AquariumService {
         Aquarium existing = aquariumRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Aquarium not found with ID: " + id));
 
-        // Update only non-null fields (partial update) — preserves createdAt and other fields
-        if (dto.getName() != null) {
-            existing.setName(dto.getName().trim());
-        }
-        if (dto.getVolume() != null) {
-            existing.setVolume(dto.getVolume());
-        }
-        if (dto.getType() != null) {
-            existing.setType(dto.getType());
-        }
-        if (dto.getDescription() != null) {
-            existing.setDescription(dto.getDescription());
-        }
-        if (dto.getImageUrl() != null) {
-            existing.setImageUrl(dto.getImageUrl());
-        }
+        // Partial update: only non-null fields are applied, preserving existing values
+        Optional.ofNullable(dto.getName()).map(String::trim).ifPresent(existing::setName);
+        Optional.ofNullable(dto.getVolume()).ifPresent(v -> existing.setVolume(v));
+        Optional.ofNullable(dto.getType()).ifPresent(existing::setType);
+        Optional.ofNullable(dto.getDescription()).ifPresent(existing::setDescription);
+        Optional.ofNullable(dto.getImageUrl()).ifPresent(existing::setImageUrl);
 
         log.info("Updating aquarium with ID: {}", id);
         return aquariumRepository.save(existing);
