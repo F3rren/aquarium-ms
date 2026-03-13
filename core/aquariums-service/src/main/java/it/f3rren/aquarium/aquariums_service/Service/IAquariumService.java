@@ -1,6 +1,7 @@
 package it.f3rren.aquarium.aquariums_service.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
@@ -25,11 +26,12 @@ public interface IAquariumService {
     Aquarium createAquarium(CreateAquariumDTO dto);
 
     /**
-     * Retrieves all aquariums.
+     * Retrieves a paginated list of aquariums.
      *
-     * @return list of all {@link Aquarium} entities; empty list if none exist
+     * @param pageable pagination and sorting parameters
+     * @return page of {@link Aquarium} entities
      */
-    List<Aquarium> getAllAquariums();
+    Page<Aquarium> getAllAquariums(Pageable pageable);
 
     /**
      * Retrieves a single aquarium by its ID.

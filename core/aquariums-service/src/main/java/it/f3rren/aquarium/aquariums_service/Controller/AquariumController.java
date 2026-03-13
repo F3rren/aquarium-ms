@@ -1,7 +1,11 @@
 package it.f3rren.aquarium.aquariums_service.controller;
 
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +22,7 @@ import jakarta.validation.Valid;
  * Controller for managing aquariums and their parameters.
  * Provides CRUD endpoints for aquariums and proxy endpoints for
  * water, manual, and target parameters via inter-service communication.
- * 
+ *
  * @author f3rren
  */
 @RestController
@@ -26,15 +30,12 @@ import jakarta.validation.Valid;
 @Tag(name = "Aquarium", description = "API for managing aquariums and their parameters")
 public class AquariumController {
 
+    private static final List<String> VALID_PERIODS = List.of("day", "week", "month");
+    private static final int MAX_LIMIT = 100;
+
     private final IAquariumService aquariumService;
     private final ParametersClient parametersClient;
 
-    /**
-     * Constructor for AquariumController.
-     *
-     * @param aquariumService  service for aquarium CRUD operations
-     * @param parametersClient client for inter-service parameter operations
-     */
     public AquariumController(IAquariumService aquariumService, ParametersClient parametersClient) {
         this.aquariumService = aquariumService;
         this.parametersClient = parametersClient;
@@ -45,24 +46,34 @@ public class AquariumController {
     // ========================
 
     /**
-     * Retrieves all aquariums.
-     * 
-     * @return ResponseEntity containing a list of aquariums
+     * Retrieves aquariums with pagination. Defaults to page 0, size 20, sorted by id.
+     *
+     * @param pageable pagination and sorting parameters
+     * @return ResponseEntity containing a paginated list of aquariums
      */
     @GetMapping
-    @Operation(summary = "Get all aquariums", description = "Retrieve details of all aquariums")
-    public ResponseEntity<ApiResponseDTO<List<AquariumResponseDTO>>> getAllAquariums() {
-        List<AquariumResponseDTO> aquariums = aquariumService.getAllAquariums()
+    @Operation(summary = "Get all aquariums", description = "Retrieve paginated list of aquariums")
+    public ResponseEntity<ApiResponseDTO<List<AquariumResponseDTO>>> getAllAquariums(
+            @PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        Page<Aquarium> page = aquariumService.getAllAquariums(pageable);
+        List<AquariumResponseDTO> aquariums = page.getContent()
                 .stream()
                 .map(AquariumResponseDTO::fromEntity)
                 .toList();
 
-        return ResponseEntity.ok(ApiResponseDTO.success("Aquariums retrieved successfully", aquariums));
+        Map<String, Object> paginationMeta = Map.of(
+                "page", page.getNumber(),
+                "size", page.getSize(),
+                "totalElements", page.getTotalElements(),
+                "totalPages", page.getTotalPages()
+        );
+
+        return ResponseEntity.ok(new ApiResponseDTO<>(true, "Aquariums retrieved successfully", aquariums, paginationMeta));
     }
 
     /**
      * Retrieves an aquarium by its ID.
-     * 
+     *
      * @param id ID of the aquarium to retrieve
      * @return ResponseEntity containing aquarium details
      */
@@ -72,12 +83,12 @@ public class AquariumController {
         Aquarium aquarium = aquariumService.getAquariumById(id);
 
         return ResponseEntity.ok(ApiResponseDTO.success("Aquarium retrieved successfully",
-                        AquariumResponseDTO.fromEntity(aquarium)));
+                AquariumResponseDTO.fromEntity(aquarium)));
     }
 
     /**
      * Creates a new aquarium.
-     * 
+     *
      * @param dto Aquarium details to be created
      * @return ResponseEntity containing created aquarium details
      */
@@ -94,7 +105,7 @@ public class AquariumController {
 
     /**
      * Updates an existing aquarium.
-     * 
+     *
      * @param id  ID of the aquarium to update
      * @param dto Updated aquarium details
      * @return ResponseEntity containing updated aquarium details
@@ -107,21 +118,20 @@ public class AquariumController {
         Aquarium updatedAquarium = aquariumService.updateAquarium(id, dto);
 
         return ResponseEntity.ok(ApiResponseDTO.success("Aquarium updated successfully",
-                        AquariumResponseDTO.fromEntity(updatedAquarium)));
+                AquariumResponseDTO.fromEntity(updatedAquarium)));
     }
 
     /**
      * Deletes an aquarium by its ID.
-     * 
+     *
      * @param id ID of the aquarium to delete
-     * @return ResponseEntity containing a success message
+     * @return 204 No Content on success
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an aquarium", description = "Remove a specific aquarium")
-    public ResponseEntity<ApiResponseDTO<Void>> deleteAquarium(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAquarium(@PathVariable Long id) {
         aquariumService.deleteAquarium(id);
-
-        return ResponseEntity.ok(ApiResponseDTO.success("Aquarium deleted successfully"));
+        return ResponseEntity.noContent().build();
     }
 
     // ========================
@@ -130,7 +140,7 @@ public class AquariumController {
 
     /**
      * Adds a water parameter measurement for an aquarium.
-     * 
+     *
      * @param id        Aquarium ID
      * @param parameter Water parameter data
      * @return ApiResponseDTO with the added parameter
@@ -146,9 +156,9 @@ public class AquariumController {
 
     /**
      * Retrieves water parameters for an aquarium.
-     * 
+     *
      * @param id    Aquarium ID
-     * @param limit Maximum number of results
+     * @param limit Maximum number of results (1–100)
      * @return ApiResponseDTO with the list of water parameters
      */
     @GetMapping("/{id}/water-parameters")
@@ -156,12 +166,15 @@ public class AquariumController {
     public ResponseEntity<ApiResponseDTO<List<WaterParameterDTO>>> getWaterParameters(
             @PathVariable Long id,
             @RequestParam(defaultValue = "10") Integer limit) {
+        if (limit < 1 || limit > MAX_LIMIT) {
+            throw new IllegalArgumentException("Limit must be between 1 and " + MAX_LIMIT);
+        }
         return ResponseEntity.ok(parametersClient.getWaterParametersByAquarium(id, limit));
     }
 
     /**
      * Retrieves the latest water parameter for an aquarium.
-     * 
+     *
      * @param id Aquarium ID
      * @return ApiResponseDTO with the latest water parameter
      */
@@ -173,11 +186,11 @@ public class AquariumController {
 
     /**
      * Retrieves water parameters history for an aquarium.
-     * 
+     *
      * @param id     Aquarium ID
-     * @param period Time period (e.g. "day", "week", "month")
-     * @param from   Start date
-     * @param to     End date
+     * @param period Optional time period: "day", "week", or "month"
+     * @param from   Optional start date (ISO-8601)
+     * @param to     Optional end date (ISO-8601)
      * @return ApiResponseDTO with the history
      */
     @GetMapping("/{id}/water-parameters/history")
@@ -187,6 +200,9 @@ public class AquariumController {
             @RequestParam(required = false) String period,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
+        if (period != null && !VALID_PERIODS.contains(period)) {
+            throw new IllegalArgumentException("Period must be one of: " + VALID_PERIODS);
+        }
         return ResponseEntity.ok(parametersClient.getWaterParametersHistory(id, period, from, to));
     }
 
@@ -196,7 +212,7 @@ public class AquariumController {
 
     /**
      * Adds a manual parameter measurement for an aquarium.
-     * 
+     *
      * @param id        Aquarium ID
      * @param parameter Manual parameter data
      * @return ApiResponseDTO with the added parameter
@@ -212,7 +228,7 @@ public class AquariumController {
 
     /**
      * Retrieves all manual parameters for an aquarium.
-     * 
+     *
      * @param id Aquarium ID
      * @return ApiResponseDTO with the list of manual parameters
      */
@@ -224,7 +240,7 @@ public class AquariumController {
 
     /**
      * Retrieves the latest manual parameter for an aquarium.
-     * 
+     *
      * @param id Aquarium ID
      * @return ApiResponseDTO with the latest manual parameter
      */
@@ -236,10 +252,10 @@ public class AquariumController {
 
     /**
      * Retrieves manual parameters history for an aquarium.
-     * 
+     *
      * @param id   Aquarium ID
-     * @param from Start date
-     * @param to   End date
+     * @param from Start date (ISO-8601)
+     * @param to   End date (ISO-8601)
      * @return ApiResponseDTO with the history
      */
     @GetMapping("/{id}/manual-parameters/history")
@@ -257,7 +273,7 @@ public class AquariumController {
 
     /**
      * Retrieves target parameters for an aquarium.
-     * 
+     *
      * @param id Aquarium ID
      * @return ApiResponseDTO with the target parameters
      */
@@ -269,7 +285,7 @@ public class AquariumController {
 
     /**
      * Saves target parameters for an aquarium.
-     * 
+     *
      * @param id              Aquarium ID
      * @param targetParameter Target parameter values
      * @return ApiResponseDTO with the saved target parameters

@@ -15,24 +15,23 @@ import lombok.*;
 public class CreateAquariumDTO {
 
     /**
-     * Name of the aquarium. This field is required and must be between 1 and 100 characters.
+     * Name of the aquarium. This field is required and must be between 2 and 100 characters.
      */
     @NotBlank(message = "Name is required")
-    @Size(min = 1, max = 100, message = "Name must be between 1 and 100 characters")
+    @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     private String name;
 
     /**
-     * Volume of the aquarium. This field is required and must be a positive number.
-     * The units for volume are liters. This field is not required, but if provided, it must be positive.
-     * The default value is 100 liters. If the volume is provided, it must be greater than 0.
+     * Volume of the aquarium in liters. Must be a positive number no greater than 100,000.
      */
     @Positive(message = "Volume must be a positive number")
+    @Max(value = 100000, message = "Volume cannot exceed 100,000 liters")
     private int volume;
 
     /**
-     * Type of the aquarium. This field is optional and must be at most 50 characters.
+     * Type of the aquarium. Must be either 'saltwater' or 'freshwater'.
      */
-    @Size(max = 50, message = "Type must be at most 50 characters")
+    @Pattern(regexp = "^(saltwater|freshwater)$", message = "Type must be 'saltwater' or 'freshwater'")
     private String type;
 
     /**
@@ -42,11 +41,9 @@ public class CreateAquariumDTO {
     private String description;
 
     /**
-     * Image URL of the aquarium. This field is optional and must be at most 500 characters.
-     * The URL must be a valid URL format. If the URL is provided, it must be a valid URL.
-     * The default value is an empty string.
+     * Image URL of the aquarium. Optional, must be a valid http/https URL if provided.
      */
-    @Size(max = 500, message = "Image URL must be at most 500 characters")
-    @Pattern(regexp = "^$|^https?://.*", message = "Image URL must be a valid URL")
+    @Size(max = 2000, message = "Image URL must be at most 2000 characters")
+    @Pattern(regexp = "^$|^https?://[^\\s/$.?#].[^\\s]*$", message = "Image URL must be a valid URL")
     private String imageUrl;
 }

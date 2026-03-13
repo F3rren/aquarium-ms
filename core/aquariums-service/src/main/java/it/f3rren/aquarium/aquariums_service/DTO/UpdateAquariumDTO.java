@@ -5,9 +5,8 @@ import lombok.*;
 
 /**
  * DTO class for updating aquarium details.
- * This class is used to transfer aquarium update information between the application layers.
+ * All fields are optional — only non-null fields are applied (partial update).
  * Lombok annotations are used for code generation.
- * Fields are annotated with validation constraints to ensure the data integrity.
  * @author F3rren
  */
 @Data
@@ -17,23 +16,24 @@ public class UpdateAquariumDTO {
 
     /**
      * Name of the aquarium. Optional for partial updates.
-     * Must be between 1 and 100 characters if provided.
+     * Must be between 2 and 100 characters if provided.
      */
-    @Size(min = 1, max = 100, message = "Name must be between 1 and 100 characters")
+    @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     private String name;
 
     /**
      * Volume of the aquarium in liters. Optional for partial updates.
-     * Must be a positive number if provided.
+     * Must be a positive number no greater than 100,000 if provided.
      */
     @Positive(message = "Volume must be a positive number")
+    @Max(value = 100000, message = "Volume cannot exceed 100,000 liters")
     private Integer volume;
 
     /**
-     * Type of the aquarium (e.g. "saltwater", "freshwater"). Optional for partial updates.
-     * Must be at most 50 characters if provided.
+     * Type of the aquarium. Optional for partial updates.
+     * Must be either 'saltwater' or 'freshwater' if provided.
      */
-    @Size(max = 50, message = "Type must be at most 50 characters")
+    @Pattern(regexp = "^(saltwater|freshwater)$", message = "Type must be 'saltwater' or 'freshwater'")
     private String type;
 
     /**
@@ -45,8 +45,8 @@ public class UpdateAquariumDTO {
 
     /**
      * URL of the aquarium image. Optional for partial updates.
-     * Must be at most 500 characters if provided.
+     * Must be at most 2000 characters and a valid http/https URL if provided.
      */
-    @Size(max = 500, message = "Image URL must be at most 500 characters")
+    @Size(max = 2000, message = "Image URL must be at most 2000 characters")
     private String imageUrl;
 }

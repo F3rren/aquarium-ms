@@ -1,8 +1,12 @@
 package it.f3rren.aquarium.aquariums_service.config;
 
+import java.net.http.HttpClient;
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 /**
@@ -13,6 +17,9 @@ import org.springframework.web.client.RestClient;
  */
 @Configuration
 public class WebClientConfig {
+
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(10);
 
     /**
      * URL for the water parameters service.
@@ -38,9 +45,7 @@ public class WebClientConfig {
      */
     @Bean
     public RestClient waterParametersRestClient() {
-        return RestClient.builder()
-                .baseUrl(waterParametersUrl)
-                .build();
+        return buildRestClient(waterParametersUrl);
     }
 
     /**
@@ -49,9 +54,7 @@ public class WebClientConfig {
      */
     @Bean
     public RestClient manualParametersRestClient() {
-        return RestClient.builder()
-                .baseUrl(manualParametersUrl)
-                .build();
+        return buildRestClient(manualParametersUrl);
     }
 
     /**
@@ -60,8 +63,18 @@ public class WebClientConfig {
      */
     @Bean
     public RestClient targetParametersRestClient() {
+        return buildRestClient(targetParametersUrl);
+    }
+
+    private RestClient buildRestClient(String baseUrl) {
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(CONNECT_TIMEOUT)
+                .build();
+        JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(httpClient);
+        factory.setReadTimeout(READ_TIMEOUT);
         return RestClient.builder()
-                .baseUrl(targetParametersUrl)
+                .baseUrl(baseUrl)
+                .requestFactory(factory)
                 .build();
     }
 }
