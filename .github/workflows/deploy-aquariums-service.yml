@@ -48,7 +48,9 @@ jobs:
           cache: maven           # caches ~/.m2 between runs for faster builds
 
       - name: Run unit tests
-        run: ./mvnw test -B
+        run: |
+          chmod +x mvnw
+          ./mvnw test -B
         working-directory: core/aquariums-service
 
 # ─────────────────────────────────────────────────────────────────────────────
