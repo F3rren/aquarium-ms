@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import it.f3rren.aquarium.inhabitants_service.dto.CoralDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.CreateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.FishDTO;
@@ -19,7 +20,7 @@ import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
 import it.f3rren.aquarium.inhabitants_service.repository.IInhabitantRepository;
 
 @Service
-public class InhabitantService {
+public class InhabitantService implements IInhabitantService {
 
     private static final Logger log = LoggerFactory.getLogger(InhabitantService.class);
 
