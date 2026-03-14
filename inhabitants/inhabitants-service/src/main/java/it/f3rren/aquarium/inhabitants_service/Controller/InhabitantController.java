@@ -22,16 +22,16 @@ import it.f3rren.aquarium.inhabitants_service.dto.CreateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.UpdateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
-import it.f3rren.aquarium.inhabitants_service.service.InhabitantService;
+import it.f3rren.aquarium.inhabitants_service.service.IInhabitantService;
 
 @RestController
 @RequestMapping("/aquariums")
 @Tag(name = "Inhabitant", description = "API for managing inhabitants")
 public class InhabitantController {
 
-    private final InhabitantService inhabitantService;
+    private final IInhabitantService inhabitantService;
 
-    public InhabitantController(InhabitantService inhabitantService) {
+    public InhabitantController(IInhabitantService inhabitantService) {
         this.inhabitantService = inhabitantService;
     }
 
