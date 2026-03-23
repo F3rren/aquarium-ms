@@ -13,16 +13,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.species.dto.ApiResponseDTO;
 import it.f3rren.aquarium.species.model.Coral;
-import it.f3rren.aquarium.species.service.CoralService;
+import it.f3rren.aquarium.species.service.ICoralService;
 
 @RestController
 @RequestMapping("/species/corals")
 @Tag(name = "Coral", description = "API for managing corals")
 public class CoralController {
 
-    private final CoralService coralService;
+    private final ICoralService coralService;
 
-    public CoralController(CoralService coralService) {
+    public CoralController(ICoralService coralService) {
         this.coralService = coralService;
     }
 

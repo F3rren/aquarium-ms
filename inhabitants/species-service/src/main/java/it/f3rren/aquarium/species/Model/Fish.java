@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "fishs", schema = "inhabitants")
+@Table(name = "fish", schema = "inhabitants")
 public class Fish {
 
     @Id

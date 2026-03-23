@@ -12,7 +12,7 @@ import it.f3rren.aquarium.species.model.Fish;
 import it.f3rren.aquarium.species.repository.IFishRepository;
 
 @Service
-public class FishService {
+public class FishService implements IFishService {
 
     private static final Logger log = LoggerFactory.getLogger(FishService.class);
 

@@ -12,7 +12,7 @@ import it.f3rren.aquarium.species.model.Coral;
 import it.f3rren.aquarium.species.repository.ICoralRepository;
 
 @Service
-public class CoralService {
+public class CoralService implements ICoralService {
 
     private static final Logger log = LoggerFactory.getLogger(CoralService.class);
 
