@@ -16,7 +16,7 @@ import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
 import it.f3rren.aquarium.maintenance_service.repository.IProductRepository;
 
 @Service
-public class ProductService {
+public class ProductService implements IProductService {
 
     private static final Logger log = LoggerFactory.getLogger(ProductService.class);
 
