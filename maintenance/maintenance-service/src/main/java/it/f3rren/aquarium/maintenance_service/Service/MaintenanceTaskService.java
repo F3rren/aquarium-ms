@@ -15,7 +15,7 @@ import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
 import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;
 
 @Service
-public class MaintenanceTaskService {
+public class MaintenanceTaskService implements IMaintenanceTaskService {
 
     private static final Logger log = LoggerFactory.getLogger(MaintenanceTaskService.class);
 

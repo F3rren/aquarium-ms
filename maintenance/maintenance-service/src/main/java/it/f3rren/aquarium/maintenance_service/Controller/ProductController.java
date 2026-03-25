@@ -16,16 +16,16 @@ import it.f3rren.aquarium.maintenance_service.dto.QuantityChangeDTO;
 import it.f3rren.aquarium.maintenance_service.dto.UpdateProductDTO;
 import it.f3rren.aquarium.maintenance_service.model.Product;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
-import it.f3rren.aquarium.maintenance_service.service.ProductService;
+import it.f3rren.aquarium.maintenance_service.service.IProductService;
 
 @RestController
 @RequestMapping("/products")
 @Tag(name = "Product", description = "API for managing aquarium products")
 public class ProductController {
 
-    private final ProductService productService;
+    private final IProductService productService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(IProductService productService) {
         this.productService = productService;
     }
 
