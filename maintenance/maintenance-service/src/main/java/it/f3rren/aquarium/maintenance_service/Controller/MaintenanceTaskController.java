@@ -14,16 +14,16 @@ import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.maintenance_service.dto.CreateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.UpdateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
-import it.f3rren.aquarium.maintenance_service.service.MaintenanceTaskService;
+import it.f3rren.aquarium.maintenance_service.service.IMaintenanceTaskService;
 
 @RestController
 @RequestMapping("/aquariums/{id}/tasks")
 @Tag(name = "MaintenanceTask", description = "API for managing maintenance tasks")
 public class MaintenanceTaskController {
 
-    private final MaintenanceTaskService taskService;
+    private final IMaintenanceTaskService taskService;
 
-    public MaintenanceTaskController(MaintenanceTaskService taskService) {
+    public MaintenanceTaskController(IMaintenanceTaskService taskService) {
         this.taskService = taskService;
     }
 
