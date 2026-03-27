@@ -14,16 +14,16 @@ import jakarta.validation.Valid;
 import it.f3rren.aquarium.parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
 import it.f3rren.aquarium.parameters_service.model.Parameter;
-import it.f3rren.aquarium.parameters_service.service.ParameterService;
+import it.f3rren.aquarium.parameters_service.service.IParameterService;
 
 @RestController
 @RequestMapping("/aquariums/{id}/parameters")
 @Tag(name = "WaterParameter", description = "API for managing water parameters")
 public class WaterParameterController {
 
-    private final ParameterService parameterService;
+    private final IParameterService parameterService;
 
-    public WaterParameterController(ParameterService parameterService) {
+    public WaterParameterController(IParameterService parameterService) {
         this.parameterService = parameterService;
     }
 
