@@ -14,7 +14,7 @@ import it.f3rren.aquarium.parameters_service.model.Parameter;
 import it.f3rren.aquarium.parameters_service.repository.IParameterRepository;
 
 @Service
-public class ParameterService {
+public class ParameterService implements IParameterService {
 
     private static final Logger log = LoggerFactory.getLogger(ParameterService.class);
 
