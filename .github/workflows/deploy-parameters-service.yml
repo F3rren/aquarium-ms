@@ -64,7 +64,7 @@ jobs:
           DB_PASSWORD: sa
         run: |
           chmod +x mvnw
-          ./mvnw test -B -Dmaven.compiler.release=17
+          ./mvnw clean test -B -Dmaven.compiler.release=17
         working-directory: parameters/parameters-service
 
   deploy:
@@ -103,13 +103,8 @@ jobs:
 
       - name: Download current ECS task definition
         run: |
-          TASK_DEF_ARN=$(aws ecs describe-services \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ env.ECS_SERVICE }} \
-            --query 'services[0].taskDefinition' \
-            --output text)
           aws ecs describe-task-definition \
-            --task-definition "$TASK_DEF_ARN" \
+            --task-definition ${{ env.ECS_SERVICE }} \
             --query taskDefinition \
             --output json > /tmp/task-definition.json
 
