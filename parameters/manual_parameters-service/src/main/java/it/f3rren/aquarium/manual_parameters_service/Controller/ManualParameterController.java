@@ -13,16 +13,16 @@ import jakarta.validation.Valid;
 import it.f3rren.aquarium.manual_parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
-import it.f3rren.aquarium.manual_parameters_service.service.ManualParameterService;
+import it.f3rren.aquarium.manual_parameters_service.service.IManualParameterService;
 
 @RestController
 @RequestMapping("/aquariums/{aquariumId}/parameters/manual")
 @Tag(name = "ManualParameter", description = "API for managing manual parameters")
 public class ManualParameterController {
 
-    private final ManualParameterService manualParameterService;
+    private final IManualParameterService manualParameterService;
 
-    public ManualParameterController(ManualParameterService manualParameterService) {
+    public ManualParameterController(IManualParameterService manualParameterService) {
         this.manualParameterService = manualParameterService;
     }
 
