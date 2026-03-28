@@ -14,7 +14,7 @@ import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
 import it.f3rren.aquarium.manual_parameters_service.repository.IManualParameterRepository;
 
 @Service
-public class ManualParameterService {
+public class ManualParameterService implements IManualParameterService {
 
     private static final Logger log = LoggerFactory.getLogger(ManualParameterService.class);
 
