@@ -22,7 +22,7 @@ services:
   # Core Services
   aquariums-service:
     build:
-      context: ./core/aquariums-service
+      context: ./services/aquariums-service
       dockerfile: Dockerfile
     container_name: aquariums-service
     environment:
@@ -40,7 +40,7 @@ services:
   # Inhabitants Services
   inhabitants-service:
     build:
-      context: ./inhabitants/inhabitants-service
+      context: ./services/inhabitants-service
       dockerfile: Dockerfile
     container_name: inhabitants-service
     environment:
@@ -58,7 +58,7 @@ services:
 
   species-service:
     build:
-      context: ./inhabitants/species-service
+      context: ./services/species-service
       dockerfile: Dockerfile
     container_name: species-service
     environment:
@@ -76,7 +76,7 @@ services:
   # Maintenance Service
   maintenance-service:
     build:
-      context: ./maintenance/maintenance-service
+      context: ./services/maintenance-service
       dockerfile: Dockerfile
     container_name: maintenance-service
     environment:
@@ -97,7 +97,7 @@ services:
   # Parameters Services
   parameters-service:
     build:
-      context: ./parameters/parameters-service
+      context: ./services/parameters-service
       dockerfile: Dockerfile
     container_name: parameters-service
     environment:
@@ -114,7 +114,7 @@ services:
 
   manual-parameters-service:
     build:
-      context: ./parameters/manual_parameters-service
+      context: ./services/manual-parameters-service
       dockerfile: Dockerfile
     container_name: manual-parameters-service
     environment:
@@ -131,7 +131,7 @@ services:
 
   target-parameters-service:
     build:
-      context: ./parameters/target_parameter-service
+      context: ./services/target-parameter-service
       dockerfile: Dockerfile
     container_name: target-parameters-service
     environment:
@@ -173,7 +173,7 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ./gateway/api-gateway
+      context: ./services/api-gateway
       dockerfile: Dockerfile
     container_name: api-gateway
     environment:
@@ -222,7 +222,7 @@ services:
   # Logstash for log processing
   logstash:
     build:
-      context: ./logstash
+      context: ./observability/logstash
       dockerfile: Dockerfile
     container_name: logstash
     ports:
