@@ -17,7 +17,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'inhabitants/species-service/**'
+      - 'services/species-service/**'
   workflow_dispatch:
 
 env:
@@ -50,7 +50,7 @@ jobs:
         run: |
           chmod +x mvnw
           ./mvnw test -B -Dmaven.compiler.release=17
-        working-directory: inhabitants/species-service
+        working-directory: services/species-service
 
 # ─────────────────────────────────────────────────────────────────────────────
 # JOB 2 — Build Docker image, push to ECR, update ECS task definition
@@ -83,7 +83,7 @@ jobs:
           IMAGE_TAG:    ${{ github.sha }}
         run: |
           IMAGE_URI="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker build -t "$IMAGE_URI" inhabitants/species-service
+          docker build -t "$IMAGE_URI" services/species-service
           docker tag  "$IMAGE_URI" "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
           docker push "$IMAGE_URI"
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"

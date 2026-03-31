@@ -16,7 +16,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'parameters/manual_parameters-service/**'
+      - 'services/manual-parameters-service/**'
   workflow_dispatch:
 
 env:
@@ -46,7 +46,7 @@ jobs:
         run: |
           chmod +x mvnw
           ./mvnw clean test -B -Dmaven.compiler.release=17
-        working-directory: parameters/manual_parameters-service
+        working-directory: services/manual-parameters-service
 
   deploy:
     name: Build & Deploy
@@ -76,7 +76,7 @@ jobs:
           IMAGE_TAG:    ${{ github.sha }}
         run: |
           IMAGE_URI="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker build -t "$IMAGE_URI" parameters/manual_parameters-service
+          docker build -t "$IMAGE_URI" services/manual-parameters-service
           docker tag  "$IMAGE_URI" "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
           docker push "$IMAGE_URI"
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"

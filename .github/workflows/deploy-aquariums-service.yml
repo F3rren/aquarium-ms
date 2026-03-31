@@ -17,7 +17,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'core/aquariums-service/**'
+      - 'services/aquariums-service/**'
   workflow_dispatch:   # manual trigger from any branch (e.g. claude_check for staging tests)
 
 env:
@@ -69,7 +69,7 @@ jobs:
         run: |
           chmod +x mvnw
           ./mvnw test -B -Dmaven.compiler.release=17
-        working-directory: core/aquariums-service
+        working-directory: services/aquariums-service
 
 # ─────────────────────────────────────────────────────────────────────────────
 # JOB 2 — Build Docker image, push to ECR, update ECS task definition
@@ -107,7 +107,7 @@ jobs:
           IMAGE_TAG:    ${{ github.sha }}
         run: |
           IMAGE_URI="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker build -t "$IMAGE_URI" core/aquariums-service
+          docker build -t "$IMAGE_URI" services/aquariums-service
           docker tag  "$IMAGE_URI" "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
           docker push "$IMAGE_URI"
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
