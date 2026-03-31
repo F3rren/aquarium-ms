@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.target_parameter_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
 import it.f3rren.aquarium.target_parameter_service.model.TargetParameter;
-import it.f3rren.aquarium.target_parameter_service.service.IITargetParameterService;
+import it.f3rren.aquarium.target_parameter_service.service.ITargetParameterService;
 import jakarta.validation.Valid;
 
 @RestController
