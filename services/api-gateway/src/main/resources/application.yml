@@ -7,123 +7,110 @@ spring:
   cloud:
     gateway:
       routes:
-        # OpenAPI docs routes for Swagger aggregation
+        # ── OpenAPI / Swagger aggregation ──────────────────────────────────────
         - id: aquariums-service-openapi
-          uri: http://aquariums-service:8081
+          uri: ${AQUARIUMS_SERVICE_URL:http://aquariums-service:8081}
           predicates:
             - Path=/aquariums-service/v3/api-docs
           filters:
             - RewritePath=/aquariums-service/v3/api-docs, /v3/api-docs
-            
+
         - id: inhabitants-service-openapi
-          uri: http://inhabitants-service:8082
+          uri: ${INHABITANTS_SERVICE_URL:http://inhabitants-service:8082}
           predicates:
             - Path=/inhabitants-service/v3/api-docs
           filters:
             - RewritePath=/inhabitants-service/v3/api-docs, /v3/api-docs
-            
+
         - id: species-service-openapi
-          uri: http://species-service:8083
+          uri: ${SPECIES_SERVICE_URL:http://species-service:8083}
           predicates:
             - Path=/species-service/v3/api-docs
           filters:
             - RewritePath=/species-service/v3/api-docs, /v3/api-docs
-            
+
         - id: maintenance-service-openapi
-          uri: http://maintenance-service:8084
+          uri: ${MAINTENANCE_SERVICE_URL:http://maintenance-service:8084}
           predicates:
             - Path=/maintenance-service/v3/api-docs
           filters:
             - RewritePath=/maintenance-service/v3/api-docs, /v3/api-docs
-            
+
         - id: parameters-service-openapi
-          uri: http://parameters-service:8085
+          uri: ${PARAMETERS_SERVICE_URL:http://parameters-service:8081}
           predicates:
             - Path=/parameters-service/v3/api-docs
           filters:
             - RewritePath=/parameters-service/v3/api-docs, /v3/api-docs
-            
+
         - id: manual-parameters-service-openapi
-          uri: http://manual-parameters-service:8086
+          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8083}
           predicates:
             - Path=/manual-parameters-service/v3/api-docs
           filters:
             - RewritePath=/manual-parameters-service/v3/api-docs, /v3/api-docs
-            
+
         - id: target-parameters-service-openapi
-          uri: http://target-parameters-service:8087
+          uri: ${TARGET_PARAMETERS_SERVICE_URL:http://target-parameters-service:8087}
           predicates:
             - Path=/target-parameters-service/v3/api-docs
           filters:
             - RewritePath=/target-parameters-service/v3/api-docs, /v3/api-docs
-            
-        - id: ai-assistant-service-openapi
-          uri: http://ai-assistant-service:8090
-          predicates:
-            - Path=/ai-assistant-service/v3/api-docs
-          filters:
-            - RewritePath=/ai-assistant-service/v3/api-docs, /v3/api-docs
-      
-        # Maintenance Service - Products
+
+        # ── Business routes ────────────────────────────────────────────────────
+
+        # Maintenance - products (before aquariums to avoid catch-all)
         - id: maintenance-service-products
-          uri: http://maintenance-service:8084
+          uri: ${MAINTENANCE_SERVICE_URL:http://maintenance-service:8084}
           predicates:
             - Path=/products/**
-      
-        # Maintenance Service - must be before aquariums-service for specific path matching
+
+        # Maintenance - tasks (before aquariums)
         - id: maintenance-service
-          uri: http://maintenance-service:8084
+          uri: ${MAINTENANCE_SERVICE_URL:http://maintenance-service:8084}
           predicates:
             - Path=/aquariums/*/tasks/**
-            
-        # Inhabitants Service - must be before aquariums-service for specific path matching
+
+        # Inhabitants (before aquariums)
         - id: inhabitants-service
-          uri: http://inhabitants-service:8082
+          uri: ${INHABITANTS_SERVICE_URL:http://inhabitants-service:8082}
           predicates:
             - Path=/aquariums/*/inhabitants/**
-            
-        # Water Parameters Service - must be before aquariums-service for specific path matching
+
+        # Water parameters (before aquariums)
         - id: water-parameters-service
-          uri: http://parameters-service:8085
+          uri: ${PARAMETERS_SERVICE_URL:http://parameters-service:8081}
           predicates:
             - Path=/aquariums/*/parameters/**
-            
-        # Aquariums Service - must be after more specific routes
+
+        # Manual parameters (before aquariums)
+        - id: manual-parameters-service
+          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8083}
+          predicates:
+            - Path=/aquariums/*/parameters/manual/**
+
+        # Target parameters (before aquariums)
+        - id: target-parameters-service
+          uri: ${TARGET_PARAMETERS_SERVICE_URL:http://target-parameters-service:8087}
+          predicates:
+            - Path=/aquariums/*/settings/targets/**
+
+        # Aquariums (catch-all, must be last)
         - id: aquariums-service
-          uri: http://aquariums-service:8081
+          uri: ${AQUARIUMS_SERVICE_URL:http://aquariums-service:8081}
           predicates:
             - Path=/aquariums/**
-            
-        # Species Service
+
+        # Species
         - id: species-service
-          uri: http://species-service:8083
+          uri: ${SPECIES_SERVICE_URL:http://species-service:8083}
           predicates:
             - Path=/species/**
-            
-        # Manual Parameters Service
-        - id: manual-parameters-service
-          uri: http://manual-parameters-service:8086
-          predicates:
-            - Path=/manual-parameters/**
-            
-        # Target Parameters Service
-        - id: target-parameters-service
-          uri: http://target-parameters-service:8087
-          predicates:
-            - Path=/target-parameters/**
-            
-        # AI Assistant Service
-        - id: ai-assistant-service
-          uri: http://ai-assistant-service:8090
-          predicates:
-            - Path=/api/ai/**
-      
-      # Configurazione CORS globale
-      # TODO: sostituire "*" con i domini effettivi in produzione
+
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "http://localhost:3000"
+            allowedOrigins: "${CORS_ALLOWED_ORIGINS:http://localhost:3000}"
             allowedMethods:
               - GET
               - POST
@@ -152,17 +139,12 @@ springdoc:
         url: /manual-parameters-service/v3/api-docs
       - name: target-parameters-service
         url: /target-parameters-service/v3/api-docs
-      - name: ai-assistant-service
-        url: /ai-assistant-service/v3/api-docs
 
 logging:
   level:
     org.springframework.cloud.gateway: INFO
-    org.springframework.cloud.gateway.handler.RoutePredicateHandlerMapping: INFO
     reactor.netty.http.client: INFO
-    reactor.netty.http.server: INFO
 
-# Actuator Configuration for Monitoring
 management:
   endpoints:
     web:
@@ -170,13 +152,7 @@ management:
         include: health,info,metrics,prometheus
   endpoint:
     health:
-      show-details: when-authorized
-      enabled: true
-    info:
-      enabled: true
-    metrics:
-      enabled: true
-    prometheus:
+      show-details: always
       enabled: true
   prometheus:
     metrics:
@@ -185,4 +161,3 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
-
