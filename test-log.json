@@ -1,9 +1,0 @@
-﻿{
-  "@timestamp": "2026-01-08T10:58:52.085Z",
-  "@version": "1",
-  "message": "Test log from aquariums-service",
-  "logger": "test.logger",
-  "thread": "main",
-  "level": "INFO",
-  "service": "aquariums-service"
-}
