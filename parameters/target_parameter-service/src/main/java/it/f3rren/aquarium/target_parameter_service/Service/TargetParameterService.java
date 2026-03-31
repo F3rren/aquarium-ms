@@ -10,7 +10,7 @@ import it.f3rren.aquarium.target_parameter_service.model.TargetParameter;
 import it.f3rren.aquarium.target_parameter_service.repository.ITargetParameterRepository;
 
 @Service
-public class TargetParameterService {
+public class TargetParameterService implements ITargetParameterService {
 
     private static final Logger log = LoggerFactory.getLogger(TargetParameterService.class);
 
