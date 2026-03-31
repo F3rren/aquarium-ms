@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.target_parameter_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
 import it.f3rren.aquarium.target_parameter_service.model.TargetParameter;
-import it.f3rren.aquarium.target_parameter_service.service.TargetParameterService;
+import it.f3rren.aquarium.target_parameter_service.service.ITargetParameterService;
 import jakarta.validation.Valid;
 
 @RestController
@@ -16,9 +16,9 @@ import jakarta.validation.Valid;
 @Tag(name = "TargetParameter", description = "API for managing target parameters")
 public class TargetParameterController {
 
-    private final TargetParameterService targetParameterService;
+    private final ITargetParameterService targetParameterService;
 
-    public TargetParameterController(TargetParameterService targetParameterService) {
+    public TargetParameterController(ITargetParameterService targetParameterService) {
         this.targetParameterService = targetParameterService;
     }
 
