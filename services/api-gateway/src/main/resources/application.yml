@@ -1,0 +1,163 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # ── OpenAPI / Swagger aggregation ──────────────────────────────────────
+        - id: aquariums-service-openapi
+          uri: ${AQUARIUMS_SERVICE_URL:http://aquariums-service:8081}
+          predicates:
+            - Path=/aquariums-service/v3/api-docs
+          filters:
+            - RewritePath=/aquariums-service/v3/api-docs, /v3/api-docs
+
+        - id: inhabitants-service-openapi
+          uri: ${INHABITANTS_SERVICE_URL:http://inhabitants-service:8082}
+          predicates:
+            - Path=/inhabitants-service/v3/api-docs
+          filters:
+            - RewritePath=/inhabitants-service/v3/api-docs, /v3/api-docs
+
+        - id: species-service-openapi
+          uri: ${SPECIES_SERVICE_URL:http://species-service:8083}
+          predicates:
+            - Path=/species-service/v3/api-docs
+          filters:
+            - RewritePath=/species-service/v3/api-docs, /v3/api-docs
+
+        - id: maintenance-service-openapi
+          uri: ${MAINTENANCE_SERVICE_URL:http://maintenance-service:8084}
+          predicates:
+            - Path=/maintenance-service/v3/api-docs
+          filters:
+            - RewritePath=/maintenance-service/v3/api-docs, /v3/api-docs
+
+        - id: parameters-service-openapi
+          uri: ${PARAMETERS_SERVICE_URL:http://parameters-service:8081}
+          predicates:
+            - Path=/parameters-service/v3/api-docs
+          filters:
+            - RewritePath=/parameters-service/v3/api-docs, /v3/api-docs
+
+        - id: manual-parameters-service-openapi
+          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8083}
+          predicates:
+            - Path=/manual-parameters-service/v3/api-docs
+          filters:
+            - RewritePath=/manual-parameters-service/v3/api-docs, /v3/api-docs
+
+        - id: target-parameters-service-openapi
+          uri: ${TARGET_PARAMETERS_SERVICE_URL:http://target-parameter-service:8087}
+          predicates:
+            - Path=/target-parameters-service/v3/api-docs
+          filters:
+            - RewritePath=/target-parameters-service/v3/api-docs, /v3/api-docs
+
+        # ── Business routes ────────────────────────────────────────────────────
+
+        # Maintenance - products (before aquariums to avoid catch-all)
+        - id: maintenance-service-products
+          uri: ${MAINTENANCE_SERVICE_URL:http://maintenance-service:8084}
+          predicates:
+            - Path=/products/**
+
+        # Maintenance - tasks (before aquariums)
+        - id: maintenance-service
+          uri: ${MAINTENANCE_SERVICE_URL:http://maintenance-service:8084}
+          predicates:
+            - Path=/aquariums/*/tasks/**
+
+        # Inhabitants (before aquariums)
+        - id: inhabitants-service
+          uri: ${INHABITANTS_SERVICE_URL:http://inhabitants-service:8082}
+          predicates:
+            - Path=/aquariums/*/inhabitants/**
+
+        # Manual parameters — must be before water-parameters (more specific path)
+        - id: manual-parameters-service
+          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8083}
+          predicates:
+            - Path=/aquariums/*/parameters/manual/**
+
+        # Water parameters (before aquariums)
+        - id: water-parameters-service
+          uri: ${PARAMETERS_SERVICE_URL:http://parameters-service:8081}
+          predicates:
+            - Path=/aquariums/*/parameters/**
+
+        # Target parameters (before aquariums)
+        - id: target-parameters-service
+          uri: ${TARGET_PARAMETERS_SERVICE_URL:http://target-parameter-service:8087}
+          predicates:
+            - Path=/aquariums/*/settings/targets/**
+
+        # Aquariums (catch-all, must be last)
+        - id: aquariums-service
+          uri: ${AQUARIUMS_SERVICE_URL:http://aquariums-service:8081}
+          predicates:
+            - Path=/aquariums/**
+
+        # Species
+        - id: species-service
+          uri: ${SPECIES_SERVICE_URL:http://species-service:8083}
+          predicates:
+            - Path=/species/**
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "${CORS_ALLOWED_ORIGINS:http://localhost:3000}"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: aquariums-service
+        url: /aquariums-service/v3/api-docs
+      - name: inhabitants-service
+        url: /inhabitants-service/v3/api-docs
+      - name: species-service
+        url: /species-service/v3/api-docs
+      - name: maintenance-service
+        url: /maintenance-service/v3/api-docs
+      - name: parameters-service
+        url: /parameters-service/v3/api-docs
+      - name: manual-parameters-service
+        url: /manual-parameters-service/v3/api-docs
+      - name: target-parameters-service
+        url: /target-parameters-service/v3/api-docs
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    reactor.netty.http.client: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}

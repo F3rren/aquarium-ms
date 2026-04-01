@@ -1,0 +1,116 @@
+package it.f3rren.aquarium.aquariums_service.service;
+
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
+import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
+import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.aquariums_service.model.Aquarium;
+import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
+
+/**
+ * Service class for managing Aquarium entities.
+ * Provides operations for creating, retrieving, updating, and deleting Aquarium entities.
+ * Also handles basic CRUD operations and transactions.
+ * Utilizes Spring Data JPA for database interactions.
+ * Caches and transactions are managed by Spring.
+ * Logs are managed by SLF4J.
+ * @Service annotation marks this class as a Spring service component.
+ * @author F3rren
+ */
+@Service
+public class AquariumService implements IAquariumService {
+
+    private static final Logger log = LoggerFactory.getLogger(AquariumService.class);
+
+    private final IAquariumRepository aquariumRepository;
+
+    public AquariumService(IAquariumRepository aquariumRepository) {
+        this.aquariumRepository = aquariumRepository;
+    }
+
+    /**
+     * Creates a new Aquarium entity.
+     * @param dto DTO containing Aquarium creation details.
+     * @return Created Aquarium entity.
+     */
+    @Transactional
+    public Aquarium createAquarium(CreateAquariumDTO dto) {
+        Aquarium aquarium = new Aquarium();
+        aquarium.setName(dto.getName().trim());
+        aquarium.setVolume(dto.getVolume());
+        aquarium.setType(dto.getType() != null ? dto.getType().trim() : null);
+        aquarium.setDescription(dto.getDescription());
+        aquarium.setImageUrl(dto.getImageUrl());
+
+        log.info("Creating aquarium: {}", dto.getName());
+        return aquariumRepository.save(aquarium);
+    }
+
+    /**
+     * Retrieves a paginated list of Aquarium entities.
+     * @param pageable pagination and sorting parameters.
+     * @return Page of Aquarium entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<Aquarium> getAllAquariums(Pageable pageable) {
+        return aquariumRepository.findAll(pageable);
+    }
+
+    /**
+     * Retrieves an Aquarium entity by its ID.
+     * @param id ID of the Aquarium entity to retrieve.
+     * @return Aquarium entity with the specified ID.
+     * @throws ResourceNotFoundException if the Aquarium entity is not found.
+     */
+    @Transactional(readOnly = true)
+    public Aquarium getAquariumById(Long id) {
+        return aquariumRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Aquarium not found with ID: " + id));
+    }
+
+    /**
+     * Updates an Aquarium entity with the provided details.
+     * Only non-null fields in the DTO are applied (partial update).
+     * @param id ID of the Aquarium entity to update.
+     * @param dto DTO containing Aquarium update details.
+     * @return Updated Aquarium entity.
+     * @throws ResourceNotFoundException if the Aquarium entity is not found.
+     */
+    @Transactional
+    public Aquarium updateAquarium(Long id, UpdateAquariumDTO dto) {
+        Aquarium existing = aquariumRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Aquarium not found with ID: " + id));
+
+        // Partial update: only non-null fields are applied, preserving existing values
+        Optional.ofNullable(dto.getName()).map(String::trim).ifPresent(existing::setName);
+        Optional.ofNullable(dto.getVolume()).ifPresent(existing::setVolume);
+        Optional.ofNullable(dto.getType()).map(String::trim).ifPresent(existing::setType);
+        Optional.ofNullable(dto.getDescription()).ifPresent(existing::setDescription);
+        Optional.ofNullable(dto.getImageUrl()).ifPresent(existing::setImageUrl);
+
+        log.info("Updating aquarium with ID: {}", id);
+        return aquariumRepository.save(existing);
+    }
+
+    /**
+     * Deletes an Aquarium entity by its ID.
+     * @param id ID of the Aquarium entity to delete.
+     * @throws ResourceNotFoundException if the Aquarium entity is not found.
+     */
+    @Transactional
+    public void deleteAquarium(Long id) {
+        if (!aquariumRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Aquarium not found with ID: " + id);
+        }
+        log.info("Deleting aquarium with ID: {}", id);
+        aquariumRepository.deleteById(id);
+    }
+}
