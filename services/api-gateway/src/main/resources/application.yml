@@ -77,17 +77,17 @@ spring:
           predicates:
             - Path=/aquariums/*/inhabitants/**
 
+        # Manual parameters — must be before water-parameters (more specific path)
+        - id: manual-parameters-service
+          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8083}
+          predicates:
+            - Path=/aquariums/*/parameters/manual/**
+
         # Water parameters (before aquariums)
         - id: water-parameters-service
           uri: ${PARAMETERS_SERVICE_URL:http://parameters-service:8081}
           predicates:
             - Path=/aquariums/*/parameters/**
-
-        # Manual parameters (before aquariums)
-        - id: manual-parameters-service
-          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8083}
-          predicates:
-            - Path=/aquariums/*/parameters/manual/**
 
         # Target parameters (before aquariums)
         - id: target-parameters-service
