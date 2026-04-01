@@ -51,7 +51,7 @@ spring:
             - RewritePath=/manual-parameters-service/v3/api-docs, /v3/api-docs
 
         - id: target-parameters-service-openapi
-          uri: ${TARGET_PARAMETERS_SERVICE_URL:http://target-parameters-service:8087}
+          uri: ${TARGET_PARAMETERS_SERVICE_URL:http://target-parameter-service:8087}
           predicates:
             - Path=/target-parameters-service/v3/api-docs
           filters:
@@ -91,7 +91,7 @@ spring:
 
         # Target parameters (before aquariums)
         - id: target-parameters-service
-          uri: ${TARGET_PARAMETERS_SERVICE_URL:http://target-parameters-service:8087}
+          uri: ${TARGET_PARAMETERS_SERVICE_URL:http://target-parameter-service:8087}
           predicates:
             - Path=/aquariums/*/settings/targets/**
 
