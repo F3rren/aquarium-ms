@@ -84,11 +84,3 @@ scrape_configs:
           application: 'target-parameters-service'
           domain: 'parameters'
 
-  # AI Services
-  - job_name: 'ai-assistant-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: ['ai-assistant-service:8090']
-        labels:
-          application: 'ai-assistant-service'
-          domain: 'ai'

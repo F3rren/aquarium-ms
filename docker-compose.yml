@@ -1,58 +1,81 @@
 services:
-  # AI Infrastructure
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
+
+  # ── Database ──────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: aquarium_ms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
     ports:
-      - "11434:11434"
+      - "5432:5432"
     volumes:
-      - ollama-data:/root/.ollama
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - aquarium-network
     restart: unless-stopped
-    # Per GPU support (opzionale, rimuovi se non hai GPU NVIDIA)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Core Services
+  # ── Core Services ─────────────────────────────────────────────────────────────
   aquariums-service:
     build:
       context: ./services/aquariums-service
       dockerfile: Dockerfile
     container_name: aquariums-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
       SERVER_PORT: 8081
     ports:
       - "8081:8081"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - aquarium-network
 
-  # Inhabitants Services
+  maintenance-service:
+    build:
+      context: ./services/maintenance-service
+      dockerfile: Dockerfile
+    container_name: maintenance-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 8084
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - aquarium-network
+
+  # ── Inhabitants Services ──────────────────────────────────────────────────────
   inhabitants-service:
     build:
       context: ./services/inhabitants-service
       dockerfile: Dockerfile
     container_name: inhabitants-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
       SERVER_PORT: 8082
       SPECIES_SERVICE_URL: http://species-service:8083/species
     ports:
       - "8082:8082"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - aquarium-network
 
@@ -62,53 +85,34 @@ services:
       dockerfile: Dockerfile
     container_name: species-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
       SERVER_PORT: 8083
     ports:
       - "8083:8083"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - aquarium-network
 
-  # Maintenance Service
-  maintenance-service:
-    build:
-      context: ./services/maintenance-service
-      dockerfile: Dockerfile
-    container_name: maintenance-service
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: root
-      SERVER_PORT: 8084
-      SERVICES_WATER_PARAMETERS_URL: http://parameters-service:8085/api
-      SERVICES_MANUAL_PARAMETERS_URL: http://manual-parameters-service:8086/api
-      SERVICES_TARGET_PARAMETERS_URL: http://target-parameters-service:8087/api
-    ports:
-      - "8084:8084"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    networks:
-      - aquarium-network
-
-  # Parameters Services
+  # ── Parameters Services ───────────────────────────────────────────────────────
   parameters-service:
     build:
       context: ./services/parameters-service
       dockerfile: Dockerfile
     container_name: parameters-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
       SERVER_PORT: 8085
     ports:
       - "8085:8085"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - aquarium-network
 
@@ -118,14 +122,15 @@ services:
       dockerfile: Dockerfile
     container_name: manual-parameters-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
       SERVER_PORT: 8086
     ports:
       - "8086:8086"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - aquarium-network
 
@@ -135,42 +140,19 @@ services:
       dockerfile: Dockerfile
     container_name: target-parameters-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/aquarium_ms
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
       SERVER_PORT: 8087
     ports:
       - "8087:8087"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    networks:
-      - aquarium-network
-
-  # AI Services
-  ai-assistant-service:
-    build:
-      context: ./ai/ai-assistant-service
-      dockerfile: Dockerfile
-    container_name: ai-assistant-service
-    environment:
-      SERVER_PORT: 8090
-      SPRING_AI_OLLAMA_BASE_URL: http://ollama:11434
-      SERVICES_AQUARIUMS_URL: http://aquariums-service:8081
-      SERVICES_INHABITANTS_URL: http://inhabitants-service:8082
-      SERVICES_PARAMETERS_URL: http://parameters-service:8085
-      SERVICES_MAINTENANCE_URL: http://maintenance-service:8084
-    ports:
-      - "8090:8090"
     depends_on:
-      - ollama
-      - aquariums-service
-      - inhabitants-service
-      - parameters-service
-      - maintenance-service
+      postgres:
+        condition: service_healthy
     networks:
       - aquarium-network
 
-  # API Gateway
+  # ── API Gateway ───────────────────────────────────────────────────────────────
   api-gateway:
     build:
       context: ./services/api-gateway
@@ -185,7 +167,6 @@ services:
       PARAMETERS_SERVICE_URL: http://parameters-service:8085
       MANUAL_PARAMETERS_SERVICE_URL: http://manual-parameters-service:8086
       TARGET_PARAMETERS_SERVICE_URL: http://target-parameters-service:8087
-      AI_ASSISTANT_SERVICE_URL: http://ai-assistant-service:8090
     ports:
       - "8080:8080"
     depends_on:
@@ -196,69 +177,17 @@ services:
       - parameters-service
       - manual-parameters-service
       - target-parameters-service
-      - ai-assistant-service
     networks:
       - aquarium-network
 
-  # Monitoring & Logging Infrastructure
-  
-  # Elasticsearch for log storage
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
-    networks:
-      - aquarium-network
-    restart: unless-stopped
-
-  # Logstash for log processing
-  logstash:
-    build:
-      context: ./observability/logstash
-      dockerfile: Dockerfile
-    container_name: logstash
-    ports:
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-      - "12201:12201/udp"
-    environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
-    depends_on:
-      - elasticsearch
-    networks:
-      - aquarium-network
-    restart: unless-stopped
-
-  # Kibana for log visualization
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.11.3
-    container_name: kibana
-    ports:
-      - "5601:5601"
-    environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-    depends_on:
-      - elasticsearch
-    networks:
-      - aquarium-network
-    restart: unless-stopped
-
-  # Prometheus for metrics collection
+  # ── Observability ─────────────────────────────────────────────────────────────
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -270,24 +199,6 @@ services:
       - aquarium-network
     restart: unless-stopped
 
-  # Filebeat for Docker logs collection
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:8.11.3
-    container_name: filebeat
-    user: root
-    volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - filebeat-data:/usr/share/filebeat/data
-    command: filebeat -e -strict.perms=false
-    depends_on:
-      - elasticsearch
-    networks:
-      - aquarium-network
-    restart: unless-stopped
-
-  # Grafana for metrics visualization
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -299,10 +210,9 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
-      - elasticsearch
     networks:
       - aquarium-network
     restart: unless-stopped
@@ -312,13 +222,9 @@ networks:
     driver: bridge
 
 volumes:
-  ollama-data:
-    driver: local
-  elasticsearch-data:
+  postgres-data:
     driver: local
   prometheus-data:
     driver: local
   grafana-data:
-    driver: local
-  filebeat-data:
     driver: local
