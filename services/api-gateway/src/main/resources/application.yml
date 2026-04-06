@@ -161,3 +161,35 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+
+rate-limit:
+  enabled: ${RATE_LIMIT_ENABLED:true}
+  general-capacity: ${RATE_LIMIT_GENERAL_CAPACITY:120}
+  general-refill-tokens: ${RATE_LIMIT_GENERAL_REFILL_TOKENS:2}
+  general-refill-seconds: ${RATE_LIMIT_GENERAL_REFILL_SECONDS:1}
+  write-capacity: ${RATE_LIMIT_WRITE_CAPACITY:20}
+  write-refill-tokens: ${RATE_LIMIT_WRITE_REFILL_TOKENS:1}
+  write-refill-seconds: ${RATE_LIMIT_WRITE_REFILL_SECONDS:3}
+  cleanup-interval-ms: ${RATE_LIMIT_CLEANUP_INTERVAL_MS:300000}
+  bucket-ttl-minutes: ${RATE_LIMIT_BUCKET_TTL_MINUTES:10}
+  excluded-paths:
+    - /actuator
+    - /swagger-ui
+    - /v3/api-docs
+
+bot-protection:
+  enabled: ${BOT_PROTECTION_ENABLED:true}
+  blocked-user-agent-patterns:
+    - "curl/"
+    - "python-requests/"
+    - "Go-http-client/"
+    - "Java/"
+    - "Apache-HttpClient"
+    - "okhttp/"
+    - "wget"
+    - "libwww-perl"
+    - "scrapy"
+  excluded-paths:
+    - /actuator
+    - /swagger-ui
+    - /v3/api-docs
