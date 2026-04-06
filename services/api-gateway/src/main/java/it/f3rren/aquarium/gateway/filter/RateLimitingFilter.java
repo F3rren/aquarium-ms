@@ -1,8 +1,8 @@
 package it.f3rren.aquarium.gateway.filter;
 
-import com.github.bucket4j.Bandwidth;
-import com.github.bucket4j.Bucket;
-import com.github.bucket4j.Refill;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Refill;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import it.f3rren.aquarium.gateway.config.RateLimitProperties;
