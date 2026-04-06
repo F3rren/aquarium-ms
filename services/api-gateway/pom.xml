@@ -46,6 +46,13 @@
 		<artifactId>micrometer-registry-prometheus</artifactId>
 	</dependency>
 
+	<!-- Rate Limiting -->
+	<dependency>
+		<groupId>com.bucket4j</groupId>
+		<artifactId>bucket4j-core</artifactId>
+		<version>8.10.1</version>
+	</dependency>
+
 	<!-- Logging -->
 	<dependency>
 		<groupId>net.logstash.logback</groupId>
