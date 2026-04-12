@@ -5,17 +5,18 @@
 ![Microservices](https://img.shields.io/badge/architecture-microservices-blue.svg)
 ![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 ![PostgreSQL](https://img.shields.io/badge/database-PostgreSQL%2016-336791.svg)
+![AWS ECS](https://img.shields.io/badge/deploy-AWS%20ECS%20Fargate-FF9900.svg)
 ![MIT License](https://img.shields.io/badge/license-MIT-green.svg)
 
 A **microservice-based backend** for comprehensive aquarium management — tanks, inhabitants, species, maintenance tasks, and water parameters.
 
-Built with **Java 17, Spring Boot 3.3.5, Spring Cloud Gateway** and **PostgreSQL 16**. Fully containerized via Docker Compose with Prometheus and Grafana monitoring.
+Built with **Java 17, Spring Boot 3.3.5, Spring Cloud Gateway** and **PostgreSQL 16**. Fully containerized via Docker Compose for local development and deployed to **AWS ECS Fargate** via GitHub Actions.
 
 > **Note:** This backend is designed to work alongside the [Aquarium Interface](https://github.com/F3rren/Aquarium-interface) frontend and is not intended as a public/general-purpose API.
 
 ---
 
-## Quick Start
+## Quick Start (local)
 
 **Only prerequisite: [Docker Desktop](https://www.docker.com/products/docker-desktop/)**
 
@@ -25,22 +26,18 @@ cd aquarium-ms
 docker-compose up -d
 ```
 
-That's it. Docker Compose will build all images, start PostgreSQL, all microservices, and the monitoring stack automatically.
-
-Wait ~30–60 seconds for services to start, then access:
+Docker Compose builds all images, starts PostgreSQL, all microservices, and the monitoring stack automatically. Wait ~30–60 seconds, then:
 
 | Service | URL |
 |---------|-----|
 | API Gateway (main entrypoint) | http://localhost:8080 |
 | Swagger UI (all services) | http://localhost:8080/swagger-ui.html |
-| Grafana (metrics) | http://localhost:3000 (admin / admin) |
+| Grafana (metrics) | http://localhost:3000 |
 | Prometheus | http://localhost:9090 |
 
-### Stop
-
 ```bash
-docker-compose down          # stop containers
-docker-compose down -v       # stop and delete all data (volumes)
+docker-compose down        # stop
+docker-compose down -v     # stop and delete volumes
 ```
 
 ---
@@ -50,13 +47,13 @@ docker-compose down -v       # stop and delete all data (volumes)
 All HTTP traffic goes through the **API Gateway** on port 8080, which routes requests to the appropriate microservice.
 
 ```
-Client → API Gateway (8080) → aquariums-service    (8081)
-                             → inhabitants-service  (8082)
-                             → species-service      (8083)
-                             → maintenance-service  (8084)
-                             → parameters-service   (8085)
-                             → manual-parameters-service (8086)
-                             → target-parameters-service (8087)
+Client → API Gateway (8080) → aquariums-service           (8081)
+                             → inhabitants-service         (8082)
+                             → species-service             (8083)
+                             → maintenance-service         (8084)
+                             → parameters-service          (8085)
+                             → manual-parameters-service   (8086)
+                             → target-parameters-service   (8087)
 ```
 
 ### Services
@@ -100,7 +97,7 @@ All requests go through the gateway at `http://localhost:8080`.
 | Manual parameters | GET, POST | `/aquariums/{id}/parameters/manual` |
 | Target parameters | GET, POST | `/aquariums/{id}/settings/targets` |
 
-Full interactive documentation available at **http://localhost:8080/swagger-ui.html**.
+Full interactive documentation: **http://localhost:8080/swagger-ui.html**
 
 ---
 
@@ -108,16 +105,78 @@ Full interactive documentation available at **http://localhost:8080/swagger-ui.h
 
 Prometheus scrapes metrics from all services every 15 seconds via `/actuator/prometheus`. Grafana comes pre-configured with Prometheus as datasource.
 
-- **Grafana:** http://localhost:3000 (admin / admin) — pre-built dashboard "Aquarium Microservices - Overview"
+- **Grafana:** http://localhost:3000 — pre-built dashboard "Aquarium Microservices - Overview"
 - **Prometheus:** http://localhost:9090 — raw metrics and target status
 
 ---
 
-## Customization
+## Deployment — AWS ECS Fargate
 
-To change table names, schemas, or service configuration, edit the relevant `application.yml` inside each service under `services/<service-name>/src/main/resources/`.
+Each microservice has a dedicated GitHub Actions workflow under [`.github/workflows/`](.github/workflows/). Workflows trigger automatically on push to `main` when files inside the relevant service directory change.
 
-To change database credentials, update both the `postgres` service and all `SPRING_DATASOURCE_*` environment variables in `docker-compose.yml`.
+### Pipeline
+
+```
+push to main
+  └─ Test (PostgreSQL service container)
+       └─ [on success] Build Docker image
+            └─ Push to Amazon ECR  (:sha + :latest)
+                 └─ Render new ECS task definition
+                      └─ Deploy to ECS Fargate (waits for health check)
+```
+
+### Prerequisites
+
+The AWS infrastructure must exist before the workflows can run:
+
+- An **ECS cluster** and one **ECS service** per microservice
+- An **ECR repository** per microservice
+- An **IAM user** with permissions: `ecr:*`, `ecs:RegisterTaskDefinition`, `ecs:UpdateService`, `ecs:DescribeTaskDefinition`
+
+### GitHub Secrets
+
+Configure these in **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
+|--------|-------------|
+| `AWS_ACCESS_KEY_ID` | IAM access key |
+| `AWS_SECRET_ACCESS_KEY` | IAM secret key |
+| `AWS_REGION` | e.g. `eu-west-1` |
+| `ECR_REPOSITORY` | ECR repo name for `aquariums-service` |
+| `ECS_CLUSTER` | ECS cluster name for `aquariums-service` |
+| `ECS_SERVICE` | ECS service name for `aquariums-service` |
+| `ECS_CONTAINER_NAME` | Container name in the task definition |
+| `GATEWAY_ECR_REPOSITORY` | ECR repo name for `api-gateway` |
+| `GATEWAY_ECS_CLUSTER` | ECS cluster name for `api-gateway` |
+| `GATEWAY_ECS_SERVICE` | ECS service name for `api-gateway` |
+| `GATEWAY_ECS_CONTAINER` | Container name for `api-gateway` |
+| `INHABITANTS_ECR_REPOSITORY` | *(same pattern for `inhabitants-service`)* |
+| `SPECIES_ECR_REPOSITORY` | *(same pattern for `species-service`)* |
+| `MAINTENANCE_ECR_REPOSITORY` | *(same pattern for `maintenance-service`)* |
+| `PARAMETERS_ECR_REPOSITORY` | *(same pattern for `parameters-service`)* |
+| `MANUAL_PARAMETERS_ECR_REPOSITORY` | *(same pattern for `manual-parameters-service`)* |
+| `TARGET_PARAMETER_ECR_REPOSITORY` | *(same pattern for `target-parameter-service`)* |
+
+Each `INHABITANTS_*`, `SPECIES_*`, `MAINTENANCE_*`, `PARAMETERS_*`, `MANUAL_PARAMETERS_*` and `TARGET_PARAMETER_*` group follows the same four-secret pattern (`_ECR_REPOSITORY`, `_ECS_CLUSTER`, `_ECS_SERVICE`, `_ECS_CONTAINER`).
+
+---
+
+## Configuration
+
+Copy `.env.example` to `.env` to override local defaults — the file is gitignored and never committed.
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Default | Used by |
+|----------|---------|---------|
+| `DB_USER` | `postgres` | postgres container + all Spring services |
+| `DB_PASSWORD` | `root` | same |
+| `GF_ADMIN_USER` | `admin` | Grafana |
+| `GF_ADMIN_PASSWORD` | `admin` | Grafana |
+
+For running a service directly with `mvn spring-boot:run` (without Docker Compose), set `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` as environment variables.
 
 ---
 
@@ -131,6 +190,9 @@ To change database credentials, update both the `postgres` service and all `SPRI
 | Persistence | Spring Data JPA, Hibernate, Flyway |
 | Database | PostgreSQL 16 |
 | Containerization | Docker, Docker Compose |
+| Container Registry | Amazon ECR |
+| Orchestration | Amazon ECS Fargate |
+| CI/CD | GitHub Actions |
 | Metrics | Prometheus, Grafana |
 | Build | Maven |
 | Utilities | Lombok |
