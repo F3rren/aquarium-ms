@@ -150,8 +150,7 @@ public class AquariumController {
     public ResponseEntity<ApiResponseDTO<WaterParameterDTO>> addWaterParameter(
             @PathVariable Long id,
             @Valid @RequestBody WaterParameterDTO parameter) {
-        parameter.setAquariumId(id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(parametersClient.addWaterParameter(parameter));
+        return ResponseEntity.status(HttpStatus.CREATED).body(parametersClient.addWaterParameter(id, parameter));
     }
 
     /**
@@ -222,8 +221,7 @@ public class AquariumController {
     public ResponseEntity<ApiResponseDTO<ManualParameterDTO>> addManualParameter(
             @PathVariable Long id,
             @Valid @RequestBody ManualParameterDTO parameter) {
-        parameter.setAquariumId(id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(parametersClient.addManualParameter(parameter));
+        return ResponseEntity.status(HttpStatus.CREATED).body(parametersClient.addManualParameter(id, parameter));
     }
 
     /**
