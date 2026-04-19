@@ -3,7 +3,7 @@ package it.f3rren.aquarium.inhabitants_service.dto;
 import lombok.Data;
 
 @Data
-public class CoralDTO {
+public class CoralDTO implements SpeciesDetailsDTO {
     private Long id;
     private String commonName;
     private String scientificName;
