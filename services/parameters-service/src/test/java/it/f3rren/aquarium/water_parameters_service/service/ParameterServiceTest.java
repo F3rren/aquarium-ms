@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.parameters_service.service;
+package it.f3rren.aquarium.water_parameters_service.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +22,7 @@ import it.f3rren.aquarium.parameters_service.dto.ParameterDTO;
 import it.f3rren.aquarium.parameters_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.parameters_service.model.Parameter;
 import it.f3rren.aquarium.parameters_service.repository.IParameterRepository;
+import it.f3rren.aquarium.parameters_service.service.ParameterService;
 
 @ExtendWith(MockitoExtension.class)
 class ParameterServiceTest {
