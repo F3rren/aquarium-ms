@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.f3rren.aquarium.maintenance_service.dto.CreateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.ProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.ProductFilter;
 import it.f3rren.aquarium.maintenance_service.dto.UpdateProductDTO;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.model.Product;
@@ -27,7 +29,7 @@ public class ProductService implements IProductService {
     }
 
     @Transactional
-    public Product createProduct(CreateProductDTO dto) {
+    public ProductDTO createProduct(CreateProductDTO dto) {
         Product product = new Product();
         product.setName(dto.getName());
         product.setCategory(dto.getCategory());
@@ -44,64 +46,46 @@ public class ProductService implements IProductService {
         product.setUsageFrequency(dto.getUsageFrequency());
 
         log.info("Creating product: {}", dto.getName());
-        return productRepository.save(product);
+        return toDTO(productRepository.save(product));
     }
 
     @Transactional(readOnly = true)
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<ProductDTO> getProducts(ProductFilter filter) {
+        if (Boolean.TRUE.equals(filter.getFavorites())) {
+            return toDTOList(productRepository.findByIsFavoriteTrueOrderByNameAsc());
+        } else if (Boolean.TRUE.equals(filter.getExpired())) {
+            return toDTOList(productRepository.findByExpiryDateBefore(LocalDate.now()));
+        } else if (Boolean.TRUE.equals(filter.getExpiringSoon())) {
+            LocalDate today = LocalDate.now();
+            return toDTOList(productRepository.findByExpiryDateBetween(today, today.plusDays(30)));
+        } else if (Boolean.TRUE.equals(filter.getLowStock())) {
+            return toDTOList(productRepository.findLowStockProducts());
+        } else if (Boolean.TRUE.equals(filter.getShouldUseAgain())) {
+            return toDTOList(productRepository.findProductsToUseAgain());
+        } else if (filter.getCategory() != null) {
+            ProductCategory cat = ProductCategory.valueOf(filter.getCategory().toUpperCase());
+            return toDTOList(productRepository.findByCategoryOrderByNameAsc(cat));
+        } else if (filter.getBrand() != null) {
+            return toDTOList(productRepository.findByBrandOrderByNameAsc(filter.getBrand()));
+        } else if (filter.getSearch() != null) {
+            return toDTOList(productRepository.findByNameContainingIgnoreCaseOrderByNameAsc(filter.getSearch()));
+        }
+        return toDTOList(productRepository.findAll());
     }
 
     @Transactional(readOnly = true)
-    public Product getProductById(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
+    public ProductDTO getProductById(Long id) {
+        return toDTO(productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id)));
     }
 
     @Transactional(readOnly = true)
-    public List<Product> getProductsByCategory(ProductCategory category) {
-        return productRepository.findByCategoryOrderByNameAsc(category);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getFavoriteProducts() {
-        return productRepository.findByIsFavoriteTrueOrderByNameAsc();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getProductsByBrand(String brand) {
-        return productRepository.findByBrandOrderByNameAsc(brand);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getExpiredProducts() {
-        return productRepository.findByExpiryDateBefore(LocalDate.now());
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getProductsExpiringSoon() {
-        LocalDate today = LocalDate.now();
-        LocalDate in30Days = today.plusDays(30);
-        return productRepository.findByExpiryDateBetween(today, in30Days);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getLowStockProducts() {
-        return productRepository.findLowStockProducts();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> searchProductsByName(String name) {
-        return productRepository.findByNameContainingIgnoreCaseOrderByNameAsc(name);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getProductsToUseAgain() {
-        return productRepository.findProductsToUseAgain();
+    public List<ProductDTO> getProductsByCategory(ProductCategory category) {
+        return toDTOList(productRepository.findByCategoryOrderByNameAsc(category));
     }
 
     @Transactional
-    public Product updateProduct(Long id, UpdateProductDTO dto) {
+    public ProductDTO updateProduct(Long id, UpdateProductDTO dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
 
@@ -121,39 +105,39 @@ public class ProductService implements IProductService {
         if (dto.getLastUsed() != null) product.setLastUsed(dto.getLastUsed());
 
         log.info("Updating product {}", id);
-        return productRepository.save(product);
+        return toDTO(productRepository.save(product));
     }
 
     @Transactional
-    public Product markAsUsed(Long id) {
+    public ProductDTO markAsUsed(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
 
         product.setLastUsed(LocalDate.now());
         log.info("Marking product {} as used", id);
-        return productRepository.save(product);
+        return toDTO(productRepository.save(product));
     }
 
     @Transactional
-    public Product toggleFavorite(Long id) {
+    public ProductDTO toggleFavorite(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
 
         product.setIsFavorite(!product.getIsFavorite());
         log.info("Toggling favorite for product {} -> {}", id, product.getIsFavorite());
-        return productRepository.save(product);
+        return toDTO(productRepository.save(product));
     }
 
     @Transactional
-    public Product updateQuantity(Long id, Double quantityChange) {
+    public ProductDTO updateQuantity(Long id, Double quantityChange) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
 
-        Double currentQuantity = product.getQuantity() != null ? product.getQuantity() : 0.0;
+        double currentQuantity = product.getQuantity() != null ? product.getQuantity() : 0.0;
         product.setQuantity(currentQuantity + quantityChange);
 
         log.info("Updating quantity for product {}: {} -> {}", id, currentQuantity, product.getQuantity());
-        return productRepository.save(product);
+        return toDTO(productRepository.save(product));
     }
 
     @Transactional
@@ -163,5 +147,36 @@ public class ProductService implements IProductService {
         }
         log.info("Deleting product {}", id);
         productRepository.deleteById(id);
+    }
+
+    private ProductDTO toDTO(Product product) {
+        ProductDTO dto = new ProductDTO();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setCategory(product.getCategory());
+        dto.setBrand(product.getBrand());
+        dto.setQuantity(product.getQuantity());
+        dto.setUnit(product.getUnit());
+        dto.setCost(product.getCost());
+        dto.setCurrency(product.getCurrency());
+        dto.setPurchaseDate(product.getPurchaseDate());
+        dto.setExpiryDate(product.getExpiryDate());
+        dto.setNotes(product.getNotes());
+        dto.setImageUrl(product.getImageUrl());
+        dto.setIsFavorite(product.getIsFavorite());
+        dto.setUsageFrequency(product.getUsageFrequency());
+        dto.setLastUsed(product.getLastUsed());
+        dto.setCreatedAt(product.getCreatedAt());
+        dto.setUpdatedAt(product.getUpdatedAt());
+        dto.setExpired(product.isExpired());
+        dto.setExpiringSoon(product.isExpiringSoon());
+        dto.setLowStock(product.isLowStock());
+        dto.setDaysSinceLastUse(product.getDaysSinceLastUse());
+        dto.setShouldUseAgain(product.shouldUseAgain());
+        return dto;
+    }
+
+    private List<ProductDTO> toDTOList(List<Product> products) {
+        return products.stream().map(this::toDTO).toList();
     }
 }
