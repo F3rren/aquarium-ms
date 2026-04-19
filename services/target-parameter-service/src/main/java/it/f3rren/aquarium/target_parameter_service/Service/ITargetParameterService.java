@@ -1,11 +1,11 @@
 package it.f3rren.aquarium.target_parameter_service.service;
 
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
-import it.f3rren.aquarium.target_parameter_service.model.TargetParameter;
+import it.f3rren.aquarium.target_parameter_service.dto.TargetParameterResponseDTO;
 
 public interface ITargetParameterService {
 
-    TargetParameter getTargetParameters(Long aquariumId);
+    TargetParameterResponseDTO getTargetParameters(Long aquariumId);
 
-    TargetParameter saveTargetParameters(Long aquariumId, SaveTargetParameterDTO dto);
+    TargetParameterResponseDTO saveTargetParameters(Long aquariumId, SaveTargetParameterDTO dto);
 }
