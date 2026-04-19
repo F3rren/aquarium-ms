@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.target_parameter_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
-import it.f3rren.aquarium.target_parameter_service.model.TargetParameter;
+import it.f3rren.aquarium.target_parameter_service.dto.TargetParameterResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.service.ITargetParameterService;
 import jakarta.validation.Valid;
 
@@ -24,24 +24,24 @@ public class TargetParameterController {
 
     @GetMapping
     @Operation(summary = "Get target parameters for an aquarium", description = "Retrieve target parameters for a specific aquarium")
-    public ResponseEntity<ApiResponseDTO<TargetParameter>> getTargetParameters(@PathVariable Long aquariumId) {
-        TargetParameter targets = targetParameterService.getTargetParameters(aquariumId);
+    public ResponseEntity<ApiResponseDTO<TargetParameterResponseDTO>> getTargetParameters(@PathVariable Long aquariumId) {
+        TargetParameterResponseDTO targets = targetParameterService.getTargetParameters(aquariumId);
 
         if (targets == null) {
-            return ResponseEntity.ok(new ApiResponseDTO<TargetParameter>(true, "No custom target parameter found", null, targets));
+            return ResponseEntity.ok(new ApiResponseDTO<>(true, "No custom target parameter found", null, null));
         }
 
-        return ResponseEntity.ok(new ApiResponseDTO<TargetParameter>(true, "Target parameters retrieved successfully", null, targets));
+        return ResponseEntity.ok(new ApiResponseDTO<>(true, "Target parameters retrieved successfully", targets, null));
     }
 
     @PostMapping
     @Operation(summary = "Save target parameters for an aquarium", description = "Save or update target parameters for a specific aquarium")
-    public ResponseEntity<ApiResponseDTO<TargetParameter>> saveTargetParameters(
+    public ResponseEntity<ApiResponseDTO<TargetParameterResponseDTO>> saveTargetParameters(
             @PathVariable Long aquariumId,
             @Valid @RequestBody SaveTargetParameterDTO dto) {
 
-        TargetParameter saved = targetParameterService.saveTargetParameters(aquariumId, dto);
+        TargetParameterResponseDTO saved = targetParameterService.saveTargetParameters(aquariumId, dto);
 
-        return ResponseEntity.ok(new ApiResponseDTO<TargetParameter>(true, "Target parameters saved successfully", null, saved));
+        return ResponseEntity.ok(new ApiResponseDTO<>(true, "Target parameters saved successfully", saved, null));
     }
 }

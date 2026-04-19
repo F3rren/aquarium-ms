@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
+import it.f3rren.aquarium.parameters_service.dto.ParameterDTO;
 import it.f3rren.aquarium.parameters_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.parameters_service.model.Parameter;
 import it.f3rren.aquarium.parameters_service.repository.IParameterRepository;
@@ -25,7 +26,7 @@ public class ParameterService implements IParameterService {
     }
 
     @Transactional
-    public Parameter saveParameter(Long aquariumId, CreateParameterDTO dto) {
+    public ParameterDTO saveParameter(Long aquariumId, CreateParameterDTO dto) {
         Parameter parameter = new Parameter();
         parameter.setAquariumId(aquariumId);
         parameter.setTemperature(dto.getTemperature());
@@ -34,59 +35,55 @@ public class ParameterService implements IParameterService {
         parameter.setOrp(dto.getOrp());
 
         log.info("Saving water parameter for aquarium {}", aquariumId);
-        return parameterRepository.save(parameter);
+        return toDTO(parameterRepository.save(parameter));
     }
 
     @Transactional(readOnly = true)
-    public List<Parameter> getParametersByAquariumId(Long aquariumId, Integer limit) {
-        List<Parameter> parameters;
-        if (limit != null && limit <= 50) {
-            parameters = parameterRepository.findByAquariumIdOrderByMeasuredAtDesc(aquariumId)
-                    .stream()
-                    .limit(limit)
-                    .toList();
-        } else {
-            parameters = parameterRepository.findByAquariumIdOrderByMeasuredAtDesc(aquariumId);
+    public List<ParameterDTO> getParametersByAquariumId(Long aquariumId, Integer limit) {
+        List<Parameter> parameters = parameterRepository.findByAquariumIdOrderByMeasuredAtDesc(aquariumId);
+
+        if (limit != null && limit > 0 && limit <= 50) {
+            parameters = parameters.stream().limit(limit).toList();
         }
 
-        if (parameters.isEmpty()) {
-            throw new ResourceNotFoundException("No parameter found for aquarium with ID: " + aquariumId);
-        }
-        return parameters;
+        return parameters.stream().map(this::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
-    public Parameter getLatestParameter(Long aquariumId) {
-        Parameter parameter = parameterRepository.findFirstByAquariumIdOrderByMeasuredAtDesc(aquariumId);
-        if (parameter == null) {
-            throw new ResourceNotFoundException("No parameter found for aquarium with ID: " + aquariumId);
-        }
-        return parameter;
+    public ParameterDTO getLatestParameter(Long aquariumId) {
+        return toDTO(parameterRepository.findFirstByAquariumIdOrderByMeasuredAtDesc(aquariumId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No parameter found for aquarium with ID: " + aquariumId)));
     }
 
     @Transactional(readOnly = true)
-    public List<Parameter> getParametersByPeriod(Long aquariumId, String period) {
+    public List<ParameterDTO> getParametersByPeriod(Long aquariumId, String period) {
         LocalDateTime end = LocalDateTime.now();
-        LocalDateTime start;
+        LocalDateTime start = switch (period) {
+            case "week"  -> end.minusWeeks(1);
+            case "month" -> end.minusMonths(1);
+            default      -> end.minusDays(1);
+        };
 
-        switch (period != null ? period : "day") {
-            case "week":
-                start = end.minusWeeks(1);
-                break;
-            case "month":
-                start = end.minusMonths(1);
-                break;
-            default:
-                start = end.minusDays(1);
-        }
-
-        return parameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
-                aquariumId, start, end);
+        return parameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(aquariumId, start, end)
+                .stream().map(this::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<Parameter> getParametersHistory(Long aquariumId, LocalDateTime from, LocalDateTime to) {
-        return parameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
-                aquariumId, from, to);
+    public List<ParameterDTO> getParametersHistory(Long aquariumId, LocalDateTime from, LocalDateTime to) {
+        return parameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(aquariumId, from, to)
+                .stream().map(this::toDTO).toList();
+    }
+
+    private ParameterDTO toDTO(Parameter parameter) {
+        ParameterDTO dto = new ParameterDTO();
+        dto.setId(parameter.getId());
+        dto.setAquariumId(parameter.getAquariumId());
+        dto.setTemperature(parameter.getTemperature());
+        dto.setPh(parameter.getPh());
+        dto.setSalinity(parameter.getSalinity());
+        dto.setOrp(parameter.getOrp());
+        dto.setMeasuredAt(parameter.getMeasuredAt());
+        return dto;
     }
 }

@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import it.f3rren.aquarium.maintenance_service.dto.CreateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.ProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.ProductFilter;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.model.Product;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
@@ -27,87 +31,120 @@ class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
-    @Test
-    void createProduct_savesAndReturnsProduct() {
-        CreateProductDTO dto = new CreateProductDTO();
-        dto.setName("Seachem Prime");
-        dto.setCategory(ProductCategory.WATER_TREATMENT);
+    private Product sampleProduct;
 
-        Product saved = new Product();
-        saved.setId(1L);
-        saved.setName("Seachem Prime");
-        saved.setCategory(ProductCategory.WATER_TREATMENT);
-
-        when(productRepository.save(any(Product.class))).thenReturn(saved);
-
-        Product result = productService.createProduct(dto);
-
-        assertEquals("Seachem Prime", result.getName());
-        verify(productRepository).save(any(Product.class));
+    @BeforeEach
+    void setUp() {
+        sampleProduct = new Product();
+        sampleProduct.setId(1L);
+        sampleProduct.setName("Seachem Prime");
+        sampleProduct.setCategory(ProductCategory.WATER_TREATMENT);
+        sampleProduct.setIsFavorite(false);
+        sampleProduct.setQuantity(100.0);
     }
 
-    @Test
-    void getAllProducts_returnsList() {
-        Product p1 = new Product();
-        p1.setId(1L);
-        p1.setName("Seachem Prime");
+    @Nested
+    class CreateProduct {
 
-        when(productRepository.findAll()).thenReturn(List.of(p1));
+        @Test
+        void savesAndReturnsDto() {
+            CreateProductDTO dto = new CreateProductDTO();
+            dto.setName("Seachem Prime");
+            dto.setCategory(ProductCategory.WATER_TREATMENT);
 
-        List<Product> result = productService.getAllProducts();
+            when(productRepository.save(any(Product.class))).thenReturn(sampleProduct);
 
-        assertEquals(1, result.size());
-        verify(productRepository).findAll();
+            ProductDTO result = productService.createProduct(dto);
+
+            assertEquals("Seachem Prime", result.getName());
+            verify(productRepository).save(any(Product.class));
+        }
     }
 
-    @Test
-    void getProductById_returnsProduct() {
-        Product product = new Product();
-        product.setId(1L);
-        product.setName("Seachem Prime");
+    @Nested
+    class GetProducts {
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        @Test
+        void returnsAllProductsWhenNoFilter() {
+            when(productRepository.findAll()).thenReturn(List.of(sampleProduct));
 
-        Product result = productService.getProductById(1L);
+            List<ProductDTO> result = productService.getProducts(new ProductFilter());
 
-        assertEquals("Seachem Prime", result.getName());
-        verify(productRepository).findById(1L);
+            assertEquals(1, result.size());
+            verify(productRepository).findAll();
+        }
+
+        @Test
+        void returnsFavoritesWhenFlagSet() {
+            when(productRepository.findByIsFavoriteTrueOrderByNameAsc()).thenReturn(List.of(sampleProduct));
+
+            List<ProductDTO> result = productService.getProducts(new ProductFilter(null, null, null, true, null, null, null, null));
+
+            assertEquals(1, result.size());
+            verify(productRepository).findByIsFavoriteTrueOrderByNameAsc();
+        }
     }
 
-    @Test
-    void getProductById_throwsWhenNotFound() {
-        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+    @Nested
+    class GetProductById {
 
-        assertThrows(ResourceNotFoundException.class, () -> productService.getProductById(99L));
+        @Test
+        void returnsDto() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+
+            ProductDTO result = productService.getProductById(1L);
+
+            assertEquals("Seachem Prime", result.getName());
+        }
+
+        @Test
+        void throwsWhenNotFound() {
+            when(productRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThrows(ResourceNotFoundException.class, () -> productService.getProductById(99L));
+        }
     }
 
-    @Test
-    void toggleFavorite_switchesFavoriteStatus() {
-        Product product = new Product();
-        product.setId(1L);
-        product.setIsFavorite(false);
+    @Nested
+    class ToggleFavorite {
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+        @Test
+        void switchesFavoriteStatus() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+            when(productRepository.save(any(Product.class))).thenReturn(sampleProduct);
 
-        Product result = productService.toggleFavorite(1L);
+            ProductDTO result = productService.toggleFavorite(1L);
 
-        assertTrue(result.getIsFavorite());
-        verify(productRepository).save(product);
+            assertTrue(result.getIsFavorite());
+            verify(productRepository).save(sampleProduct);
+        }
     }
 
-    @Test
-    void updateQuantity_addsToCurrentQuantity() {
-        Product product = new Product();
-        product.setId(1L);
-        product.setQuantity(100.0);
+    @Nested
+    class UpdateQuantity {
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+        @Test
+        void addsToCurrentQuantity() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+            when(productRepository.save(any(Product.class))).thenReturn(sampleProduct);
 
-        Product result = productService.updateQuantity(1L, -25.0);
+            ProductDTO result = productService.updateQuantity(1L, -25.0);
 
-        assertEquals(75.0, result.getQuantity());
-        verify(productRepository).save(product);
+            assertEquals(75.0, result.getQuantity());
+        }
+    }
+
+    @Nested
+    class MarkAsUsed {
+
+        @Test
+        void setsLastUsedToToday() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+            when(productRepository.save(any(Product.class))).thenReturn(sampleProduct);
+
+            ProductDTO result = productService.markAsUsed(1L);
+
+            assertNotNull(result.getLastUsed());
+        }
     }
 }

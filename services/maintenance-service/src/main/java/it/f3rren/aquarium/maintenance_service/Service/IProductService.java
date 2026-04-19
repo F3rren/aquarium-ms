@@ -3,41 +3,28 @@ package it.f3rren.aquarium.maintenance_service.service;
 import java.util.List;
 
 import it.f3rren.aquarium.maintenance_service.dto.CreateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.ProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.ProductFilter;
 import it.f3rren.aquarium.maintenance_service.dto.UpdateProductDTO;
-import it.f3rren.aquarium.maintenance_service.model.Product;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
 
 public interface IProductService {
 
-    Product createProduct(CreateProductDTO dto);
+    ProductDTO createProduct(CreateProductDTO dto);
 
-    List<Product> getAllProducts();
+    List<ProductDTO> getProducts(ProductFilter filter);
 
-    Product getProductById(Long id);
+    ProductDTO getProductById(Long id);
 
-    List<Product> getProductsByCategory(ProductCategory category);
+    List<ProductDTO> getProductsByCategory(ProductCategory category);
 
-    List<Product> getFavoriteProducts();
+    ProductDTO updateProduct(Long id, UpdateProductDTO dto);
 
-    List<Product> getProductsByBrand(String brand);
+    ProductDTO markAsUsed(Long id);
 
-    List<Product> getExpiredProducts();
+    ProductDTO toggleFavorite(Long id);
 
-    List<Product> getProductsExpiringSoon();
-
-    List<Product> getLowStockProducts();
-
-    List<Product> searchProductsByName(String name);
-
-    List<Product> getProductsToUseAgain();
-
-    Product updateProduct(Long id, UpdateProductDTO dto);
-
-    Product markAsUsed(Long id);
-
-    Product toggleFavorite(Long id);
-
-    Product updateQuantity(Long id, Double quantityChange);
+    ProductDTO updateQuantity(Long id, Double quantityChange);
 
     void deleteProduct(Long id);
 }

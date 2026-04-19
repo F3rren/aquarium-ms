@@ -16,13 +16,13 @@ import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
 
 /**
- * Service class for managing Aquarium entities.
- * Provides operations for creating, retrieving, updating, and deleting Aquarium entities.
- * Also handles basic CRUD operations and transactions.
- * Utilizes Spring Data JPA for database interactions.
- * Caches and transactions are managed by Spring.
- * Logs are managed by SLF4J.
- * @Service annotation marks this class as a Spring service component.
+ * Default implementation of {@link IAquariumService}.
+ *
+ * <p>Handles all business logic for aquarium lifecycle management: creation with input
+ * sanitization (trim), partial updates via {@link java.util.Optional}, and existence
+ * checks before delete. All write operations are wrapped in a transaction; reads use
+ * {@code readOnly = true} for performance.</p>
+ *
  * @author F3rren
  */
 @Service

@@ -4,15 +4,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
-import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
+import it.f3rren.aquarium.manual_parameters_service.dto.ManualParameterDTO;
 
 public interface IManualParameterService {
 
-    ManualParameter saveManualParameter(Long aquariumId, CreateManualParameterDTO dto);
+    ManualParameterDTO saveManualParameter(Long aquariumId, CreateManualParameterDTO dto);
 
-    ManualParameter getLatestManualParameter(Long aquariumId);
+    ManualParameterDTO getLatestManualParameter(Long aquariumId);
 
-    List<ManualParameter> getAllManualParameters(Long aquariumId);
+    List<ManualParameterDTO> getAllManualParameters(Long aquariumId);
 
-    List<ManualParameter> getManualParametersHistory(Long aquariumId, LocalDateTime from, LocalDateTime to);
+    List<ManualParameterDTO> getManualParametersHistory(Long aquariumId, LocalDateTime from, LocalDateTime to);
 }

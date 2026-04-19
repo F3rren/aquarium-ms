@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import it.f3rren.aquarium.inhabitants_service.dto.CoralDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.CreateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.FishDTO;
@@ -25,15 +24,11 @@ public class InhabitantService implements IInhabitantService {
     private static final Logger log = LoggerFactory.getLogger(InhabitantService.class);
 
     private final IInhabitantRepository inhabitantRepository;
-    private final FishService fishService;
-    private final CoralService coralService;
+    private final SpeciesClient speciesClient;
 
-    public InhabitantService(IInhabitantRepository inhabitantRepository,
-                             FishService fishService,
-                             CoralService coralService) {
+    public InhabitantService(IInhabitantRepository inhabitantRepository, SpeciesClient speciesClient) {
         this.inhabitantRepository = inhabitantRepository;
-        this.fishService = fishService;
-        this.coralService = coralService;
+        this.speciesClient = speciesClient;
     }
 
     @Transactional(readOnly = true)
@@ -42,29 +37,17 @@ public class InhabitantService implements IInhabitantService {
         List<InhabitantDetailsDTO> result = new ArrayList<>();
 
         for (Inhabitant relation : relations) {
-            InhabitantDetailsDTO dto = new InhabitantDetailsDTO();
-            dto.setId(relation.getId());
-            dto.setType(relation.getInhabitantType());
-            dto.setQuantity(relation.getQuantity());
-            dto.setAddedDate(relation.getAddedDate());
-            dto.setNotes(relation.getNotes());
-            dto.setCustomName(relation.getCustomName());
-            dto.setCurrentSize(relation.getCurrentSize());
-            dto.setCustomDifficulty(relation.getCustomDifficulty());
-            dto.setCustomTemperament(relation.getCustomTemperament());
-            dto.setCustomDiet(relation.getCustomDiet());
-            dto.setIsReefSafe(relation.getIsReefSafe());
-            dto.setCustomMinTankSize(relation.getCustomMinTankSize());
+            InhabitantDetailsDTO dto = toDetailsDTO(relation);
 
             try {
                 InhabitantType type = InhabitantType.fromValue(relation.getInhabitantType());
                 if (type == InhabitantType.FISH) {
-                    FishDTO fish = fishService.getFishById(relation.getInhabitantId());
+                    FishDTO fish = speciesClient.getFishById(relation.getInhabitantId());
                     dto.setCommonName(relation.getCustomName() != null ? relation.getCustomName() : fish.getCommonName());
                     dto.setScientificName(fish.getScientificName());
                     dto.setDetails(fish);
                 } else if (type == InhabitantType.CORAL) {
-                    CoralDTO coral = coralService.getCoralById(relation.getInhabitantId());
+                    CoralDTO coral = speciesClient.getCoralById(relation.getInhabitantId());
                     dto.setCommonName(relation.getCustomName() != null ? relation.getCustomName() : coral.getCommonName());
                     dto.setScientificName(coral.getScientificName());
                     dto.setDetails(coral);
@@ -84,13 +67,12 @@ public class InhabitantService implements IInhabitantService {
     }
 
     @Transactional
-    public Inhabitant addInhabitant(Long aquariumId, CreateInhabitantDTO dto) {
-        // Verify that the referenced species exists
+    public InhabitantDetailsDTO addInhabitant(Long aquariumId, CreateInhabitantDTO dto) {
         InhabitantType type = dto.getInhabitantType();
         if (type == InhabitantType.FISH) {
-            fishService.getFishById(dto.getInhabitantId());
+            speciesClient.getFishById(dto.getInhabitantId());
         } else {
-            coralService.getCoralById(dto.getInhabitantId());
+            speciesClient.getCoralById(dto.getInhabitantId());
         }
 
         Inhabitant inhabitant = new Inhabitant();
@@ -102,7 +84,7 @@ public class InhabitantService implements IInhabitantService {
         inhabitant.setCustomName(dto.getCustomName());
 
         log.info("Adding {} (speciesId={}) to aquarium {}", type.getValue(), dto.getInhabitantId(), aquariumId);
-        return inhabitantRepository.save(inhabitant);
+        return toDetailsDTO(inhabitantRepository.save(inhabitant));
     }
 
     @Transactional
@@ -110,9 +92,8 @@ public class InhabitantService implements IInhabitantService {
         Inhabitant inhabitant = inhabitantRepository.findById(inhabitantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inhabitant not found with ID: " + inhabitantId));
 
-        // Verify the inhabitant belongs to the specified aquarium
         if (!inhabitant.getAquariumId().equals(aquariumId)) {
-            throw new ResourceNotFoundException(
+            throw new IllegalArgumentException(
                     "Inhabitant " + inhabitantId + " does not belong to aquarium " + aquariumId);
         }
 
@@ -121,17 +102,15 @@ public class InhabitantService implements IInhabitantService {
     }
 
     @Transactional
-    public Inhabitant updateInhabitant(Long aquariumId, Long inhabitantId, UpdateInhabitantDTO dto) {
+    public InhabitantDetailsDTO updateInhabitant(Long aquariumId, Long inhabitantId, UpdateInhabitantDTO dto) {
         Inhabitant existing = inhabitantRepository.findById(inhabitantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inhabitant not found with ID: " + inhabitantId));
 
-        // Verify the inhabitant belongs to the specified aquarium
         if (!existing.getAquariumId().equals(aquariumId)) {
-            throw new ResourceNotFoundException(
+            throw new IllegalArgumentException(
                     "Inhabitant " + inhabitantId + " does not belong to aquarium " + aquariumId);
         }
 
-        // Partial update — only non-null fields
         if (dto.getQuantity() != null) existing.setQuantity(dto.getQuantity());
         if (dto.getNotes() != null) existing.setNotes(dto.getNotes());
         if (dto.getCustomName() != null) existing.setCustomName(dto.getCustomName());
@@ -143,6 +122,23 @@ public class InhabitantService implements IInhabitantService {
         if (dto.getCustomMinTankSize() != null) existing.setCustomMinTankSize(dto.getCustomMinTankSize());
 
         log.info("Updating inhabitant {} in aquarium {}", inhabitantId, aquariumId);
-        return inhabitantRepository.save(existing);
+        return toDetailsDTO(inhabitantRepository.save(existing));
+    }
+
+    private InhabitantDetailsDTO toDetailsDTO(Inhabitant relation) {
+        InhabitantDetailsDTO dto = new InhabitantDetailsDTO();
+        dto.setId(relation.getId());
+        dto.setType(relation.getInhabitantType());
+        dto.setQuantity(relation.getQuantity());
+        dto.setAddedDate(relation.getAddedDate());
+        dto.setNotes(relation.getNotes());
+        dto.setCustomName(relation.getCustomName());
+        dto.setCurrentSize(relation.getCurrentSize());
+        dto.setCustomDifficulty(relation.getCustomDifficulty());
+        dto.setCustomTemperament(relation.getCustomTemperament());
+        dto.setCustomDiet(relation.getCustomDiet());
+        dto.setIsReefSafe(relation.getIsReefSafe());
+        dto.setCustomMinTankSize(relation.getCustomMinTankSize());
+        return dto;
     }
 }
