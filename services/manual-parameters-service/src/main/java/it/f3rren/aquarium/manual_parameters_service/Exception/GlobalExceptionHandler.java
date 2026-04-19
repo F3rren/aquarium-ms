@@ -1,5 +1,6 @@
 package it.f3rren.aquarium.manual_parameters_service.exception;
 
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponseDTO<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
         log.warn("Invalid argument: {}", e.getMessage());
         return new ResponseEntity<>(new ApiResponseDTO<>(false, e.getMessage(), null, null), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleDateTimeParseException(DateTimeParseException e) {
+        log.warn("Invalid date format: {}", e.getMessage());
+        return new ResponseEntity<>(
+                new ApiResponseDTO<>(false, "Invalid date format. Expected ISO-8601 (e.g. 2024-01-15T10:30:00)", null, null),
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

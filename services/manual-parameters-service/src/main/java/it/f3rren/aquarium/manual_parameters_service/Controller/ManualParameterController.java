@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.manual_parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
-import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
+import it.f3rren.aquarium.manual_parameters_service.dto.ManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.service.IManualParameterService;
 
 @RestController
@@ -28,11 +28,11 @@ public class ManualParameterController {
 
     @PostMapping
     @Operation(summary = "Add a new manual parameter", description = "Add a new manual parameter for a specific aquarium")
-    public ResponseEntity<ApiResponseDTO<ManualParameter>> addManualParameter(
+    public ResponseEntity<ApiResponseDTO<ManualParameterDTO>> addManualParameter(
             @PathVariable Long aquariumId,
             @Valid @RequestBody CreateManualParameterDTO dto) {
 
-        ManualParameter saved = manualParameterService.saveManualParameter(aquariumId, dto);
+        ManualParameterDTO saved = manualParameterService.saveManualParameter(aquariumId, dto);
 
         return new ResponseEntity<>(new ApiResponseDTO<>(
                 true, "Manual parameter saved successfully", saved, null), HttpStatus.CREATED);
@@ -40,10 +40,10 @@ public class ManualParameterController {
 
     @GetMapping
     @Operation(summary = "Get latest manual parameter", description = "Retrieve the most recent manual parameter")
-    public ResponseEntity<ApiResponseDTO<ManualParameter>> getLatestManualParameter(
+    public ResponseEntity<ApiResponseDTO<ManualParameterDTO>> getLatestManualParameter(
             @PathVariable Long aquariumId) {
 
-        ManualParameter latest = manualParameterService.getLatestManualParameter(aquariumId);
+        ManualParameterDTO latest = manualParameterService.getLatestManualParameter(aquariumId);
 
         return ResponseEntity.ok(new ApiResponseDTO<>(
                 true, "Latest manual parameter retrieved successfully", latest, null));
@@ -51,14 +51,15 @@ public class ManualParameterController {
 
     @GetMapping("/history")
     @Operation(summary = "Get manual parameters history", description = "Retrieve manual parameters within a date range")
-    public ResponseEntity<ApiResponseDTO<List<ManualParameter>>> getManualParametersHistory(
+    public ResponseEntity<ApiResponseDTO<List<ManualParameterDTO>>> getManualParametersHistory(
             @PathVariable Long aquariumId,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
 
-        List<ManualParameter> parameters;
+        List<ManualParameterDTO> parameters;
 
         if (from != null && to != null) {
+            // DateTimeParseException is handled by GlobalExceptionHandler → 400 Bad Request
             LocalDateTime fromDate = LocalDateTime.parse(from);
             LocalDateTime toDate = LocalDateTime.parse(to);
             parameters = manualParameterService.getManualParametersHistory(aquariumId, fromDate, toDate);
