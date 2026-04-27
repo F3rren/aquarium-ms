@@ -3,13 +3,14 @@
 ![Java 17](https://img.shields.io/badge/java-17-blue.svg)
 ![Spring Boot 3.3.5](https://img.shields.io/badge/spring--boot-3.3.5-green.svg)
 ![Microservices](https://img.shields.io/badge/architecture-microservices-blue.svg)
+![Kafka](https://img.shields.io/badge/messaging-Apache%20Kafka-231F20.svg)
 ![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 ![PostgreSQL](https://img.shields.io/badge/database-PostgreSQL%2016-336791.svg)
 ![MIT License](https://img.shields.io/badge/license-MIT-green.svg)
 
 A **microservice-based backend** for comprehensive aquarium management — tanks, inhabitants, species catalog, maintenance tracking, and water parameter monitoring.
 
-Built with **Java 17, Spring Boot 3.3.5, Spring Cloud Gateway** and **PostgreSQL 16**. Fully containerized via Docker Compose with Prometheus and Grafana monitoring.
+Built with **Java 17, Spring Boot 3.3.5, Spring Cloud Gateway**, **PostgreSQL 16**, and **Apache Kafka**. Fully containerized via Docker Compose with Prometheus and Grafana monitoring.
 
 > **Note:** This backend is designed to work alongside the [Aquarium Interface](https://github.com/F3rren/Aquarium-interface) frontend and is not intended as a public/general-purpose API.
 
@@ -25,12 +26,13 @@ cd aquarium-ms
 docker-compose up -d
 ```
 
-Docker Compose will build all images and start PostgreSQL, all microservices, and the monitoring stack automatically. Wait ~30–60 seconds, then access:
+Docker Compose will build all images and start PostgreSQL, Kafka, all microservices, and the monitoring stack automatically. Wait ~30–60 seconds, then access:
 
 | Service | URL |
 |---------|-----|
 | API Gateway (main entrypoint) | http://localhost:8080 |
 | Swagger UI (all services) | http://localhost:8080/swagger-ui.html |
+| Kafka UI (topic browser) | http://localhost:8090 |
 | Grafana (metrics) | http://localhost:3000 (admin / admin) |
 | Prometheus | http://localhost:9090 |
 
@@ -62,9 +64,28 @@ All HTTP traffic enters through the **API Gateway** on port 8080, which routes e
                                                  target-parameter-service  :8087
 ```
 
-**Inter-service communication:**
+**Synchronous inter-service communication (HTTP):**
 - `inhabitants-service` → `species-service`: fetches fish/coral details to enrich inhabitant responses
 - `aquariums-service` → `parameters-service`, `manual-parameters-service`, `target-parameter-service`: proxies parameter endpoints (with circuit breaker + retry via Resilience4j)
+
+**Asynchronous inter-service communication (Kafka):**
+
+```
+aquariums-service ──[AquariumCreated / AquariumDeleted]──► topic: aquarium.lifecycle
+                                                                      │
+                                                     ┌────────────────┼──────────────────┐
+                                                     ▼                ▼                  ▼
+                                             inhabitants-      parameters-         maintenance-
+                                               service           service             service
+                                           (cascade delete)  (cascade delete)   (cascade delete)
+
+parameters-service ──[ParameterMeasured]──► topic: parameter.measurements
+                                                      │
+                                       ┌──────────────┴──────────────┐
+                                       ▼                             ▼
+                              parameters-service             maintenance-service
+                           (CQRS read model update)       (auto-create alert task)
+```
 
 ### Services
 
@@ -79,15 +100,40 @@ All HTTP traffic enters through the **API Gateway** on port 8080, which routes e
 | `manual-parameters-service` | 8086 | `parameters` | Manual chemical measurements (Ca, Mg, KH, etc.) |
 | `target-parameter-service` | 8087 | `parameters` | Target parameter ranges for alerts and comparison |
 
+---
+
+## Messaging (Event-Driven Architecture)
+
+The system uses **Apache Kafka** (KRaft mode, no Zookeeper) for asynchronous communication between services. Three topics are declared:
+
+| Topic | Producers | Consumers | Purpose |
+|-------|-----------|-----------|---------|
+| `aquarium.lifecycle` | `aquariums-service` | `inhabitants-service`, `parameters-service`, `maintenance-service` | Lifecycle events: creation and deletion of an aquarium |
+| `parameter.measurements` | `parameters-service` | `parameters-service` (CQRS), `maintenance-service` (alerts) | Every new water parameter measurement |
+| `maintenance.events` | _(reserved)_ | — | Future: task completion events |
+
+### Key patterns implemented
+
+| Pattern | Where | What it solves |
+|---------|-------|----------------|
+| **Transactional Outbox** | `aquariums-service` | Events are written to `outbox_events` in the same DB transaction as the business operation; a scheduler publishes them to Kafka — zero message loss even if Kafka is temporarily down |
+| **CQRS (read/write model separation)** | `parameters-service` | Write model: `water_parameters` (append-only). Read model: `parameter_latest` (one row per aquarium, updated by a Kafka consumer). `GET /parameters/latest` reads from the fast read model |
+| **Idempotent consumer** | all consumers | Each service has a `processed_events` table; duplicate messages (Kafka at-least-once) are detected and skipped by `eventId` |
+| **`@RetryableTopic` + Dead Letter Topic** | all `@KafkaListener` methods | Failed events are retried up to 3 times (exponential backoff 1s→2s→4s); after all retries the message lands on a `.DLT` topic for investigation |
+| **Exactly-once producer** | `aquariums-service` | `TRANSACTIONAL_ID_CONFIG` + `ENABLE_IDEMPOTENCE_CONFIG=true` + `ACKS=all` |
+| **`isolation.level=read_committed`** | all consumers | Consumers never read events from uncommitted producer transactions |
+| **Parameter anomaly alerts** | `maintenance-service` | Listens to `parameter.measurements`; if temperature (24–28 °C) or pH (8.1–8.4) is out of the safe range, automatically creates a `high`-priority maintenance task |
+
 ### Database
 
 All services share a single **PostgreSQL 16** instance (`aquarium_ms` database) with three logical schemas:
 
 | Schema | Tables |
 |--------|--------|
-| `core` | `aquariums`, maintenance tables |
-| `inhabitants` | `inhabitants`, `fish`, `corals` |
-| `parameters` | `parameters`, `manual_parameters`, `target_parameters` |
+| `core` | `aquariums`, `outbox_events` |
+| `inhabitants` | `inhabitants`, `fish`, `corals`, `processed_events` |
+| `parameters` | `parameters`, `manual_parameters`, `target_parameters`, `parameter_latest`, `processed_events` |
+| `maintenance` | `maintenance_tasks`, `products`, `processed_events` |
 
 Schema isolation is enforced at the application level via `spring.jpa.properties.hibernate.default_schema`. Migrations are managed by **Flyway** (each service has its own migration history table to avoid conflicts).
 
@@ -208,6 +254,7 @@ SPECIES_SERVICE_URL: http://my-host:8083/species
 | Persistence | Spring Data JPA, Hibernate |
 | Migrations | Flyway |
 | Database | PostgreSQL 16 |
+| Messaging | Apache Kafka 3.7 (KRaft), Spring Kafka |
 | Resilience | Resilience4j (circuit breaker + retry) |
 | Containerization | Docker, Docker Compose |
 | Metrics | Prometheus, Grafana |

@@ -1,5 +1,47 @@
 services:
 
+  # ── Messaging ─────────────────────────────────────────────────────────────────
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: kafka
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "false"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/bitnami/kafka
+    networks:
+      - aquarium-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: aquarium-ms
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "8090:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - aquarium-network
+    restart: unless-stopped
+
   # ── Database ──────────────────────────────────────────────────────────────────
   postgres:
     image: postgres:16
@@ -33,10 +75,13 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
       SERVER_PORT: 8081
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8081:8081"
     depends_on:
       postgres:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     networks:
       - aquarium-network
@@ -51,10 +96,13 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
       SERVER_PORT: 8084
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8084:8084"
     depends_on:
       postgres:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     networks:
       - aquarium-network
@@ -71,10 +119,13 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
       SERVER_PORT: 8082
       SPECIES_SERVICE_URL: http://species-service:8083/species
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8082:8082"
     depends_on:
       postgres:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     networks:
       - aquarium-network
@@ -108,10 +159,13 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
       SERVER_PORT: 8085
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8085:8085"
     depends_on:
       postgres:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     networks:
       - aquarium-network
@@ -126,10 +180,13 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
       SERVER_PORT: 8086
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8086:8086"
     depends_on:
       postgres:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     networks:
       - aquarium-network
@@ -144,10 +201,13 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
       SERVER_PORT: 8087
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8087:8087"
     depends_on:
       postgres:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     networks:
       - aquarium-network
@@ -223,6 +283,8 @@ networks:
 
 volumes:
   postgres-data:
+    driver: local
+  kafka-data:
     driver: local
   prometheus-data:
     driver: local

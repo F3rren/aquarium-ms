@@ -6,8 +6,9 @@ Manages the inhabitants (fish and corals) assigned to each aquarium. When return
 |----------|-------|
 | Port | `8082` |
 | Database schema | `inhabitants` |
-| Migrations | Flyway |
+| Migrations | Flyway (`V1__init`, `V2__add_processed_events`) |
 | Inter-service dependency | `species-service` (via `SpeciesClient`) |
+| Kafka role | **Consumer** — listens to `aquarium.lifecycle`; deletes all inhabitants when an aquarium is deleted |
 
 ---
 
@@ -23,6 +24,13 @@ InhabitantController
             └── SpeciesClient ──► species-service:8083
                                   GET /species/fish/{id}
                                   GET /species/corals/{id}
+
+topic: aquarium.lifecycle
+    │
+    └── AquariumEventListener (@KafkaListener)
+            │
+            ├── IInhabitantRepository.deleteAllByAquariumId()
+            └── ProcessedEventRepository (idempotency check)
 ```
 
 All responses are wrapped in `ApiResponseDTO<T>`.
@@ -48,8 +56,10 @@ Base path: `/aquariums`
 |-------|------|
 | `InhabitantController` | REST layer |
 | `InhabitantService` | Business logic: CRUD, ownership checks, species enrichment via `SpeciesClient` |
-| `IInhabitantRepository` | JPA repository with queries by aquarium ID |
+| `IInhabitantRepository` | JPA repository; includes `findByAquariumId` and `deleteAllByAquariumId` |
 | `SpeciesClient` | HTTP client for `species-service`; generic internal helper avoids code duplication between fish and coral fetches |
+| `AquariumEventListener` | `@KafkaListener` on `aquarium.lifecycle`; reacts to `AquariumDeleted` events by deleting all inhabitants for that aquarium |
+| `ProcessedEventRepository` | Idempotency guard: checks/records `eventId` in `inhabitants.processed_events` to handle Kafka at-least-once delivery |
 | `InhabitantDetailsDTO` | Response shape: base inhabitant fields + polymorphic `details` field (either `FishDTO` or `CoralDTO`) |
 | `SpeciesDetailsDTO` | Marker interface implemented by `FishDTO` and `CoralDTO` for type-safe polymorphism |
 | `InhabitantType` | Enum: `FISH`, `CORAL` — carries string values used for DB column and routing |
@@ -97,6 +107,7 @@ All write operations (`PUT`, `DELETE`) verify that the inhabitant belongs to the
 | `DB_USERNAME` | `postgres` | Database username |
 | `DB_PASSWORD` | `root` | Database password |
 | `SPECIES_SERVICE_URL` | `http://species-service:8083/species` | Base URL for species lookups |
+| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka broker address |
 
 ---
 
@@ -104,3 +115,8 @@ All write operations (`PUT`, `DELETE`) verify that the inhabitant belongs to the
 
 Schema: `inhabitants`. Migrations managed by Flyway.  
 `ddl-auto=validate`.
+
+| Migration | Description |
+|-----------|-------------|
+| `V1__init` | `inhabitants`, `fish`, `corals` tables |
+| `V2__add_processed_events` | `processed_events` table for idempotent Kafka consumer |
