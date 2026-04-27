@@ -12,4 +12,6 @@ public interface IMaintenanceTaskRepository extends JpaRepository<MaintenanceTas
     List<MaintenanceTask> findByAquariumIdAndIsCompletedOrderByDueDateAsc(Long aquariumId, Boolean isCompleted);
     
     List<MaintenanceTask> findByAquariumIdAndIsCompletedFalseOrderByDueDateAsc(Long aquariumId);
+
+    void deleteAllByAquariumId(Long aquariumId);
 }

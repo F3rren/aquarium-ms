@@ -11,9 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
+import it.f3rren.aquarium.aquariums_service.event.EventPublisher;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
+import it.f3rren.aquarium.events.AquariumCreatedEvent;
+import it.f3rren.aquarium.events.AquariumDeletedEvent;
 
 /**
  * Default implementation of {@link IAquariumService}.
@@ -30,10 +33,14 @@ public class AquariumService implements IAquariumService {
 
     private static final Logger log = LoggerFactory.getLogger(AquariumService.class);
 
-    private final IAquariumRepository aquariumRepository;
+    private static final String TOPIC_LIFECYCLE = "aquarium.lifecycle";
 
-    public AquariumService(IAquariumRepository aquariumRepository) {
+    private final IAquariumRepository aquariumRepository;
+    private final EventPublisher eventPublisher;
+
+    public AquariumService(IAquariumRepository aquariumRepository, EventPublisher eventPublisher) {
         this.aquariumRepository = aquariumRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -51,7 +58,12 @@ public class AquariumService implements IAquariumService {
         aquarium.setImageUrl(dto.getImageUrl());
 
         log.info("Creating aquarium: {}", dto.getName());
-        return aquariumRepository.save(aquarium);
+        Aquarium saved = aquariumRepository.save(aquarium);
+        eventPublisher.publish(
+                new AquariumCreatedEvent(String.valueOf(saved.getId()), saved.getName(), saved.getVolume(), saved.getType()),
+                TOPIC_LIFECYCLE
+        );
+        return saved;
     }
 
     /**
@@ -112,5 +124,6 @@ public class AquariumService implements IAquariumService {
         }
         log.info("Deleting aquarium with ID: {}", id);
         aquariumRepository.deleteById(id);
+        eventPublisher.publish(new AquariumDeletedEvent(String.valueOf(id)), TOPIC_LIFECYCLE);
     }
 }

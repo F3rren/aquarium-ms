@@ -6,8 +6,9 @@ Manages the lifecycle of aquarium tanks. Also acts as a **proxy** for all parame
 |----------|-------|
 | Port | `8081` |
 | Database schema | `core` |
-| Migrations | Flyway |
+| Migrations | Flyway (`V1__init`, `V2__indexes`, `V3__add_outbox_events`) |
 | Resilience | Resilience4j (circuit breaker + retry) |
+| Kafka role | **Producer** — publishes `AquariumCreated` and `AquariumDeleted` events via Transactional Outbox |
 
 ---
 
@@ -17,6 +18,12 @@ Manages the lifecycle of aquarium tanks. Also acts as a **proxy** for all parame
 AquariumController
     │
     ├── IAquariumService → AquariumService → IAquariumRepository (JPA)
+    │                          │
+    │                          └── EventPublisher ──► OutboxRepository (JPA)
+    │                                                        │
+    │                                               OutboxPublisher (@Scheduled)
+    │                                                        │
+    │                                               KafkaTemplate ──► topic: aquarium.lifecycle
     │
     └── ParametersClient ──► parameters-service      (circuit breaker: waterParameters)
                          ──► manual-parameters-service (circuit breaker: manualParameters)
@@ -73,9 +80,13 @@ Base path: `/aquariums`
 | Class | Role |
 |-------|------|
 | `AquariumController` | REST layer; validates input, delegates to service or `ParametersClient` |
-| `AquariumService` | Business logic: CRUD operations, validation |
+| `AquariumService` | Business logic: CRUD operations; calls `EventPublisher` on create/delete |
 | `IAquariumRepository` | Spring Data JPA repository (`JpaRepository<Aquarium, Long>`) |
 | `ParametersClient` | HTTP client for the three parameter services; applies circuit breaker and retry via Resilience4j |
+| `EventPublisher` | Serializes a `BaseEvent` to JSON and persists it in `outbox_events` within the current transaction |
+| `OutboxEvent` | JPA entity for `core.outbox_events`: `aggregateId`, `eventType`, `payload`, `topic`, `publishedAt` |
+| `OutboxRepository` | JPA repository; exposes `findByPublishedAtIsNullOrderByCreatedAtAsc()` for the polling scheduler |
+| `OutboxPublisher` | `@Scheduled` every 5 s — reads unpublished outbox rows, sends them to Kafka via `KafkaTemplate`, marks `publishedAt` |
 | `AquariumResponseDTO` | Response shape (maps from `Aquarium` entity via `fromEntity()`) |
 | `CreateAquariumDTO` | Request body for creation (Bean Validation) |
 | `UpdateAquariumDTO` | Request body for update (Bean Validation) |
@@ -104,6 +115,7 @@ Each instance also has a **retry** policy: 3 attempts, 500 ms wait between retri
 | `DB_URL` | — | JDBC URL for PostgreSQL |
 | `DB_USERNAME` | — | Database username |
 | `DB_PASSWORD` | — | Database password |
+| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka broker address |
 | `WATER_PARAMETERS_URL` | `http://localhost:8085/api` | parameters-service base URL |
 | `MANUAL_PARAMETERS_URL` | `http://localhost:8086/api` | manual-parameters-service base URL |
 | `TARGET_PARAMETERS_URL` | `http://localhost:8087/api` | target-parameter-service base URL |
@@ -114,3 +126,13 @@ Each instance also has a **retry** policy: 3 attempts, 500 ms wait between retri
 
 Schema: `core`. Migrations in `src/main/resources/db/migration/` managed by Flyway.  
 `ddl-auto=validate` — Hibernate validates the schema against migrations but never modifies it.
+
+| Migration | Description |
+|-----------|-------------|
+| `V1__init` | `aquariums` table |
+| `V2__indexes` | Indexes on `aquariums` |
+| `V3__add_outbox_events` | `outbox_events` table + partial index on unpublished rows |
+
+### Transactional Outbox
+
+`createAquarium()` and `deleteAquarium()` call `EventPublisher.publish()` inside the existing `@Transactional` method. The event is written to `core.outbox_events` atomically with the business operation — if the transaction rolls back, the event row is also rolled back. `OutboxPublisher` polls every 5 seconds, sends unsent rows to Kafka, and marks them with `publishedAt`. If Kafka is temporarily unavailable, rows remain in the table and are retried on the next tick.

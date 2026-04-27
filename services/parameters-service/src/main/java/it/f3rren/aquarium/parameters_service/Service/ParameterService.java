@@ -10,8 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
 import it.f3rren.aquarium.parameters_service.dto.ParameterDTO;
+import it.f3rren.aquarium.parameters_service.event.ParameterEventPublisher;
 import it.f3rren.aquarium.parameters_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.parameters_service.model.Parameter;
+import it.f3rren.aquarium.parameters_service.model.ParameterReadModel;
+import it.f3rren.aquarium.parameters_service.repository.IParameterReadModelRepository;
 import it.f3rren.aquarium.parameters_service.repository.IParameterRepository;
 
 @Service
@@ -20,9 +23,15 @@ public class ParameterService implements IParameterService {
     private static final Logger log = LoggerFactory.getLogger(ParameterService.class);
 
     private final IParameterRepository parameterRepository;
+    private final IParameterReadModelRepository readModelRepository;
+    private final ParameterEventPublisher eventPublisher;
 
-    public ParameterService(IParameterRepository parameterRepository) {
+    public ParameterService(IParameterRepository parameterRepository,
+                             IParameterReadModelRepository readModelRepository,
+                             ParameterEventPublisher eventPublisher) {
         this.parameterRepository = parameterRepository;
+        this.readModelRepository = readModelRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -35,7 +44,10 @@ public class ParameterService implements IParameterService {
         parameter.setOrp(dto.getOrp());
 
         log.info("Saving water parameter for aquarium {}", aquariumId);
-        return toDTO(parameterRepository.save(parameter));
+        Parameter saved = parameterRepository.save(parameter);
+        // CQRS write side: pubblica evento per aggiornare il read model in modo asincrono
+        eventPublisher.publishParameterMeasured(saved);
+        return toDTO(saved);
     }
 
     @Transactional(readOnly = true)
@@ -49,11 +61,18 @@ public class ParameterService implements IParameterService {
         return parameters.stream().map(this::toDTO).toList();
     }
 
+    /**
+     * CQRS read side: legge da parameter_latest invece di MAX(measured_at) sul write store.
+     * Fallback sul write store se il read model non è ancora stato popolato.
+     */
     @Transactional(readOnly = true)
     public ParameterDTO getLatestParameter(Long aquariumId) {
-        return toDTO(parameterRepository.findFirstByAquariumIdOrderByMeasuredAtDesc(aquariumId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "No parameter found for aquarium with ID: " + aquariumId)));
+        return readModelRepository.findByAquariumId(aquariumId)
+                .map(this::fromReadModel)
+                .orElseGet(() -> toDTO(
+                        parameterRepository.findFirstByAquariumIdOrderByMeasuredAtDesc(aquariumId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                        "No parameter found for aquarium with ID: " + aquariumId))));
     }
 
     @Transactional(readOnly = true)
@@ -84,6 +103,17 @@ public class ParameterService implements IParameterService {
         dto.setSalinity(parameter.getSalinity());
         dto.setOrp(parameter.getOrp());
         dto.setMeasuredAt(parameter.getMeasuredAt());
+        return dto;
+    }
+
+    private ParameterDTO fromReadModel(ParameterReadModel model) {
+        ParameterDTO dto = new ParameterDTO();
+        dto.setAquariumId(model.getAquariumId());
+        dto.setTemperature(model.getTemperature());
+        dto.setPh(model.getPh());
+        dto.setSalinity(model.getSalinity());
+        dto.setOrp(model.getOrp());
+        dto.setMeasuredAt(model.getMeasuredAt());
         return dto;
     }
 }

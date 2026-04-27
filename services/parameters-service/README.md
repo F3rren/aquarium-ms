@@ -6,7 +6,8 @@ Records and retrieves automated water parameter measurements (temperature, pH, s
 |----------|-------|
 | Port | `8085` |
 | Database schema | `parameters` |
-| Migrations | Flyway (history table: `flyway_schema_history_water`) |
+| Migrations | Flyway (`V1__init`, `V2__add_kafka_tables`; history table: `flyway_schema_history_water`) |
+| Kafka role | **Producer + Consumer** — publishes `ParameterMeasured` on every new reading; consumes `aquarium.lifecycle` for cascade delete; implements CQRS read model |
 
 ---
 
@@ -17,10 +18,21 @@ WaterParameterController
     │
     └── IParameterService → ParameterService
             │
-            └── IParameterRepository (JPA)
+            ├── IParameterRepository (JPA)  ← write model (water_parameters, append-only)
+            ├── IParameterReadModelRepository (JPA)  ← read model (parameter_latest)
+            └── ParameterEventPublisher ──► topic: parameter.measurements
+
+topic: aquarium.lifecycle
+    └── AquariumEventListener (@KafkaListener)
+            ├── IParameterRepository.deleteAllByAquariumId()
+            └── IParameterReadModelRepository.deleteByAquariumId()
+
+topic: parameter.measurements
+    └── ParameterMeasuredListener (@KafkaListener, groupId: parameters-cqrs)
+            └── IParameterReadModelRepository.save()  ← updates CQRS read model
 ```
 
-All responses use `ApiResponseDTO<T>`. The service layer maps `Parameter` entities to `ParameterDTO` via a private `toDTO()` helper — entities are never exposed directly.
+All responses use `ApiResponseDTO<T>`. The service layer maps entities to `ParameterDTO` — entities are never exposed directly.
 
 ---
 
@@ -51,8 +63,14 @@ If neither is provided, defaults to the last week. If an invalid date string is 
 | Class | Role |
 |-------|------|
 | `WaterParameterController` | REST layer; delegates history routing logic to the service |
-| `ParameterService` | CRUD + history logic; period → date range mapping via Java 17 switch expression |
-| `IParameterRepository` | JPA: `findFirstByAquariumIdOrderByMeasuredAtDesc` (returns `Optional`), `findByAquariumIdOrderByMeasuredAtDesc`, `findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc` |
+| `ParameterService` | CRUD + history logic; calls `ParameterEventPublisher` on save; `getLatestParameter()` reads from `ParameterReadModel` with fallback to write store |
+| `IParameterRepository` | JPA write store; includes `deleteAllByAquariumId` |
+| `ParameterReadModel` | JPA entity for `parameters.parameter_latest` — one row per aquarium, always reflects the last measurement |
+| `IParameterReadModelRepository` | JPA read store; `findByAquariumId`, `deleteByAquariumId` |
+| `ParameterEventPublisher` | Publishes `ParameterMeasuredEvent` to `parameter.measurements` after every `saveParameter()` |
+| `AquariumEventListener` | Consumes `aquarium.lifecycle`; deletes write store + read model rows on `AquariumDeleted` |
+| `ParameterMeasuredListener` | Consumes `parameter.measurements` (group `parameters-cqrs`); updates `parameter_latest` — this is the CQRS read side |
+| `ProcessedEventRepository` | Idempotency guard for both listeners |
 | `ParameterDTO` | Response: id, aquariumId, temperature, ph, salinity, orp, measuredAt |
 | `CreateParameterDTO` | Request body (Bean Validation) |
 | `GlobalExceptionHandler` | `ResourceNotFoundException` → 404, `DateTimeParseException` → 400, `IllegalArgumentException` → 400 |
@@ -86,6 +104,18 @@ The `period` query parameter is resolved to a date range using a switch expressi
 
 ---
 
+## CQRS
+
+`GET /parameters/latest` no longer queries `MAX(measured_at)` on the full `water_parameters` table. Instead:
+
+1. `POST /parameters` saves the measurement → calls `ParameterEventPublisher` → Kafka event on `parameter.measurements`
+2. `ParameterMeasuredListener` consumes the event → upserts `parameter_latest` (one row per aquarium)
+3. `GET /parameters/latest` reads from `parameter_latest` — O(1) by primary key
+
+If the read model row does not exist yet (e.g. service restarted before consuming), `getLatestParameter()` falls back to the write store transparently.
+
+---
+
 ## Environment Variables
 
 | Variable | Default | Description |
@@ -93,6 +123,7 @@ The `period` query parameter is resolved to a date range using a switch expressi
 | `DB_URL` | `jdbc:postgresql://localhost:5432/aquarium_ms` | JDBC URL |
 | `DB_USERNAME` | `postgres` | Database username |
 | `DB_PASSWORD` | `root` | Database password |
+| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka broker address |
 
 ---
 
@@ -100,3 +131,8 @@ The `period` query parameter is resolved to a date range using a switch expressi
 
 Schema: `parameters`. Flyway history table: `flyway_schema_history_water` (avoids conflicts with `manual-parameters-service` and `target-parameter-service` which share the same schema).  
 `ddl-auto=validate`.
+
+| Migration | Description |
+|-----------|-------------|
+| `V1__init` | `water_parameters` table |
+| `V2__add_kafka_tables` | `parameter_latest` (CQRS read model) + `processed_events` (idempotency) |

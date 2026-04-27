@@ -15,8 +15,10 @@ public interface IParameterRepository extends JpaRepository<Parameter, Long> {
     Optional<Parameter> findFirstByAquariumIdOrderByMeasuredAtDesc(Long aquariumId);
         
     List<Parameter> findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
-        Long aquariumId, 
-        LocalDateTime start, 
+        Long aquariumId,
+        LocalDateTime start,
         LocalDateTime end
     );
+
+    void deleteAllByAquariumId(Long aquariumId);
 }

@@ -6,7 +6,8 @@ Manages two independent domains for aquarium upkeep: **maintenance tasks** (recu
 |----------|-------|
 | Port | `8084` |
 | Database schema | `maintenance` |
-| Migrations | Flyway |
+| Migrations | Flyway (`V1__init`, `V2__add_processed_events`) |
+| Kafka role | **Consumer** — listens to `aquarium.lifecycle` (cascade delete) and `parameter.measurements` (auto-create alert tasks) |
 
 ---
 
@@ -19,6 +20,14 @@ MaintenanceTaskController        ProductController
             │                               │
             └── IMaintenanceTaskRepository  └── IProductRepository (JPA)
                      (JPA)
+
+topic: aquarium.lifecycle
+    └── AquariumEventListener (@KafkaListener)
+            └── IMaintenanceTaskRepository.deleteAllByAquariumId()
+
+topic: parameter.measurements
+    └── ParameterAlertListener (@KafkaListener, groupId: maintenance-alerts)
+            └── IMaintenanceTaskRepository.save()  ← creates high-priority alert task
 ```
 
 Both controllers share the same `ApiResponseDTO<T>` wrapper.  
@@ -77,7 +86,10 @@ Base path: `/products`
 |-------|------|
 | `MaintenanceTaskController` | REST layer for tasks |
 | `MaintenanceTaskService` | Business logic: CRUD, status filtering, ownership validation, task completion |
-| `IMaintenanceTaskRepository` | JPA repository with queries by aquarium ID and completion status |
+| `IMaintenanceTaskRepository` | JPA repository; includes `deleteAllByAquariumId` |
+| `AquariumEventListener` | Consumes `aquarium.lifecycle`; deletes all tasks for the deleted aquarium |
+| `ParameterAlertListener` | Consumes `parameter.measurements`; creates a `high`-priority task if temperature (24–28 °C) or pH (8.1–8.4) is out of range |
+| `ProcessedEventRepository` | Idempotency guard for both listeners |
 | `ProductController` | REST layer for products; builds `ProductFilter` from query params |
 | `ProductService` | Business logic: CRUD, all filter-based queries, computed fields |
 | `IProductRepository` | JPA repository |
@@ -101,6 +113,7 @@ Both task and product write operations validate that the resource belongs to the
 | `DB_URL` | `jdbc:postgresql://localhost:5432/aquarium_ms` | JDBC URL |
 | `DB_USERNAME` | `postgres` | Database username |
 | `DB_PASSWORD` | `root` | Database password |
+| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka broker address |
 
 ---
 
@@ -108,3 +121,8 @@ Both task and product write operations validate that the resource belongs to the
 
 Schema: `maintenance`. Migrations managed by Flyway.  
 `ddl-auto=validate`.
+
+| Migration | Description |
+|-----------|-------------|
+| `V1__init` | `maintenance_tasks`, `products` tables |
+| `V2__add_processed_events` | `processed_events` table for idempotent Kafka consumers |
