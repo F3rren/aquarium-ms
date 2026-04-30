@@ -8,10 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import it.f3rren.aquarium.maintenance_service.dto.CreateProductDTO;
-import it.f3rren.aquarium.maintenance_service.dto.ProductDTO;
-import it.f3rren.aquarium.maintenance_service.dto.ProductFilter;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.ProductFilter;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
+import it.f3rren.aquarium.maintenance_service.mapper.ProductMapper;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.model.Product;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
@@ -23,9 +24,11 @@ public class ProductService implements IProductService {
     private static final Logger log = LoggerFactory.getLogger(ProductService.class);
 
     private final IProductRepository productRepository;
+    private final ProductMapper productMapper;
 
-    public ProductService(IProductRepository productRepository) {
+    public ProductService(IProductRepository productRepository, ProductMapper productMapper) {
         this.productRepository = productRepository;
+        this.productMapper = productMapper;
     }
 
     @Transactional
@@ -46,42 +49,42 @@ public class ProductService implements IProductService {
         product.setUsageFrequency(dto.getUsageFrequency());
 
         log.info("Creating product: {}", dto.getName());
-        return toDTO(productRepository.save(product));
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional(readOnly = true)
     public List<ProductDTO> getProducts(ProductFilter filter) {
         if (Boolean.TRUE.equals(filter.getFavorites())) {
-            return toDTOList(productRepository.findByIsFavoriteTrueOrderByNameAsc());
+            return productMapper.toDTOList(productRepository.findByIsFavoriteTrueOrderByNameAsc());
         } else if (Boolean.TRUE.equals(filter.getExpired())) {
-            return toDTOList(productRepository.findByExpiryDateBefore(LocalDate.now()));
+            return productMapper.toDTOList(productRepository.findByExpiryDateBefore(LocalDate.now()));
         } else if (Boolean.TRUE.equals(filter.getExpiringSoon())) {
             LocalDate today = LocalDate.now();
-            return toDTOList(productRepository.findByExpiryDateBetween(today, today.plusDays(30)));
+            return productMapper.toDTOList(productRepository.findByExpiryDateBetween(today, today.plusDays(30)));
         } else if (Boolean.TRUE.equals(filter.getLowStock())) {
-            return toDTOList(productRepository.findLowStockProducts());
+            return productMapper.toDTOList(productRepository.findLowStockProducts());
         } else if (Boolean.TRUE.equals(filter.getShouldUseAgain())) {
-            return toDTOList(productRepository.findProductsToUseAgain());
+            return productMapper.toDTOList(productRepository.findProductsToUseAgain());
         } else if (filter.getCategory() != null) {
             ProductCategory cat = ProductCategory.valueOf(filter.getCategory().toUpperCase());
-            return toDTOList(productRepository.findByCategoryOrderByNameAsc(cat));
+            return productMapper.toDTOList(productRepository.findByCategoryOrderByNameAsc(cat));
         } else if (filter.getBrand() != null) {
-            return toDTOList(productRepository.findByBrandOrderByNameAsc(filter.getBrand()));
+            return productMapper.toDTOList(productRepository.findByBrandOrderByNameAsc(filter.getBrand()));
         } else if (filter.getSearch() != null) {
-            return toDTOList(productRepository.findByNameContainingIgnoreCaseOrderByNameAsc(filter.getSearch()));
+            return productMapper.toDTOList(productRepository.findByNameContainingIgnoreCaseOrderByNameAsc(filter.getSearch()));
         }
-        return toDTOList(productRepository.findAll());
+        return productMapper.toDTOList(productRepository.findAll());
     }
 
     @Transactional(readOnly = true)
     public ProductDTO getProductById(Long id) {
-        return toDTO(productRepository.findById(id)
+        return productMapper.toDTO(productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id)));
     }
 
     @Transactional(readOnly = true)
     public List<ProductDTO> getProductsByCategory(ProductCategory category) {
-        return toDTOList(productRepository.findByCategoryOrderByNameAsc(category));
+        return productMapper.toDTOList(productRepository.findByCategoryOrderByNameAsc(category));
     }
 
     @Transactional
@@ -105,7 +108,7 @@ public class ProductService implements IProductService {
         if (dto.getLastUsed() != null) product.setLastUsed(dto.getLastUsed());
 
         log.info("Updating product {}", id);
-        return toDTO(productRepository.save(product));
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional
@@ -115,7 +118,7 @@ public class ProductService implements IProductService {
 
         product.setLastUsed(LocalDate.now());
         log.info("Marking product {} as used", id);
-        return toDTO(productRepository.save(product));
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional
@@ -125,7 +128,7 @@ public class ProductService implements IProductService {
 
         product.setIsFavorite(!product.getIsFavorite());
         log.info("Toggling favorite for product {} -> {}", id, product.getIsFavorite());
-        return toDTO(productRepository.save(product));
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional
@@ -137,7 +140,7 @@ public class ProductService implements IProductService {
         product.setQuantity(currentQuantity + quantityChange);
 
         log.info("Updating quantity for product {}: {} -> {}", id, currentQuantity, product.getQuantity());
-        return toDTO(productRepository.save(product));
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional
@@ -147,36 +150,5 @@ public class ProductService implements IProductService {
         }
         log.info("Deleting product {}", id);
         productRepository.deleteById(id);
-    }
-
-    private ProductDTO toDTO(Product product) {
-        ProductDTO dto = new ProductDTO();
-        dto.setId(product.getId());
-        dto.setName(product.getName());
-        dto.setCategory(product.getCategory());
-        dto.setBrand(product.getBrand());
-        dto.setQuantity(product.getQuantity());
-        dto.setUnit(product.getUnit());
-        dto.setCost(product.getCost());
-        dto.setCurrency(product.getCurrency());
-        dto.setPurchaseDate(product.getPurchaseDate());
-        dto.setExpiryDate(product.getExpiryDate());
-        dto.setNotes(product.getNotes());
-        dto.setImageUrl(product.getImageUrl());
-        dto.setIsFavorite(product.getIsFavorite());
-        dto.setUsageFrequency(product.getUsageFrequency());
-        dto.setLastUsed(product.getLastUsed());
-        dto.setCreatedAt(product.getCreatedAt());
-        dto.setUpdatedAt(product.getUpdatedAt());
-        dto.setExpired(product.isExpired());
-        dto.setExpiringSoon(product.isExpiringSoon());
-        dto.setLowStock(product.isLowStock());
-        dto.setDaysSinceLastUse(product.getDaysSinceLastUse());
-        dto.setShouldUseAgain(product.shouldUseAgain());
-        return dto;
-    }
-
-    private List<ProductDTO> toDTOList(List<Product> products) {
-        return products.stream().map(this::toDTO).toList();
     }
 }

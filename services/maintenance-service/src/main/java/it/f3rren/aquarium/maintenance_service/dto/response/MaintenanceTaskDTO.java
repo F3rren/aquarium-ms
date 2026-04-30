@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.maintenance_service.dto;
+package it.f3rren.aquarium.maintenance_service.dto.response;
 
 import java.time.LocalDateTime;
 

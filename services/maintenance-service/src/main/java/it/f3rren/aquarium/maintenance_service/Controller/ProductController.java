@@ -11,11 +11,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
-import it.f3rren.aquarium.maintenance_service.dto.CreateProductDTO;
-import it.f3rren.aquarium.maintenance_service.dto.ProductDTO;
-import it.f3rren.aquarium.maintenance_service.dto.ProductFilter;
-import it.f3rren.aquarium.maintenance_service.dto.QuantityChangeDTO;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.ProductFilter;
+import it.f3rren.aquarium.maintenance_service.dto.request.QuantityChangeDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
 import it.f3rren.aquarium.maintenance_service.service.IProductService;
 

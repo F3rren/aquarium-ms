@@ -2,10 +2,10 @@ package it.f3rren.aquarium.maintenance_service.service;
 
 import java.util.List;
 
-import it.f3rren.aquarium.maintenance_service.dto.CreateProductDTO;
-import it.f3rren.aquarium.maintenance_service.dto.ProductDTO;
-import it.f3rren.aquarium.maintenance_service.dto.ProductFilter;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.ProductFilter;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
 
 public interface IProductService {

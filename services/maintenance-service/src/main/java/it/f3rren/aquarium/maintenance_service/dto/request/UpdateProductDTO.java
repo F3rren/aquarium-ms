@@ -1,10 +1,8 @@
-package it.f3rren.aquarium.maintenance_service.dto;
+package it.f3rren.aquarium.maintenance_service.dto.request;
 
 import java.time.LocalDate;
 
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -12,13 +10,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateProductDTO {
+public class UpdateProductDTO {
 
-    @NotBlank(message = "Name is required")
     @Size(max = 255, message = "Name must be at most 255 characters")
     private String name;
 
-    @NotNull(message = "Category is required")
     private ProductCategory category;
 
     @Size(max = 255, message = "Brand must be at most 255 characters")
@@ -49,4 +45,6 @@ public class CreateProductDTO {
 
     @Positive(message = "Usage frequency must be positive")
     private Integer usageFrequency;
+
+    private LocalDate lastUsed;
 }

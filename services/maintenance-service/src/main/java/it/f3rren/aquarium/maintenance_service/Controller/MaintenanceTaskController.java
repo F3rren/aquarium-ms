@@ -11,9 +11,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
-import it.f3rren.aquarium.maintenance_service.dto.CreateMaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.MaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.service.IMaintenanceTaskService;
 
 @RestController

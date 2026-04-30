@@ -16,6 +16,8 @@ import it.f3rren.aquarium.inhabitants_service.dto.UpdateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
 import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
+import it.f3rren.aquarium.inhabitants_service.client.SpeciesClient;
+import it.f3rren.aquarium.inhabitants_service.mapper.InhabitantMapper;
 import it.f3rren.aquarium.inhabitants_service.repository.IInhabitantRepository;
 
 @Service
@@ -25,10 +27,12 @@ public class InhabitantService implements IInhabitantService {
 
     private final IInhabitantRepository inhabitantRepository;
     private final SpeciesClient speciesClient;
+    private final InhabitantMapper inhabitantMapper;
 
-    public InhabitantService(IInhabitantRepository inhabitantRepository, SpeciesClient speciesClient) {
+    public InhabitantService(IInhabitantRepository inhabitantRepository, SpeciesClient speciesClient, InhabitantMapper inhabitantMapper) {
         this.inhabitantRepository = inhabitantRepository;
         this.speciesClient = speciesClient;
+        this.inhabitantMapper = inhabitantMapper;
     }
 
     @Transactional(readOnly = true)
@@ -37,7 +41,7 @@ public class InhabitantService implements IInhabitantService {
         List<InhabitantDetailsDTO> result = new ArrayList<>();
 
         for (Inhabitant relation : relations) {
-            InhabitantDetailsDTO dto = toDetailsDTO(relation);
+            InhabitantDetailsDTO dto = inhabitantMapper.toDetailsDTO(relation);
 
             try {
                 InhabitantType type = InhabitantType.fromValue(relation.getInhabitantType());
@@ -84,7 +88,7 @@ public class InhabitantService implements IInhabitantService {
         inhabitant.setCustomName(dto.getCustomName());
 
         log.info("Adding {} (speciesId={}) to aquarium {}", type.getValue(), dto.getInhabitantId(), aquariumId);
-        return toDetailsDTO(inhabitantRepository.save(inhabitant));
+        return inhabitantMapper.toDetailsDTO(inhabitantRepository.save(inhabitant));
     }
 
     @Transactional
@@ -122,23 +126,6 @@ public class InhabitantService implements IInhabitantService {
         if (dto.getCustomMinTankSize() != null) existing.setCustomMinTankSize(dto.getCustomMinTankSize());
 
         log.info("Updating inhabitant {} in aquarium {}", inhabitantId, aquariumId);
-        return toDetailsDTO(inhabitantRepository.save(existing));
-    }
-
-    private InhabitantDetailsDTO toDetailsDTO(Inhabitant relation) {
-        InhabitantDetailsDTO dto = new InhabitantDetailsDTO();
-        dto.setId(relation.getId());
-        dto.setType(relation.getInhabitantType());
-        dto.setQuantity(relation.getQuantity());
-        dto.setAddedDate(relation.getAddedDate());
-        dto.setNotes(relation.getNotes());
-        dto.setCustomName(relation.getCustomName());
-        dto.setCurrentSize(relation.getCurrentSize());
-        dto.setCustomDifficulty(relation.getCustomDifficulty());
-        dto.setCustomTemperament(relation.getCustomTemperament());
-        dto.setCustomDiet(relation.getCustomDiet());
-        dto.setIsReefSafe(relation.getIsReefSafe());
-        dto.setCustomMinTankSize(relation.getCustomMinTankSize());
-        return dto;
+        return inhabitantMapper.toDetailsDTO(inhabitantRepository.save(existing));
     }
 }

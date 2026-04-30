@@ -2,9 +2,9 @@ package it.f3rren.aquarium.maintenance_service.service;
 
 import java.util.List;
 
-import it.f3rren.aquarium.maintenance_service.dto.CreateMaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.MaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
 
 public interface IMaintenanceTaskService {
 
