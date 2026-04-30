@@ -1,6 +1,7 @@
 package it.f3rren.aquarium.maintenance_service.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
@@ -14,9 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import it.f3rren.aquarium.maintenance_service.dto.CreateMaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.MaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
 import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;

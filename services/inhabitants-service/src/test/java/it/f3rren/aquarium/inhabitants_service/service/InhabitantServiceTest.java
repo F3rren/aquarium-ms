@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import it.f3rren.aquarium.inhabitants_service.dto.CoralDTO;
@@ -23,6 +24,8 @@ import it.f3rren.aquarium.inhabitants_service.dto.UpdateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
 import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
+import it.f3rren.aquarium.inhabitants_service.client.SpeciesClient;
+import it.f3rren.aquarium.inhabitants_service.mapper.InhabitantMapper;
 import it.f3rren.aquarium.inhabitants_service.repository.IInhabitantRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +36,9 @@ class InhabitantServiceTest {
 
     @Mock
     private SpeciesClient speciesClient;
+
+    @Spy
+    private InhabitantMapper inhabitantMapper = new InhabitantMapper();
 
     @InjectMocks
     private InhabitantService inhabitantService;

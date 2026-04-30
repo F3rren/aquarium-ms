@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.maintenance_service.dto;
+package it.f3rren.aquarium.maintenance_service.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,7 +29,6 @@ public class ProductDTO {
     private LocalDate lastUsed;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    // Computed fields derived from model helper methods
     private boolean expired;
     private boolean expiringSoon;
     private boolean lowStock;

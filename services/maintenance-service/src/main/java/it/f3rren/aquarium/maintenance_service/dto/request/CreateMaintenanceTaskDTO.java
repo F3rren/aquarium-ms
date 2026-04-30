@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.maintenance_service.dto;
+package it.f3rren.aquarium.maintenance_service.dto.request;
 
 import java.time.LocalDateTime;
 
@@ -19,10 +19,10 @@ public class CreateMaintenanceTaskDTO {
     private String description;
 
     @Size(max = 50, message = "Frequency must be at most 50 characters")
-    private String frequency; // daily, weekly, monthly, custom
+    private String frequency;
 
     @Size(max = 50, message = "Priority must be at most 50 characters")
-    private String priority; // low, medium, high
+    private String priority;
 
     private LocalDateTime dueDate;
 

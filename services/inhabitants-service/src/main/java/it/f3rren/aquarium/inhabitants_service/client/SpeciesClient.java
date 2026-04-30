@@ -1,4 +1,4 @@
-package it.f3rren.aquarium.inhabitants_service.service;
+package it.f3rren.aquarium.inhabitants_service.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import it.f3rren.aquarium.maintenance_service.dto.CreateMaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.MaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.mapper.MaintenanceTaskMapper;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
 import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;
@@ -21,9 +22,11 @@ public class MaintenanceTaskService implements IMaintenanceTaskService {
     private static final Logger log = LoggerFactory.getLogger(MaintenanceTaskService.class);
 
     private final IMaintenanceTaskRepository taskRepository;
+    private final MaintenanceTaskMapper taskMapper;
 
-    public MaintenanceTaskService(IMaintenanceTaskRepository taskRepository) {
+    public MaintenanceTaskService(IMaintenanceTaskRepository taskRepository, MaintenanceTaskMapper taskMapper) {
         this.taskRepository = taskRepository;
+        this.taskMapper = taskMapper;
     }
 
     @Transactional
@@ -39,25 +42,25 @@ public class MaintenanceTaskService implements IMaintenanceTaskService {
         task.setIsCompleted(false);
 
         log.info("Creating task '{}' for aquarium {}", dto.getTitle(), aquariumId);
-        return toDTO(taskRepository.save(task));
+        return taskMapper.toDTO(taskRepository.save(task));
     }
 
     @Transactional(readOnly = true)
     public List<MaintenanceTaskDTO> getAllTasks(Long aquariumId) {
         return taskRepository.findByAquariumIdOrderByDueDateAsc(aquariumId)
-                .stream().map(this::toDTO).toList();
+                .stream().map(taskMapper::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
     public List<MaintenanceTaskDTO> getPendingTasks(Long aquariumId) {
         return taskRepository.findByAquariumIdAndIsCompletedFalseOrderByDueDateAsc(aquariumId)
-                .stream().map(this::toDTO).toList();
+                .stream().map(taskMapper::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
     public List<MaintenanceTaskDTO> getTasksByStatus(Long aquariumId, Boolean isCompleted) {
         return taskRepository.findByAquariumIdAndIsCompletedOrderByDueDateAsc(aquariumId, isCompleted)
-                .stream().map(this::toDTO).toList();
+                .stream().map(taskMapper::toDTO).toList();
     }
 
     @Transactional
@@ -77,7 +80,7 @@ public class MaintenanceTaskService implements IMaintenanceTaskService {
         if (dto.getNotes() != null) task.setNotes(dto.getNotes());
 
         log.info("Updating task {} in aquarium {}", taskId, aquariumId);
-        return toDTO(taskRepository.save(task));
+        return taskMapper.toDTO(taskRepository.save(task));
     }
 
     @Transactional
@@ -92,7 +95,7 @@ public class MaintenanceTaskService implements IMaintenanceTaskService {
         task.setIsCompleted(true);
         task.setCompletedAt(LocalDateTime.now());
         log.info("Completing task {} in aquarium {}", taskId, aquariumId);
-        return toDTO(taskRepository.save(task));
+        return taskMapper.toDTO(taskRepository.save(task));
     }
 
     @Transactional
@@ -106,21 +109,5 @@ public class MaintenanceTaskService implements IMaintenanceTaskService {
 
         log.info("Deleting task {} from aquarium {}", taskId, aquariumId);
         taskRepository.deleteById(taskId);
-    }
-
-    private MaintenanceTaskDTO toDTO(MaintenanceTask task) {
-        MaintenanceTaskDTO dto = new MaintenanceTaskDTO();
-        dto.setId(task.getId());
-        dto.setAquariumId(task.getAquariumId());
-        dto.setTitle(task.getTitle());
-        dto.setDescription(task.getDescription());
-        dto.setFrequency(task.getFrequency());
-        dto.setPriority(task.getPriority());
-        dto.setIsCompleted(task.getIsCompleted());
-        dto.setDueDate(task.getDueDate());
-        dto.setCompletedAt(task.getCompletedAt());
-        dto.setCreatedAt(task.getCreatedAt());
-        dto.setNotes(task.getNotes());
-        return dto;
     }
 }
