@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +55,7 @@ public class AquariumController {
     @GetMapping
     @Operation(summary = "Get all aquariums", description = "Retrieve paginated list of aquariums")
     public ResponseEntity<ApiResponseDTO<List<AquariumResponseDTO>>> getAllAquariums(
-            @PageableDefault(size = 20, sort = "id") Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable) {
         Page<Aquarium> page = aquariumService.getAllAquariums(pageable);
         List<AquariumResponseDTO> aquariums = page.getContent()
                 .stream()

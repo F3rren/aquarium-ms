@@ -111,6 +111,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Messaging -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
         <!-- Flyway for DB migrations -->
         <dependency>
             <groupId>org.flywaydb</groupId>

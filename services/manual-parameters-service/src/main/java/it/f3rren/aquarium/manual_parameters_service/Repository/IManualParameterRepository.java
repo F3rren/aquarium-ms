@@ -14,8 +14,10 @@ public interface IManualParameterRepository extends JpaRepository<ManualParamete
     Optional<ManualParameter> findFirstByAquariumIdOrderByMeasuredAtDesc(Long aquariumId);
     
     List<ManualParameter> findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
-        Long aquariumId, 
-        LocalDateTime start, 
+        Long aquariumId,
+        LocalDateTime start,
         LocalDateTime end
     );
+
+    void deleteAllByAquariumId(Long aquariumId);
 }

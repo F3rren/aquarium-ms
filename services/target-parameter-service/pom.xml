@@ -51,6 +51,12 @@
 			<version>${springdoc.version}</version>
 		</dependency>
 
+		<!-- Messaging -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
