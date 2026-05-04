@@ -1,18 +1,11 @@
 package it.f3rren.aquarium.parameters_service.kafka.listener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import it.f3rren.aquarium.parameters_service.kafka.event.AquariumEvent;
 import it.f3rren.aquarium.parameters_service.repository.IParameterRepository;
 
 @Component
-public class AquariumEventListener {
-
-    private static final Logger log = LoggerFactory.getLogger(AquariumEventListener.class);
+public class AquariumEventListener extends BaseAquariumEventListener {
 
     private final IParameterRepository parameterRepository;
 
@@ -20,12 +13,13 @@ public class AquariumEventListener {
         this.parameterRepository = parameterRepository;
     }
 
-    @Transactional
-    @KafkaListener(topics = "aquarium-events", groupId = "${spring.application.name}")
-    public void onAquariumEvent(AquariumEvent event) {
-        if ("DELETED".equals(event.type())) {
-            log.info("Received DELETED event for aquarium ID: {} — removing water parameters", event.aquariumId());
-            parameterRepository.deleteAllByAquariumId(event.aquariumId());
-        }
+    @Override
+    protected String getResourceDescription() {
+        return "water parameters";
+    }
+
+    @Override
+    protected void handleAquariumDeleted(Long aquariumId) {
+        parameterRepository.deleteAllByAquariumId(aquariumId);
     }
 }
