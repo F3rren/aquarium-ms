@@ -13,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.maintenance_service.mapper.MaintenanceTaskMapper;
 import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
 import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;
 
@@ -27,6 +29,9 @@ class MaintenanceTaskServiceTest {
 
     @Mock
     private IMaintenanceTaskRepository taskRepository;
+
+    @Spy
+    private MaintenanceTaskMapper taskMapper = new MaintenanceTaskMapper();
 
     @InjectMocks
     private MaintenanceTaskService taskService;

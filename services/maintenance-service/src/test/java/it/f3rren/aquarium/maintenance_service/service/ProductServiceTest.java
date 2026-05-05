@@ -13,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.ProductFilter;
 import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.maintenance_service.mapper.ProductMapper;
 import it.f3rren.aquarium.maintenance_service.model.Product;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
 import it.f3rren.aquarium.maintenance_service.repository.IProductRepository;
@@ -28,6 +30,9 @@ class ProductServiceTest {
 
     @Mock
     private IProductRepository productRepository;
+
+    @Spy
+    private ProductMapper productMapper = new ProductMapper();
 
     @InjectMocks
     private ProductService productService;

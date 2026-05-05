@@ -8,12 +8,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.ParameterizedTypeReference;
@@ -43,12 +45,17 @@ class ParametersClientTest {
 
     private ParametersClient parametersClient;
 
+    // RETURNS_SELF: uri(), body() etc. all return this same mock, avoid manual chain stubs
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private RestClient.RequestBodyUriSpec postChain;
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     @BeforeEach
     void setUp() {
         uriSpec      = mock(RestClient.RequestHeadersUriSpec.class);
         headersSpec  = mock(RestClient.RequestHeadersSpec.class);
         responseSpec = mock(RestClient.ResponseSpec.class);
+        postChain    = mock(RestClient.RequestBodyUriSpec.class, Answers.RETURNS_SELF);
 
         parametersClient = new ParametersClient(waterRestClient, manualRestClient, targetRestClient);
     }
@@ -145,6 +152,174 @@ class ParametersClientTest {
 
             assertThat(result.getSuccess()).isTrue();
             assertThat(result.getData().getPh()).isEqualTo(8.2);
+        }
+    }
+
+    @Nested
+    @DisplayName("addWaterParameter")
+    class AddWaterParameter {
+
+        @Test
+        @DisplayName("should POST and return response")
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        void shouldAddWaterParameter() {
+            WaterParameterDTO param = new WaterParameterDTO();
+            param.setTemperature(25.0);
+            ApiResponseDTO<WaterParameterDTO> apiResponse = new ApiResponseDTO<>(true, "ok", param, null);
+
+            when(waterRestClient.post()).thenReturn(postChain);
+            when(postChain.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(apiResponse);
+
+            ApiResponseDTO<WaterParameterDTO> result = parametersClient.addWaterParameter(1L, param);
+
+            assertThat(result.getSuccess()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("getWaterParametersByAquarium")
+    class GetWaterParametersByAquarium {
+
+        @Test
+        @DisplayName("should GET list of water parameters")
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        void shouldReturnWaterParametersList() {
+            ApiResponseDTO<List<WaterParameterDTO>> apiResponse = new ApiResponseDTO<>(true, "ok", List.of(), null);
+
+            when(waterRestClient.get()).thenReturn(uriSpec);
+            doReturn(headersSpec).when(uriSpec).uri(any(Function.class));
+            when(headersSpec.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(apiResponse);
+
+            ApiResponseDTO<List<WaterParameterDTO>> result = parametersClient.getWaterParametersByAquarium(1L, 10);
+
+            assertThat(result.getSuccess()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("getWaterParametersHistory")
+    class GetWaterParametersHistory {
+
+        @Test
+        @DisplayName("should GET history with period")
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        void shouldReturnHistoryByPeriod() {
+            ApiResponseDTO<List<WaterParameterDTO>> apiResponse = new ApiResponseDTO<>(true, "ok", List.of(), null);
+
+            when(waterRestClient.get()).thenReturn(uriSpec);
+            doReturn(headersSpec).when(uriSpec).uri(any(Function.class));
+            when(headersSpec.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(apiResponse);
+
+            ApiResponseDTO<List<WaterParameterDTO>> result =
+                    parametersClient.getWaterParametersHistory(1L, "week", null, null);
+
+            assertThat(result.getSuccess()).isTrue();
+        }
+
+        @Test
+        @DisplayName("should GET history with date range")
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        void shouldReturnHistoryByDateRange() {
+            ApiResponseDTO<List<WaterParameterDTO>> apiResponse = new ApiResponseDTO<>(true, "ok", List.of(), null);
+
+            when(waterRestClient.get()).thenReturn(uriSpec);
+            doReturn(headersSpec).when(uriSpec).uri(any(Function.class));
+            when(headersSpec.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(apiResponse);
+
+            ApiResponseDTO<List<WaterParameterDTO>> result =
+                    parametersClient.getWaterParametersHistory(1L, null, "2025-01-01", "2025-12-31");
+
+            assertThat(result.getSuccess()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("addManualParameter")
+    class AddManualParameter {
+
+        @Test
+        @DisplayName("should POST and return response")
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        void shouldAddManualParameter() {
+            ManualParameterDTO param = new ManualParameterDTO();
+            param.setCalcium(420.0);
+            ApiResponseDTO<ManualParameterDTO> apiResponse = new ApiResponseDTO<>(true, "ok", param, null);
+
+            when(manualRestClient.post()).thenReturn(postChain);
+            when(postChain.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(apiResponse);
+
+            ApiResponseDTO<ManualParameterDTO> result = parametersClient.addManualParameter(1L, param);
+
+            assertThat(result.getSuccess()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("getAllManualParameters")
+    class GetAllManualParameters {
+
+        @Test
+        @DisplayName("should GET all manual parameters")
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        void shouldReturnAllManualParameters() {
+            ApiResponseDTO<List<ManualParameterDTO>> apiResponse = new ApiResponseDTO<>(true, "ok", List.of(), null);
+
+            when(manualRestClient.get()).thenReturn(uriSpec);
+            doReturn(headersSpec).when(uriSpec).uri(anyString(), any(Object.class));
+            when(headersSpec.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(apiResponse);
+
+            ApiResponseDTO<List<ManualParameterDTO>> result = parametersClient.getAllManualParameters(1L);
+
+            assertThat(result.getSuccess()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("getManualParametersHistory")
+    class GetManualParametersHistory {
+
+        @Test
+        @DisplayName("should GET manual parameters history by date range")
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        void shouldReturnManualParametersHistory() {
+            ApiResponseDTO<List<ManualParameterDTO>> apiResponse = new ApiResponseDTO<>(true, "ok", List.of(), null);
+
+            when(manualRestClient.get()).thenReturn(uriSpec);
+            doReturn(headersSpec).when(uriSpec).uri(any(Function.class));
+            when(headersSpec.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(apiResponse);
+
+            ApiResponseDTO<List<ManualParameterDTO>> result =
+                    parametersClient.getManualParametersHistory(1L, "2025-01-01", "2025-12-31");
+
+            assertThat(result.getSuccess()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("saveTargetParameters")
+    class SaveTargetParameters {
+
+        @Test
+        @DisplayName("should POST and return response")
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        void shouldSaveTargetParameters() {
+            TargetParameterDTO param = TargetParameterDTO.builder().temperature(26.0).build();
+            ApiResponseDTO<TargetParameterDTO> apiResponse = new ApiResponseDTO<>(true, "ok", param, null);
+
+            when(targetRestClient.post()).thenReturn(postChain);
+            when(postChain.retrieve()).thenReturn(responseSpec);
+            when(responseSpec.body(any(ParameterizedTypeReference.class))).thenReturn(apiResponse);
+
+            ApiResponseDTO<TargetParameterDTO> result = parametersClient.saveTargetParameters(1L, param);
+
+            assertThat(result.getSuccess()).isTrue();
         }
     }
 

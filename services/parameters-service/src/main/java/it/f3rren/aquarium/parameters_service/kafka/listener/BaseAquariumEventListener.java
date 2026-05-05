@@ -13,7 +13,7 @@ public abstract class BaseAquariumEventListener {
 
     @Transactional
     @KafkaListener(topics = "aquarium-events", groupId = "${spring.application.name}")
-    public final void onAquariumEvent(AquariumEvent event) {
+    public void onAquariumEvent(AquariumEvent event) {
         if ("DELETED".equals(event.type())) {
             log.info("Received DELETED event for aquarium ID: {} — removing {}", event.aquariumId(), getResourceDescription());
             handleAquariumDeleted(event.aquariumId());
