@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.TargetParameterResponseDTO;
+import it.f3rren.aquarium.target_parameter_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.target_parameter_service.service.ITargetParameterService;
 
 @WebMvcTest(TargetParameterController.class)
@@ -66,6 +67,23 @@ class TargetParameterControllerTest {
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.message").value("No custom target parameter found"));
         }
+
+        @Test
+        void returns400ForNonNumericAquariumId() throws Exception {
+            mockMvc.perform(get("/aquariums/abc/settings/targets"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+
+        @Test
+        void returns500ForUnexpectedException() throws Exception {
+            when(targetParameterService.getTargetParameters(1L))
+                    .thenThrow(new RuntimeException("unexpected error"));
+
+            mockMvc.perform(get("/aquariums/1/settings/targets"))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
     }
 
     @Nested
@@ -93,7 +111,6 @@ class TargetParameterControllerTest {
         @Test
         void savesWithAllNullFields() throws Exception {
             SaveTargetParameterDTO dto = new SaveTargetParameterDTO();
-            // all fields optional — should succeed
 
             when(targetParameterService.saveTargetParameters(eq(1L), any(SaveTargetParameterDTO.class)))
                     .thenReturn(sampleTargets);
@@ -103,6 +120,21 @@ class TargetParameterControllerTest {
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
+        }
+
+        @Test
+        void returns404WhenNotFound() throws Exception {
+            SaveTargetParameterDTO dto = new SaveTargetParameterDTO();
+            dto.setTemperature(26.0);
+
+            when(targetParameterService.saveTargetParameters(eq(99L), any()))
+                    .thenThrow(new ResourceNotFoundException("Aquarium not found with ID: 99"));
+
+            mockMvc.perform(post("/aquariums/99/settings/targets")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.success").value(false));
         }
     }
 }

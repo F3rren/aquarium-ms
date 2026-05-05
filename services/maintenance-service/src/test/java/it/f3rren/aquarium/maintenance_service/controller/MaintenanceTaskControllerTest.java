@@ -210,5 +210,15 @@ class MaintenanceTaskControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.success").value(false));
         }
+
+        @Test
+        void returns400WhenAquariumMismatch() throws Exception {
+            when(taskService.completeTask(1L, 2L))
+                    .thenThrow(new IllegalArgumentException("Task 2 does not belong to aquarium 1"));
+
+            mockMvc.perform(post("/aquariums/1/tasks/2/complete"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
     }
 }

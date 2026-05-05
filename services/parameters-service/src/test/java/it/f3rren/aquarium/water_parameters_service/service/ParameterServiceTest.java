@@ -133,4 +133,23 @@ class ParameterServiceTest {
             assertEquals(25.0, result.get(0).getTemperature());
         }
     }
+
+    @Nested
+    class GetParametersHistory {
+
+        @Test
+        void returnsFilteredList() {
+            LocalDateTime from = LocalDateTime.now().minusDays(7);
+            LocalDateTime to = LocalDateTime.now();
+
+            when(parameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
+                    eq(1L), eq(from), eq(to)))
+                    .thenReturn(List.of(sampleParameter));
+
+            List<ParameterDTO> result = parameterService.getParametersHistory(1L, from, to);
+
+            assertEquals(1, result.size());
+            assertEquals(25.0, result.get(0).getTemperature());
+        }
+    }
 }

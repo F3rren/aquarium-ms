@@ -138,6 +138,18 @@ class InhabitantServiceTest {
             assertNull(result.get(0).getCommonName());
             assertNull(result.get(0).getDetails());
         }
+
+        @Test
+        void returnsDtoWithoutSpeciesDetailsWhenRuntimeExceptionOccurs() {
+            when(inhabitantRepository.findByAquariumId(10L)).thenReturn(List.of(sampleFishInhabitant));
+            when(speciesClient.getFishById(100L)).thenThrow(new RuntimeException("Connection timeout"));
+
+            List<InhabitantDetailsDTO> result = inhabitantService.getInhabitantsByAquariumId(10L);
+
+            assertEquals(1, result.size());
+            assertNull(result.get(0).getCommonName());
+            assertNull(result.get(0).getDetails());
+        }
     }
 
     @Nested

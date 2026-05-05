@@ -1,5 +1,6 @@
 package it.f3rren.aquarium.water_parameters_service.kafka.listener;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Nested;
@@ -53,4 +54,8 @@ class AquariumEventListenerTest {
         }
     }
 
+    @Test
+    void resourceDescriptionIsWaterParameters() {
+        assertEquals("water parameters", listener.getResourceDescription());
+    }
 }

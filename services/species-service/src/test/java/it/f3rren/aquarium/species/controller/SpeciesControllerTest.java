@@ -90,6 +90,13 @@ class SpeciesControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.success").value(false));
         }
+
+        @Test
+        void returns400ForNonNumericId() throws Exception {
+            mockMvc.perform(get("/species/fish/abc"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
     }
 
     @Nested
@@ -136,6 +143,13 @@ class SpeciesControllerTest {
 
             mockMvc.perform(get("/species/corals/99"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+
+        @Test
+        void returns400ForNonNumericId() throws Exception {
+            mockMvc.perform(get("/species/corals/abc"))
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
         }
     }

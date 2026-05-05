@@ -144,6 +144,14 @@ class AquariumControllerTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
         }
+
+        @Test
+        @DisplayName("should return 400 for non-numeric ID (MethodArgumentTypeMismatch)")
+        void shouldReturn400ForNonNumericId() throws Exception {
+            mockMvc.perform(get("/aquariums/xyz"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
     }
 
     // ========================

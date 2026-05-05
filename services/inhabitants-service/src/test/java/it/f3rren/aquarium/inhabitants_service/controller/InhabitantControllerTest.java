@@ -72,6 +72,13 @@ class InhabitantControllerTest {
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data").isEmpty());
         }
+
+        @Test
+        void returns400ForNonNumericAquariumId() throws Exception {
+            mockMvc.perform(get("/aquariums/abc/inhabitants"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
     }
 
     @Nested

@@ -129,5 +129,14 @@ class ManualParameterControllerTest {
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data").isArray());
         }
+
+        @Test
+        void returns400ForInvalidDateFormat() throws Exception {
+            mockMvc.perform(get("/aquariums/1/parameters/manual/history")
+                            .param("from", "not-a-date")
+                            .param("to", "2025-12-31T23:59:59"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
     }
 }

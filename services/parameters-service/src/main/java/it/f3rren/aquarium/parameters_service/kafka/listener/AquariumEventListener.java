@@ -14,7 +14,7 @@ public class AquariumEventListener extends BaseAquariumEventListener {
     }
 
     @Override
-    protected String getResourceDescription() {
+    public String getResourceDescription() {
         return "water parameters";
     }
 
