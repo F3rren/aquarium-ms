@@ -162,5 +162,15 @@ class WaterParameterControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
         }
+
+        @Test
+        void returnsAllHistoryWhenOnlyFromProvided() throws Exception {
+            when(parameterService.getParametersByPeriod(1L, "week")).thenReturn(List.of(sampleParameter));
+
+            mockMvc.perform(get("/aquariums/1/parameters/history")
+                            .param("from", "2025-01-01T00:00:00"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
     }
 }
