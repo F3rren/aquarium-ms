@@ -131,6 +131,17 @@ class ManualParameterControllerTest {
         }
 
         @Test
+        void returnsAllHistoryWhenOnlyFromProvided() throws Exception {
+            when(manualParameterService.getAllManualParameters(1L)).thenReturn(List.of(sampleParameter));
+
+            mockMvc.perform(get("/aquariums/1/parameters/manual/history")
+                            .param("from", "2025-01-01T00:00:00"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true))
+                    .andExpect(jsonPath("$.data").isArray());
+        }
+
+        @Test
         void returns400ForInvalidDateFormat() throws Exception {
             mockMvc.perform(get("/aquariums/1/parameters/manual/history")
                             .param("from", "not-a-date")

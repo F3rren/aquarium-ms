@@ -66,6 +66,21 @@ class ProductServiceTest {
             assertEquals("Seachem Prime", result.getName());
             verify(productRepository).save(any(Product.class));
         }
+
+        @Test
+        void savesWithExplicitCurrencyAndFavorite() {
+            CreateProductDTO dto = new CreateProductDTO();
+            dto.setName("Reef Salt");
+            dto.setCategory(ProductCategory.WATER_TREATMENT);
+            dto.setCurrency("$");
+            dto.setIsFavorite(true);
+
+            when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
+
+            productService.createProduct(dto);
+
+            verify(productRepository).save(any(Product.class));
+        }
     }
 
     @Nested
@@ -209,6 +224,17 @@ class ProductServiceTest {
 
             assertEquals(75.0, result.getQuantity());
         }
+
+        @Test
+        void treatsNullCurrentQuantityAsZero() {
+            sampleProduct.setQuantity(null);
+            when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+            when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
+
+            ProductDTO result = productService.updateQuantity(1L, 50.0);
+
+            assertEquals(50.0, result.getQuantity());
+        }
     }
 
     @Nested
@@ -243,6 +269,32 @@ class ProductServiceTest {
         }
 
         @Test
+        void updatesAllOptionalFields() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+            when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
+
+            UpdateProductDTO dto = new UpdateProductDTO();
+            dto.setName("Full Update");
+            dto.setCategory(ProductCategory.FOOD);
+            dto.setBrand("Aquatic");
+            dto.setQuantity(200.0);
+            dto.setUnit("ml");
+            dto.setCost(15.99);
+            dto.setCurrency("$");
+            dto.setNotes("Updated notes");
+            dto.setImageUrl("https://example.com/img.jpg");
+            dto.setIsFavorite(true);
+            dto.setUsageFrequency(14);
+
+            ProductDTO result = productService.updateProduct(1L, dto);
+
+            assertEquals("Full Update", result.getName());
+            assertEquals(ProductCategory.FOOD, result.getCategory());
+            assertEquals("Aquatic", result.getBrand());
+            assertEquals(200.0, result.getQuantity());
+        }
+
+        @Test
         void throwsWhenNotFound() {
             when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -253,6 +305,15 @@ class ProductServiceTest {
 
     @Nested
     class DeleteProduct {
+
+        @Test
+        void deletesExistingProduct() {
+            when(productRepository.existsById(1L)).thenReturn(true);
+
+            productService.deleteProduct(1L);
+
+            verify(productRepository).deleteById(1L);
+        }
 
         @Test
         void throwsWhenNotFound() {
