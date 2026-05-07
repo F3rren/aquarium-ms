@@ -8,7 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOProductCategoryArray;
+import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOProductList;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
@@ -32,6 +37,7 @@ public class ProductController {
 
     @GetMapping
     @Operation(summary = "Get all products", description = "Retrieve products, optionally filtered by category, brand, or search term")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOProductList.class)))
     public ResponseEntity<ApiResponseDTO<List<ProductDTO>>> getAllProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String brand,
@@ -56,6 +62,7 @@ public class ProductController {
 
     @GetMapping("/categories")
     @Operation(summary = "Get all product categories", description = "Retrieve the list of all available product categories")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOProductCategoryArray.class)))
     public ResponseEntity<ApiResponseDTO<ProductCategory[]>> getCategories() {
         ProductCategory[] categories = ProductCategory.values();
 
