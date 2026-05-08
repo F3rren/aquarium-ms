@@ -1,0 +1,7 @@
+# Prod Profile — api-gateway
+# Activate with: SPRING_PROFILES_ACTIVE=prod nelle ECS task definitions
+
+logging:
+  level:
+    org.springframework.cloud.gateway: WARN
+    reactor.netty.http.client: WARN

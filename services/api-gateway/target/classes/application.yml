@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 spring:
   application:
@@ -37,14 +37,14 @@ spring:
             - RewritePath=/maintenance-service/v3/api-docs, /v3/api-docs
 
         - id: parameters-service-openapi
-          uri: ${PARAMETERS_SERVICE_URL:http://parameters-service:8081}
+          uri: ${PARAMETERS_SERVICE_URL:http://parameters-service:8085}
           predicates:
             - Path=/parameters-service/v3/api-docs
           filters:
             - RewritePath=/parameters-service/v3/api-docs, /v3/api-docs
 
         - id: manual-parameters-service-openapi
-          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8083}
+          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8086}
           predicates:
             - Path=/manual-parameters-service/v3/api-docs
           filters:
@@ -79,13 +79,13 @@ spring:
 
         # Manual parameters — must be before water-parameters (more specific path)
         - id: manual-parameters-service
-          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8083}
+          uri: ${MANUAL_PARAMETERS_SERVICE_URL:http://manual-parameters-service:8086}
           predicates:
             - Path=/aquariums/*/parameters/manual/**
 
         # Water parameters (before aquariums)
         - id: water-parameters-service
-          uri: ${PARAMETERS_SERVICE_URL:http://parameters-service:8081}
+          uri: ${PARAMETERS_SERVICE_URL:http://parameters-service:8085}
           predicates:
             - Path=/aquariums/*/parameters/**
 
@@ -152,7 +152,7 @@ management:
         include: health,info,metrics,prometheus
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
       enabled: true
   prometheus:
     metrics:
