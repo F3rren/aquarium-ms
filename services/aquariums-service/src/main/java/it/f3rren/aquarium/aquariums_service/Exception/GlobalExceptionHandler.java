@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import it.f3rren.aquarium.aquariums_service.dto.ApiResponseDTO;
 
@@ -113,6 +114,18 @@ public class GlobalExceptionHandler {
 
         ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, "External service communication error", null, null);
         return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    /**
+     * Handles requests for static resources that do not exist (e.g. favicon.ico).
+     * Logged at DEBUG to avoid noise in ERROR logs.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleNoResourceFound(NoResourceFoundException ex) {
+        log.debug("Static resource not found: {}", ex.getMessage());
+
+        ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, "Resource not found", null, null);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /**

@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
 
@@ -49,6 +50,12 @@ public class GlobalExceptionHandler {
         log.warn("Type mismatch: {}", message);
         ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, message, null, null);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleNoResourceFound(NoResourceFoundException e) {
+        log.debug("Static resource not found: {}", e.getMessage());
+        return new ResponseEntity<>(new ApiResponseDTO<>(false, "Resource not found", null, null), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
