@@ -9,7 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.f3rren.aquarium.parameters_service.dto.ApiResponseDTOParameterList;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
@@ -41,6 +45,7 @@ public class WaterParameterController {
 
     @GetMapping
     @Operation(summary = "Get water parameters", description = "Retrieve water parameters for a specific aquarium with optional limit")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<ParameterDTO>>> getParametersByAquarium(
             @PathVariable Long id,
             @RequestParam(required = false, defaultValue = "10") Integer limit) {
@@ -63,6 +68,7 @@ public class WaterParameterController {
 
     @GetMapping("/history")
     @Operation(summary = "Get water parameters history", description = "Retrieve history based on period or date range")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<ParameterDTO>>> getParametersHistory(
             @PathVariable Long id,
             @RequestParam(required = false) String period,

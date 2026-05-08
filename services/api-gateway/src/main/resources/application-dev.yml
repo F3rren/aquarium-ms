@@ -1,0 +1,12 @@
+# Dev Profile — api-gateway
+# Activate with: spring.profiles.active=dev
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG

@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
 
@@ -35,6 +36,9 @@ class AquariumServiceTest {
 
     @Mock
     private IAquariumRepository aquariumRepository;
+
+    @Mock
+    private AquariumEventPublisher eventPublisher;
 
     @InjectMocks
     private AquariumService aquariumService;

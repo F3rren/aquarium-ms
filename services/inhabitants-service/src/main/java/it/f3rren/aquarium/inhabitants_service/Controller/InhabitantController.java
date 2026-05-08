@@ -15,7 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.f3rren.aquarium.inhabitants_service.dto.ApiResponseDTOInhabitantDetailsList;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.inhabitants_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.CreateInhabitantDTO;
@@ -37,6 +41,7 @@ public class InhabitantController {
 
     @GetMapping("/{id}/inhabitants")
     @Operation(summary = "Get inhabitants by aquarium ID", description = "Retrieve details of inhabitants in a specific aquarium")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOInhabitantDetailsList.class)))
     public ResponseEntity<ApiResponseDTO<List<InhabitantDetailsDTO>>> getAquariumInhabitants(@PathVariable Long id) {
         List<InhabitantDetailsDTO> inhabitants = inhabitantService.getInhabitantsByAquariumId(id);
 

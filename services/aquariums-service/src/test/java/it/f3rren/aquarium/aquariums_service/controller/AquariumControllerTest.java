@@ -26,8 +26,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.f3rren.aquarium.aquariums_service.client.ParametersClient;
+import it.f3rren.aquarium.aquariums_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
+import it.f3rren.aquarium.aquariums_service.dto.ManualParameterDTO;
+import it.f3rren.aquarium.aquariums_service.dto.TargetParameterDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
+import it.f3rren.aquarium.aquariums_service.dto.WaterParameterDTO;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.service.AquariumService;
@@ -137,6 +141,14 @@ class AquariumControllerTest {
         @DisplayName("should return 400 for invalid ID type")
         void shouldReturn400ForInvalidId() throws Exception {
             mockMvc.perform(get("/aquariums/abc"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+
+        @Test
+        @DisplayName("should return 400 for non-numeric ID (MethodArgumentTypeMismatch)")
+        void shouldReturn400ForNonNumericId() throws Exception {
+            mockMvc.perform(get("/aquariums/xyz"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
         }
@@ -290,6 +302,167 @@ class AquariumControllerTest {
                             .param("period", "year"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
+        }
+    }
+
+    // ========================
+    // Water Parameters proxy
+    // ========================
+
+    @Nested
+    @DisplayName("POST /aquariums/{id}/water-parameters")
+    class AddWaterParameter {
+
+        @Test
+        @DisplayName("should proxy to ParametersClient and return 201")
+        void shouldAddAndReturn201() throws Exception {
+            WaterParameterDTO param =
+                    new WaterParameterDTO();
+            param.setTemperature(25.0);
+
+            when(parametersClient.addWaterParameter(eq(1L), any()))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", param, null));
+
+            mockMvc.perform(post("/aquariums/1/water-parameters")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(param)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /aquariums/{id}/water-parameters/latest")
+    class GetLatestWaterParameter {
+
+        @Test
+        @DisplayName("should proxy to ParametersClient and return 200")
+        void shouldReturnLatest() throws Exception {
+            when(parametersClient.getLatestWaterParameter(1L))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", null, null));
+
+            mockMvc.perform(get("/aquariums/1/water-parameters/latest"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+    }
+
+    // ========================
+    // Manual Parameters proxy
+    // ========================
+
+    @Nested
+    @DisplayName("POST /aquariums/{id}/manual-parameters")
+    class AddManualParameter {
+
+        @Test
+        @DisplayName("should proxy to ParametersClient and return 201")
+        void shouldAddAndReturn201() throws Exception {
+            ManualParameterDTO param =
+                    new ManualParameterDTO();
+            param.setCalcium(420.0);
+            param.setMeasuredAt(LocalDateTime.of(2025, 1, 1, 12, 0));
+
+            when(parametersClient.addManualParameter(eq(1L), any()))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", param, null));
+
+            mockMvc.perform(post("/aquariums/1/manual-parameters")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(param)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /aquariums/{id}/manual-parameters")
+    class GetManualParameters {
+
+        @Test
+        @DisplayName("should proxy to ParametersClient and return 200")
+        void shouldReturnAll() throws Exception {
+            when(parametersClient.getAllManualParameters(1L))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", List.of(), null));
+
+            mockMvc.perform(get("/aquariums/1/manual-parameters"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /aquariums/{id}/manual-parameters/latest")
+    class GetLatestManualParameter {
+
+        @Test
+        @DisplayName("should proxy to ParametersClient and return 200")
+        void shouldReturnLatest() throws Exception {
+            when(parametersClient.getLatestManualParameter(1L))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", null, null));
+
+            mockMvc.perform(get("/aquariums/1/manual-parameters/latest"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /aquariums/{id}/manual-parameters/history")
+    class GetManualParametersHistory {
+
+        @Test
+        @DisplayName("should proxy to ParametersClient and return 200")
+        void shouldReturnHistory() throws Exception {
+            when(parametersClient.getManualParametersHistory(eq(1L), any(), any()))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", List.of(), null));
+
+            mockMvc.perform(get("/aquariums/1/manual-parameters/history")
+                            .param("from", "2025-01-01T00:00:00")
+                            .param("to", "2025-12-31T23:59:59"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+    }
+
+    // ========================
+    // Target Parameters proxy
+    // ========================
+
+    @Nested
+    @DisplayName("GET /aquariums/{id}/target-parameters")
+    class GetTargetParameters {
+
+        @Test
+        @DisplayName("should proxy to ParametersClient and return 200")
+        void shouldReturnTargets() throws Exception {
+            when(parametersClient.getTargetParameters(1L))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", null, null));
+
+            mockMvc.perform(get("/aquariums/1/target-parameters"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /aquariums/{id}/target-parameters")
+    class SaveTargetParameters {
+
+        @Test
+        @DisplayName("should proxy to ParametersClient and return 201")
+        void shouldSaveAndReturn201() throws Exception {
+            TargetParameterDTO target =
+                    new TargetParameterDTO();
+            target.setTemperature(26.0);
+
+            when(parametersClient.saveTargetParameters(eq(1L), any()))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", target, null));
+
+            mockMvc.perform(post("/aquariums/1/target-parameters")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(target)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.success").value(true));
         }
     }
 }

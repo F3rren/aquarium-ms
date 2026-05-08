@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
 
@@ -31,9 +32,11 @@ public class AquariumService implements IAquariumService {
     private static final Logger log = LoggerFactory.getLogger(AquariumService.class);
 
     private final IAquariumRepository aquariumRepository;
+    private final AquariumEventPublisher eventPublisher;
 
-    public AquariumService(IAquariumRepository aquariumRepository) {
+    public AquariumService(IAquariumRepository aquariumRepository, AquariumEventPublisher eventPublisher) {
         this.aquariumRepository = aquariumRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -51,7 +54,9 @@ public class AquariumService implements IAquariumService {
         aquarium.setImageUrl(dto.getImageUrl());
 
         log.info("Creating aquarium: {}", dto.getName());
-        return aquariumRepository.save(aquarium);
+        Aquarium saved = aquariumRepository.save(aquarium);
+        eventPublisher.publishCreated(saved.getId());
+        return saved;
     }
 
     /**
@@ -112,5 +117,6 @@ public class AquariumService implements IAquariumService {
         }
         log.info("Deleting aquarium with ID: {}", id);
         aquariumRepository.deleteById(id);
+        eventPublisher.publishDeleted(id);
     }
 }

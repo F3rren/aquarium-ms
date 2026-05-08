@@ -116,6 +116,26 @@ class ParameterServiceTest {
 
             assertTrue(result.isEmpty());
         }
+
+        @Test
+        void returnsAllWhenLimitExceedsMax() {
+            when(parameterRepository.findByAquariumIdOrderByMeasuredAtDesc(1L))
+                    .thenReturn(List.of(sampleParameter, sampleParameter, sampleParameter));
+
+            List<ParameterDTO> result = parameterService.getParametersByAquariumId(1L, 100);
+
+            assertEquals(3, result.size());
+        }
+
+        @Test
+        void returnsAllWhenLimitIsNull() {
+            when(parameterRepository.findByAquariumIdOrderByMeasuredAtDesc(1L))
+                    .thenReturn(List.of(sampleParameter, sampleParameter));
+
+            List<ParameterDTO> result = parameterService.getParametersByAquariumId(1L, null);
+
+            assertEquals(2, result.size());
+        }
     }
 
     @Nested
@@ -130,6 +150,47 @@ class ParameterServiceTest {
             List<ParameterDTO> result = parameterService.getParametersByPeriod(1L, "week");
 
             assertFalse(result.isEmpty());
+            assertEquals(25.0, result.get(0).getTemperature());
+        }
+
+        @Test
+        void returnsMonthDtoList() {
+            when(parameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
+                    eq(1L), any(LocalDateTime.class), any(LocalDateTime.class)))
+                    .thenReturn(List.of(sampleParameter));
+
+            List<ParameterDTO> result = parameterService.getParametersByPeriod(1L, "month");
+
+            assertFalse(result.isEmpty());
+        }
+
+        @Test
+        void returnsDefaultDayDtoListForUnknownPeriod() {
+            when(parameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
+                    eq(1L), any(LocalDateTime.class), any(LocalDateTime.class)))
+                    .thenReturn(List.of(sampleParameter));
+
+            List<ParameterDTO> result = parameterService.getParametersByPeriod(1L, "day");
+
+            assertFalse(result.isEmpty());
+        }
+    }
+
+    @Nested
+    class GetParametersHistory {
+
+        @Test
+        void returnsFilteredList() {
+            LocalDateTime from = LocalDateTime.now().minusDays(7);
+            LocalDateTime to = LocalDateTime.now();
+
+            when(parameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
+                    eq(1L), eq(from), eq(to)))
+                    .thenReturn(List.of(sampleParameter));
+
+            List<ParameterDTO> result = parameterService.getParametersHistory(1L, from, to);
+
+            assertEquals(1, result.size());
             assertEquals(25.0, result.get(0).getTemperature());
         }
     }

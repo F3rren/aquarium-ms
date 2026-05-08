@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,9 @@ import it.f3rren.aquarium.aquariums_service.dto.*;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.service.IAquariumService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -53,8 +57,9 @@ public class AquariumController {
      */
     @GetMapping
     @Operation(summary = "Get all aquariums", description = "Retrieve paginated list of aquariums")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOAquariumList.class)))
     public ResponseEntity<ApiResponseDTO<List<AquariumResponseDTO>>> getAllAquariums(
-            @PageableDefault(size = 20, sort = "id") Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable) {
         Page<Aquarium> page = aquariumService.getAllAquariums(pageable);
         List<AquariumResponseDTO> aquariums = page.getContent()
                 .stream()
@@ -162,6 +167,7 @@ public class AquariumController {
      */
     @GetMapping("/{id}/water-parameters")
     @Operation(summary = "Get water parameters", description = "Retrieve water parameter measurements for an aquarium")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOWaterParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<WaterParameterDTO>>> getWaterParameters(
             @PathVariable Long id,
             @RequestParam(defaultValue = "10") Integer limit) {
@@ -194,6 +200,7 @@ public class AquariumController {
      */
     @GetMapping("/{id}/water-parameters/history")
     @Operation(summary = "Get water parameters history", description = "Retrieve historical water parameter data")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOWaterParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<WaterParameterDTO>>> getWaterParametersHistory(
             @PathVariable Long id,
             @RequestParam(required = false) String period,
@@ -232,6 +239,7 @@ public class AquariumController {
      */
     @GetMapping("/{id}/manual-parameters")
     @Operation(summary = "Get manual parameters", description = "Retrieve all manual parameter measurements for an aquarium")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOManualParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<ManualParameterDTO>>> getManualParameters(@PathVariable Long id) {
         return ResponseEntity.ok(parametersClient.getAllManualParameters(id));
     }
@@ -258,6 +266,7 @@ public class AquariumController {
      */
     @GetMapping("/{id}/manual-parameters/history")
     @Operation(summary = "Get manual parameters history", description = "Retrieve historical manual parameter data")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOManualParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<ManualParameterDTO>>> getManualParametersHistory(
             @PathVariable Long id,
             @RequestParam String from,

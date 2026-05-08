@@ -13,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.maintenance_service.mapper.MaintenanceTaskMapper;
 import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
 import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;
 
@@ -27,6 +29,9 @@ class MaintenanceTaskServiceTest {
 
     @Mock
     private IMaintenanceTaskRepository taskRepository;
+
+    @Spy
+    private MaintenanceTaskMapper taskMapper = new MaintenanceTaskMapper();
 
     @InjectMocks
     private MaintenanceTaskService taskService;
@@ -76,6 +81,55 @@ class MaintenanceTaskServiceTest {
     }
 
     @Nested
+    class GetPendingTasks {
+
+        @Test
+        void returnsPendingDtoListForAquarium() {
+            when(taskRepository.findByAquariumIdAndIsCompletedFalseOrderByDueDateAsc(1L))
+                    .thenReturn(List.of(sampleTask));
+
+            List<MaintenanceTaskDTO> result = taskService.getPendingTasks(1L);
+
+            assertEquals(1, result.size());
+            assertFalse(result.get(0).getIsCompleted());
+            verify(taskRepository).findByAquariumIdAndIsCompletedFalseOrderByDueDateAsc(1L);
+        }
+    }
+
+    @Nested
+    class GetTasksByStatus {
+
+        @Test
+        void returnsCompletedTasks() {
+            MaintenanceTask completedTask = new MaintenanceTask();
+            completedTask.setId(2L);
+            completedTask.setAquariumId(1L);
+            completedTask.setTitle("Filter cleaning");
+            completedTask.setIsCompleted(true);
+
+            when(taskRepository.findByAquariumIdAndIsCompletedOrderByDueDateAsc(1L, true))
+                    .thenReturn(List.of(completedTask));
+
+            List<MaintenanceTaskDTO> result = taskService.getTasksByStatus(1L, true);
+
+            assertEquals(1, result.size());
+            assertTrue(result.get(0).getIsCompleted());
+            verify(taskRepository).findByAquariumIdAndIsCompletedOrderByDueDateAsc(1L, true);
+        }
+
+        @Test
+        void returnsPendingTasksByStatus() {
+            when(taskRepository.findByAquariumIdAndIsCompletedOrderByDueDateAsc(1L, false))
+                    .thenReturn(List.of(sampleTask));
+
+            List<MaintenanceTaskDTO> result = taskService.getTasksByStatus(1L, false);
+
+            assertEquals(1, result.size());
+            verify(taskRepository).findByAquariumIdAndIsCompletedOrderByDueDateAsc(1L, false);
+        }
+    }
+
+    @Nested
     class UpdateTask {
 
         @Test
@@ -90,6 +144,27 @@ class MaintenanceTaskServiceTest {
 
             assertEquals("Oil change", result.getTitle());
             verify(taskRepository).save(sampleTask);
+        }
+
+        @Test
+        void updatesAllOptionalFields() {
+            when(taskRepository.findById(1L)).thenReturn(Optional.of(sampleTask));
+            when(taskRepository.save(any(MaintenanceTask.class))).thenAnswer(i -> i.getArgument(0));
+
+            UpdateMaintenanceTaskDTO dto = new UpdateMaintenanceTaskDTO();
+            dto.setTitle("Full update");
+            dto.setDescription("Detailed description");
+            dto.setFrequency("weekly");
+            dto.setPriority("medium");
+            dto.setNotes("Some notes");
+
+            MaintenanceTaskDTO result = taskService.updateTask(1L, 1L, dto);
+
+            assertEquals("Full update", result.getTitle());
+            assertEquals("Detailed description", result.getDescription());
+            assertEquals("weekly", result.getFrequency());
+            assertEquals("medium", result.getPriority());
+            assertEquals("Some notes", result.getNotes());
         }
 
         @Test
@@ -122,6 +197,14 @@ class MaintenanceTaskServiceTest {
             assertTrue(result.getIsCompleted());
             assertNotNull(result.getCompletedAt());
             verify(taskRepository).save(sampleTask);
+        }
+
+        @Test
+        void throwsWhenNotFound() {
+            when(taskRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThrows(ResourceNotFoundException.class,
+                    () -> taskService.completeTask(1L, 99L));
         }
 
         @Test

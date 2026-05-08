@@ -10,7 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.f3rren.aquarium.species.dto.ApiResponseDTOCoralList;
+import it.f3rren.aquarium.species.dto.ApiResponseDTOFishList;
 import it.f3rren.aquarium.species.dto.ApiResponseDTO;
 import it.f3rren.aquarium.species.dto.CoralResponseDTO;
 import it.f3rren.aquarium.species.dto.FishResponseDTO;
@@ -29,6 +34,7 @@ public class SpeciesController {
 
     @GetMapping("/fish")
     @Operation(summary = "Get all fish", description = "Retrieve a list of all fish species")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOFishList.class)))
     public ResponseEntity<ApiResponseDTO<List<FishResponseDTO>>> getAllFish() {
         List<FishResponseDTO> fish = speciesService.getAllFish();
 
@@ -51,6 +57,7 @@ public class SpeciesController {
 
     @GetMapping("/corals")
     @Operation(summary = "Get all corals", description = "Retrieve a list of all coral species")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOCoralList.class)))
     public ResponseEntity<ApiResponseDTO<List<CoralResponseDTO>>> getAllCorals() {
         List<CoralResponseDTO> corals = speciesService.getAllCorals();
 

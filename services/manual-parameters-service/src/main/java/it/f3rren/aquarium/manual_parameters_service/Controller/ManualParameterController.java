@@ -8,7 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.f3rren.aquarium.manual_parameters_service.dto.ApiResponseDTOManualParameterList;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.manual_parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
@@ -51,6 +55,7 @@ public class ManualParameterController {
 
     @GetMapping("/history")
     @Operation(summary = "Get manual parameters history", description = "Retrieve manual parameters within a date range")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOManualParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<ManualParameterDTO>>> getManualParametersHistory(
             @PathVariable Long aquariumId,
             @RequestParam(required = false) String from,
