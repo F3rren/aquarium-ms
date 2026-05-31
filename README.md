@@ -4,6 +4,7 @@
 ![Spring Boot 3.3.5](https://img.shields.io/badge/spring--boot-3.3.5-green.svg)
 ![Microservices](https://img.shields.io/badge/architecture-microservices-blue.svg)
 ![Kafka](https://img.shields.io/badge/messaging-Apache%20Kafka-231F20.svg)
+![Resilience4j](https://img.shields.io/badge/resilience-Resilience4j-blue.svg)
 ![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 ![PostgreSQL](https://img.shields.io/badge/database-PostgreSQL%2016-336791.svg)
 ![MIT License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -201,7 +202,7 @@ All requests go through the gateway at `http://localhost:8080`. Full interactive
 |--------|------|-------------|
 | `GET` | `/aquariums/{id}/parameters` | List readings (optional `?limit=N`) |
 | `POST` | `/aquariums/{id}/parameters` | Add a reading |
-| `GET` | `/aquariums/{id}/parameters/latest` | Get the latest reading |
+| `GET` | `/aquariums/{id}/parameters/latest` | Get the latest reading (CQRS read model) |
 | `GET` | `/aquariums/{id}/parameters/history` | History by `?period=day\|week\|month` or `?from=...&to=...` |
 
 ### Manual Parameters
@@ -223,24 +224,12 @@ All requests go through the gateway at `http://localhost:8080`. Full interactive
 
 ## Observability
 
-Prometheus scrapes metrics from all services every 15 seconds via `/actuator/prometheus`.
+![Aquarium Microservices Dashboard](docs/grafana-dashboard.png)
+
+Real-time monitoring of all 7 microservices via Prometheus + Grafana. Metrics include request rate per service, JVM memory usage, active threads, and overall success rate. Dashboard auto-provisioned on `docker-compose up`.
 
 - **Grafana:** http://localhost:3000 (admin / admin) — pre-built dashboard "Aquarium Microservices - Overview"
 - **Prometheus:** http://localhost:9090 — raw metrics and target status
-
----
-
-## Configuration
-
-Database credentials and service URLs are passed as environment variables. Default values are safe for local development.
-
-To change database credentials, update `DB_USER` and `DB_PASSWORD` in `docker-compose.yml` (they propagate automatically to all services).
-
-To point services at external URLs, override the environment variables in `docker-compose.yml`:
-
-```yaml
-SPECIES_SERVICE_URL: http://my-host:8083/species
-```
 
 ---
 
@@ -263,13 +252,17 @@ SPECIES_SERVICE_URL: http://my-host:8083/species
 
 ---
 
-## Observability
+## Configuration
 
-![Aquarium Microservices Dashboard](docs/grafana-dashboard.png)
+Database credentials and service URLs are passed as environment variables. Default values are safe for local development.
 
-Real-time monitoring of all 7 microservices via Prometheus + Grafana.
-Metrics include request rate per service, JVM memory usage, active threads,
-and overall success rate. Dashboard auto-provisioned on `docker-compose up`.
+To change database credentials, update `DB_USER` and `DB_PASSWORD` in `docker-compose.yml` (they propagate automatically to all services).
+
+To point services at external URLs, override the environment variables in `docker-compose.yml`:
+
+```yaml
+SPECIES_SERVICE_URL: http://my-host:8083/species
+```
 
 ---
 
