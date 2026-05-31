@@ -2,18 +2,17 @@
 
 ![Java 17](https://img.shields.io/badge/java-17-blue.svg)
 ![Spring Boot 3.3.5](https://img.shields.io/badge/spring--boot-3.3.5-green.svg)
-![Microservices](https://img.shields.io/badge/architecture-microservices-blue.svg)
 ![Kafka](https://img.shields.io/badge/messaging-Apache%20Kafka-231F20.svg)
 ![Resilience4j](https://img.shields.io/badge/resilience-Resilience4j-blue.svg)
 ![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
 ![PostgreSQL](https://img.shields.io/badge/database-PostgreSQL%2016-336791.svg)
 ![MIT License](https://img.shields.io/badge/license-MIT-green.svg)
 
-A **microservice-based backend** for comprehensive aquarium management — tanks, inhabitants, species catalog, maintenance tracking, and water parameter monitoring.
+Microservice backend for comprehensive aquarium management — tanks, inhabitants, species catalog, maintenance tracking, and water parameter monitoring.
 
-Built with **Java 17, Spring Boot 3.3.5, Spring Cloud Gateway**, **PostgreSQL 16**, and **Apache Kafka**. Fully containerized via Docker Compose with Prometheus and Grafana monitoring.
+Built with **Java 17, Spring Boot 3.3.5, Spring Cloud Gateway, Apache Kafka (KRaft), PostgreSQL 16, Resilience4j**. Fully containerized with Docker Compose, monitored via Prometheus and Grafana.
 
-> **Note:** This backend is designed to work alongside the [Aquarium Interface](https://github.com/F3rren/Aquarium-interface) frontend and is not intended as a public/general-purpose API.
+> Designed to work alongside the [Aquarium Interface](https://github.com/F3rren/Aquarium-interface) Flutter frontend.
 
 ---
 
@@ -27,198 +26,51 @@ cd aquarium-ms
 docker-compose up -d
 ```
 
-Docker Compose will build all images and start PostgreSQL, Kafka, all microservices, and the monitoring stack automatically. Wait ~30–60 seconds, then access:
-
 | Service | URL |
 |---------|-----|
-| API Gateway (main entrypoint) | http://localhost:8080 |
-| Swagger UI (all services) | http://localhost:8080/swagger-ui.html |
-| Kafka UI (topic browser) | http://localhost:8090 |
-| Grafana (metrics) | http://localhost:3000 (admin / admin) |
+| API Gateway + Swagger UI | http://localhost:8080/swagger-ui.html |
+| Kafka UI | http://localhost:8090 |
+| Grafana | http://localhost:3000 (admin / admin) |
 | Prometheus | http://localhost:9090 |
-
-```bash
-docker-compose down        # stop containers
-docker-compose down -v     # stop and delete all data (volumes)
-```
 
 ---
 
 ## Architecture
 
-All HTTP traffic enters through the **API Gateway** on port 8080, which routes each request to the appropriate downstream microservice based on path prefix.
-
 ```
-                        ┌─────────────────────────────────────┐
-                        │         API Gateway :8080           │
-                        │  (routing · CORS · request logging) │
-                        └──────────────┬──────────────────────┘
-                                       │
-          ┌──────────────┬─────────────┼──────────────┬───────────────┐
-          ▼              ▼             ▼              ▼               ▼
-  aquariums-service  inhabitants-  species-      maintenance-   parameters-
-      :8081           service       service        service        service
-                       :8082         :8083          :8084          :8085
-                          │            ▲
-                          └────────────┘         manual-parameters-service :8086
-                     (inter-service call)
-                                                 target-parameter-service  :8087
+                    ┌─────────────────────────────────────┐
+                    │         API Gateway :8080           │
+                    │  (routing · CORS · request logging) │
+                    └──────────────┬──────────────────────┘
+                                   │
+      ┌──────────────┬─────────────┼──────────────┬───────────────┐
+      ▼              ▼             ▼              ▼               ▼
+aquariums-service  inhabitants-  species-      maintenance-   parameters-
+    :8081           service       service        service        service
+                     :8082         :8083          :8084          :8085
+
+                                            manual-parameters-service :8086
+                                            target-parameter-service  :8087
 ```
 
-**Synchronous inter-service communication (HTTP):**
-- `inhabitants-service` → `species-service`: fetches fish/coral details to enrich inhabitant responses
-- `aquariums-service` → `parameters-service`, `manual-parameters-service`, `target-parameter-service`: proxies parameter endpoints (with circuit breaker + retry via Resilience4j)
+**Synchronous (HTTP):** `inhabitants-service` → `species-service` for species enrichment. `aquariums-service` → parameter services via circuit breaker + retry.
 
-**Asynchronous inter-service communication (Kafka):**
-
-```
-aquariums-service ──[AquariumCreated / AquariumDeleted]──► topic: aquarium.lifecycle
-                                                                      │
-                                                     ┌────────────────┼──────────────────┐
-                                                     ▼                ▼                  ▼
-                                             inhabitants-      parameters-         maintenance-
-                                               service           service             service
-                                           (cascade delete)  (cascade delete)   (cascade delete)
-
-parameters-service ──[ParameterMeasured]──► topic: parameter.measurements
-                                                      │
-                                       ┌──────────────┴──────────────┐
-                                       ▼                             ▼
-                              parameters-service             maintenance-service
-                           (CQRS read model update)       (auto-create alert task)
-```
-
-### Services
-
-| Service | Port | Schema | Responsibility |
-|---------|------|--------|----------------|
-| `api-gateway` | 8080 | — | Single entrypoint, path-based routing, CORS, request/response logging |
-| `aquariums-service` | 8081 | `core` | Aquarium CRUD + parameter proxy with circuit breaker |
-| `inhabitants-service` | 8082 | `inhabitants` | Inhabitants per aquarium, enriched with species details |
-| `species-service` | 8083 | `inhabitants` | Read-only catalog of fish and coral species |
-| `maintenance-service` | 8084 | `maintenance` | Maintenance tasks and product inventory per aquarium |
-| `parameters-service` | 8085 | `parameters` | Automated water parameter readings and history |
-| `manual-parameters-service` | 8086 | `parameters` | Manual chemical measurements (Ca, Mg, KH, etc.) |
-| `target-parameter-service` | 8087 | `parameters` | Target parameter ranges for alerts and comparison |
+**Asynchronous (Kafka):**
+- `aquarium.lifecycle` — cascade delete across inhabitants, parameters, maintenance
+- `parameter.measurements` — triggers CQRS read model update and anomaly alert creation
 
 ---
 
-## Messaging (Event-Driven Architecture)
+## Key Patterns
 
-The system uses **Apache Kafka** (KRaft mode, no Zookeeper) for asynchronous communication between services. Three topics are declared:
-
-| Topic | Producers | Consumers | Purpose |
-|-------|-----------|-----------|---------|
-| `aquarium.lifecycle` | `aquariums-service` | `inhabitants-service`, `parameters-service`, `maintenance-service` | Lifecycle events: creation and deletion of an aquarium |
-| `parameter.measurements` | `parameters-service` | `parameters-service` (CQRS), `maintenance-service` (alerts) | Every new water parameter measurement |
-| `maintenance.events` | _(reserved)_ | — | Future: task completion events |
-
-### Key patterns implemented
-
-| Pattern | Where | What it solves |
-|---------|-------|----------------|
-| **Transactional Outbox** | `aquariums-service` | Events are written to `outbox_events` in the same DB transaction as the business operation; a scheduler publishes them to Kafka — zero message loss even if Kafka is temporarily down |
-| **CQRS (read/write model separation)** | `parameters-service` | Write model: `water_parameters` (append-only). Read model: `parameter_latest` (one row per aquarium, updated by a Kafka consumer). `GET /parameters/latest` reads from the fast read model |
-| **Idempotent consumer** | all consumers | Each service has a `processed_events` table; duplicate messages (Kafka at-least-once) are detected and skipped by `eventId` |
-| **`@RetryableTopic` + Dead Letter Topic** | all `@KafkaListener` methods | Failed events are retried up to 3 times (exponential backoff 1s→2s→4s); after all retries the message lands on a `.DLT` topic for investigation |
-| **Exactly-once producer** | `aquariums-service` | `TRANSACTIONAL_ID_CONFIG` + `ENABLE_IDEMPOTENCE_CONFIG=true` + `ACKS=all` |
-| **`isolation.level=read_committed`** | all consumers | Consumers never read events from uncommitted producer transactions |
-| **Parameter anomaly alerts** | `maintenance-service` | Listens to `parameter.measurements`; if temperature (24–28 °C) or pH (8.1–8.4) is out of the safe range, automatically creates a `high`-priority maintenance task |
-
-### Database
-
-All services share a single **PostgreSQL 16** instance (`aquarium_ms` database) with three logical schemas:
-
-| Schema | Tables |
-|--------|--------|
-| `core` | `aquariums`, `outbox_events` |
-| `inhabitants` | `inhabitants`, `fish`, `corals`, `processed_events` |
-| `parameters` | `parameters`, `manual_parameters`, `target_parameters`, `parameter_latest`, `processed_events` |
-| `maintenance` | `maintenance_tasks`, `products`, `processed_events` |
-
-Schema isolation is enforced at the application level via `spring.jpa.properties.hibernate.default_schema`. Migrations are managed by **Flyway** (each service has its own migration history table to avoid conflicts).
-
----
-
-## API Endpoints
-
-All requests go through the gateway at `http://localhost:8080`. Full interactive documentation is at **http://localhost:8080/swagger-ui.html**.
-
-### Aquariums
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/aquariums` | List all aquariums (paginated) |
-| `GET` | `/aquariums/{id}` | Get aquarium by ID |
-| `POST` | `/aquariums` | Create a new aquarium |
-| `PUT` | `/aquariums/{id}` | Update an aquarium |
-| `DELETE` | `/aquariums/{id}` | Delete an aquarium |
-
-### Inhabitants
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/aquariums/{id}/inhabitants` | List inhabitants of an aquarium (with species details) |
-| `POST` | `/aquariums/{id}/inhabitants` | Add an inhabitant |
-| `PUT` | `/aquariums/{id}/inhabitants/{inhabitantId}` | Update an inhabitant |
-| `DELETE` | `/aquariums/{id}/inhabitants/{inhabitantId}` | Remove an inhabitant |
-
-### Species
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/species/fish` | List all fish species |
-| `GET` | `/species/fish/{id}` | Get fish by ID |
-| `GET` | `/species/corals` | List all coral species |
-| `GET` | `/species/corals/{id}` | Get coral by ID |
-
-### Maintenance Tasks
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/aquariums/{id}/tasks` | List tasks (optional `?status=pending\|completed`) |
-| `POST` | `/aquariums/{id}/tasks` | Create a task |
-| `PUT` | `/aquariums/{id}/tasks/{taskId}` | Update a task |
-| `DELETE` | `/aquariums/{id}/tasks/{taskId}` | Delete a task |
-| `POST` | `/aquariums/{id}/tasks/{taskId}/complete` | Mark a task as completed |
-
-### Products
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/products` | List products (supports filters) |
-| `GET` | `/products/categories` | List distinct product categories |
-| `GET` | `/products/{id}` | Get product by ID |
-| `POST` | `/products` | Create a product |
-| `PUT` | `/products/{id}` | Update a product |
-| `PATCH` | `/products/{id}/mark-used` | Record last use date |
-| `PATCH` | `/products/{id}/toggle-favorite` | Toggle favorite flag |
-| `PATCH` | `/products/{id}/quantity` | Update quantity |
-| `DELETE` | `/products/{id}` | Delete a product |
-
-### Water Parameters
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/aquariums/{id}/parameters` | List readings (optional `?limit=N`) |
-| `POST` | `/aquariums/{id}/parameters` | Add a reading |
-| `GET` | `/aquariums/{id}/parameters/latest` | Get the latest reading (CQRS read model) |
-| `GET` | `/aquariums/{id}/parameters/history` | History by `?period=day\|week\|month` or `?from=...&to=...` |
-
-### Manual Parameters
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/aquariums/{id}/parameters/manual` | List manual readings (optional `?limit=N`) |
-| `POST` | `/aquariums/{id}/parameters/manual` | Add a manual reading |
-| `GET` | `/aquariums/{id}/parameters/manual/history` | History by `?from=...&to=...` (ISO-8601) |
-
-### Target Parameters
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/aquariums/{id}/settings/targets` | Get target values (null if not configured) |
-| `POST` | `/aquariums/{id}/settings/targets` | Save or update target values |
+| Pattern | Where | Purpose |
+|---------|-------|---------|
+| **Transactional Outbox** | `aquariums-service` | Zero message loss — events written to DB and Kafka atomically |
+| **CQRS** | `parameters-service` | Separate write (`water_parameters`) and read (`parameter_latest`) models |
+| **Idempotent consumer** | all consumers | Deduplication via `processed_events` table, safe with Kafka at-least-once |
+| **`@RetryableTopic` + DLT** | all `@KafkaListener` | 3 retries with exponential backoff, failed events land on `.DLT` topic |
+| **Circuit breaker + retry** | `aquariums-service` | Resilience4j protects inter-service HTTP calls |
+| **Parameter anomaly alerts** | `maintenance-service` | Auto-creates high-priority task when temp or pH is out of safe range |
 
 ---
 
@@ -226,10 +78,7 @@ All requests go through the gateway at `http://localhost:8080`. Full interactive
 
 ![Aquarium Microservices Dashboard](docs/grafana-dashboard.png)
 
-Real-time monitoring of all 7 microservices via Prometheus + Grafana. Metrics include request rate per service, JVM memory usage, active threads, and overall success rate. Dashboard auto-provisioned on `docker-compose up`.
-
-- **Grafana:** http://localhost:3000 (admin / admin) — pre-built dashboard "Aquarium Microservices - Overview"
-- **Prometheus:** http://localhost:9090 — raw metrics and target status
+Request rate, JVM memory, active threads, and success rate across all 7 services. Dashboard auto-provisioned on `docker-compose up`.
 
 ---
 
@@ -240,38 +89,19 @@ Real-time monitoring of all 7 microservices via Prometheus + Grafana. Metrics in
 | Language | Java 17 |
 | Framework | Spring Boot 3.3.5 |
 | Gateway | Spring Cloud Gateway |
-| Persistence | Spring Data JPA, Hibernate |
-| Migrations | Flyway |
+| Persistence | Spring Data JPA, Hibernate, Flyway |
 | Database | PostgreSQL 16 |
 | Messaging | Apache Kafka 3.7 (KRaft), Spring Kafka |
 | Resilience | Resilience4j (circuit breaker + retry) |
 | Containerization | Docker, Docker Compose |
 | Metrics | Prometheus, Grafana |
-| Build | Maven |
-| Utilities | Lombok, Springdoc OpenAPI |
-
----
-
-## Configuration
-
-Database credentials and service URLs are passed as environment variables. Default values are safe for local development.
-
-To change database credentials, update `DB_USER` and `DB_PASSWORD` in `docker-compose.yml` (they propagate automatically to all services).
-
-To point services at external URLs, override the environment variables in `docker-compose.yml`:
-
-```yaml
-SPECIES_SERVICE_URL: http://my-host:8083/species
-```
 
 ---
 
 ## Previous Version
 
-This project is the microservice evolution of a previous monolithic backend: [aquarium-monitor](https://github.com/F3rren/aquarium-monitor).
+Microservice evolution of [aquarium-monitor](https://github.com/F3rren/aquarium-monitor), the original monolithic backend.
 
 ---
-
-## License
 
 MIT © F3rren
