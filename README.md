@@ -263,6 +263,16 @@ SPECIES_SERVICE_URL: http://my-host:8083/species
 
 ---
 
+## Observability
+
+![Aquarium Microservices Dashboard](docs/grafana-dashboard.png)
+
+Real-time monitoring of all 7 microservices via Prometheus + Grafana.
+Metrics include request rate per service, JVM memory usage, active threads,
+and overall success rate. Dashboard auto-provisioned on `docker-compose up`.
+
+---
+
 ## Previous Version
 
 This project is the microservice evolution of a previous monolithic backend: [aquarium-monitor](https://github.com/F3rren/aquarium-monitor).
