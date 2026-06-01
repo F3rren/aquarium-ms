@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -72,6 +73,21 @@ public class GlobalExceptionHandler {
         log.warn("Illegal argument: {}", ex.getMessage());
 
         ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, ex.getMessage(), null, null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles malformed or unreadable request bodies, including JSON values that do not
+     * map to an accepted enum constant (e.g. an unknown aquarium {@code type}).
+     * Returns 400 Bad Request instead of a generic 500.
+     * @param ex the exception raised while parsing the request body.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleNotReadable(HttpMessageNotReadableException ex) {
+        log.warn("Malformed request body: {}", ex.getMostSpecificCause().getMessage());
+
+        ApiResponseDTO<Void> response = new ApiResponseDTO<>(
+                false, "Malformed or invalid request body", null, null);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 

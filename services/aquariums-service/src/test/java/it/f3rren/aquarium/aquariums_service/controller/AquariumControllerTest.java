@@ -34,6 +34,7 @@ import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.WaterParameterDTO;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
+import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 import it.f3rren.aquarium.aquariums_service.service.AquariumService;
 
 /**
@@ -64,7 +65,7 @@ class AquariumControllerTest {
         sampleAquarium.setId(1L);
         sampleAquarium.setName("Reef Tank");
         sampleAquarium.setVolume(200);
-        sampleAquarium.setType("saltwater");
+        sampleAquarium.setType(AquariumType.SALTWATER);
         sampleAquarium.setDescription("A reef aquarium");
         sampleAquarium.setCreatedAt(LocalDateTime.of(2025, 1, 1, 12, 0));
     }
@@ -168,7 +169,7 @@ class AquariumControllerTest {
             CreateAquariumDTO dto = new CreateAquariumDTO();
             dto.setName("New Tank");
             dto.setVolume(150);
-            dto.setType("freshwater");
+            dto.setType(AquariumType.FRESHWATER);
 
             when(aquariumService.createAquarium(any(CreateAquariumDTO.class))).thenReturn(sampleAquarium);
 
@@ -196,14 +197,13 @@ class AquariumControllerTest {
         @Test
         @DisplayName("should return 400 for invalid type")
         void shouldReturn400ForInvalidType() throws Exception {
-            CreateAquariumDTO dto = new CreateAquariumDTO();
-            dto.setName("Tank");
-            dto.setVolume(100);
-            dto.setType("invalid-type");
+            // 'type' is now a strict enum: an unknown value fails JSON deserialization
+            // and must be reported as 400, not 500.
+            String body = "{\"name\":\"Tank\",\"volume\":100,\"type\":\"invalid-type\"}";
 
             mockMvc.perform(post("/aquariums")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(dto)))
+                            .content(body))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
         }

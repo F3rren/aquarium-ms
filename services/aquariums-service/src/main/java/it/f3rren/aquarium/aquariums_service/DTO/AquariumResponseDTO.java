@@ -3,6 +3,7 @@ package it.f3rren.aquarium.aquariums_service.dto;
 import java.time.LocalDateTime;
 
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
+import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 import lombok.*;
 
 /**
@@ -30,7 +31,7 @@ public class AquariumResponseDTO {
     private int volume;
 
     /** Aquarium type: {@code "saltwater"} or {@code "freshwater"}. */
-    private String type;
+    private AquariumType type;
 
     /** Timestamp of when the aquarium was first created in the system. */
     private LocalDateTime createdAt;

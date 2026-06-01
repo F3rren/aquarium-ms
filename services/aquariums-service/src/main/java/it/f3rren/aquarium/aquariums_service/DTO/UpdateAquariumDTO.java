@@ -1,5 +1,6 @@
 package it.f3rren.aquarium.aquariums_service.dto;
 
+import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -33,8 +34,7 @@ public class UpdateAquariumDTO {
      * Type of the aquarium. Optional for partial updates.
      * Must be either 'saltwater' or 'freshwater' if provided.
      */
-    @Pattern(regexp = "^(saltwater|freshwater)$", message = "Type must be 'saltwater' or 'freshwater'")
-    private String type;
+    private AquariumType type;
 
     /**
      * Description of the aquarium. Optional for partial updates.
