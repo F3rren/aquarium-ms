@@ -24,6 +24,7 @@ import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
+import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
 
@@ -51,7 +52,7 @@ class AquariumServiceTest {
         sampleAquarium.setId(1L);
         sampleAquarium.setName("Reef Tank");
         sampleAquarium.setVolume(200);
-        sampleAquarium.setType("saltwater");
+        sampleAquarium.setType(AquariumType.SALTWATER);
         sampleAquarium.setDescription("A beautiful reef aquarium");
     }
 
@@ -69,7 +70,7 @@ class AquariumServiceTest {
             CreateAquariumDTO dto = new CreateAquariumDTO();
             dto.setName("  Reef Tank  ");
             dto.setVolume(200);
-            dto.setType("saltwater");
+            dto.setType(AquariumType.SALTWATER);
             dto.setDescription("A beautiful reef aquarium");
 
             when(aquariumRepository.save(any(Aquarium.class))).thenReturn(sampleAquarium);
@@ -88,7 +89,7 @@ class AquariumServiceTest {
             CreateAquariumDTO dto = new CreateAquariumDTO();
             dto.setName("  My Tank  ");
             dto.setVolume(100);
-            dto.setType("freshwater");
+            dto.setType(AquariumType.FRESHWATER);
 
             when(aquariumRepository.save(any(Aquarium.class))).thenAnswer(invocation -> {
                 Aquarium saved = invocation.getArgument(0);
@@ -117,7 +118,7 @@ class AquariumServiceTest {
             second.setId(2L);
             second.setName("Freshwater Tank");
             second.setVolume(100);
-            second.setType("freshwater");
+            second.setType(AquariumType.FRESHWATER);
 
             PageRequest pageable = PageRequest.of(0, 20);
             Page<Aquarium> page = new PageImpl<>(List.of(sampleAquarium, second), pageable, 2);
@@ -198,7 +199,7 @@ class AquariumServiceTest {
 
             assertEquals("Updated Name", result.getName());
             assertEquals(200, result.getVolume()); // unchanged
-            assertEquals("saltwater", result.getType()); // unchanged
+            assertEquals(AquariumType.SALTWATER, result.getType()); // unchanged
             assertEquals("A beautiful reef aquarium", result.getDescription()); // unchanged
         }
 
@@ -211,7 +212,7 @@ class AquariumServiceTest {
             UpdateAquariumDTO dto = new UpdateAquariumDTO();
             dto.setName("New Name");
             dto.setVolume(500);
-            dto.setType("freshwater");
+            dto.setType(AquariumType.FRESHWATER);
             dto.setDescription("New desc");
             dto.setImageUrl("https://example.com/img.jpg");
 
@@ -219,7 +220,7 @@ class AquariumServiceTest {
 
             assertEquals("New Name", result.getName());
             assertEquals(500, result.getVolume());
-            assertEquals("freshwater", result.getType());
+            assertEquals(AquariumType.FRESHWATER, result.getType());
             assertEquals("New desc", result.getDescription());
             assertEquals("https://example.com/img.jpg", result.getImageUrl());
         }

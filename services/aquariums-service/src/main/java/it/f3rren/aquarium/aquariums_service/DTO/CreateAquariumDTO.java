@@ -1,5 +1,6 @@
 package it.f3rren.aquarium.aquariums_service.dto;
 
+import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -29,10 +30,10 @@ public class CreateAquariumDTO {
     private int volume;
 
     /**
-     * Type of the aquarium. Must be either 'saltwater' or 'freshwater'.
+     * Type of the aquarium. Required. Must be either 'saltwater' or 'freshwater'.
      */
-    @Pattern(regexp = "^(saltwater|freshwater)$", message = "Type must be 'saltwater' or 'freshwater'")
-    private String type;
+    @NotNull(message = "Type is required and must be 'saltwater' or 'freshwater'")
+    private AquariumType type;
 
     /**
      * Description of the aquarium. This field is optional and must be at most 500 characters.

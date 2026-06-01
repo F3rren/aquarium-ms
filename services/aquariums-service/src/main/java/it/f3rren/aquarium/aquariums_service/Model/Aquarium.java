@@ -51,13 +51,14 @@ public class Aquarium {
     private int volume;
 
     /**
-     * Aquarium type: either {@code "saltwater"} or {@code "freshwater"}.
+     * Aquarium type: either {@code SALTWATER} or {@code FRESHWATER}.
      * Drives which parameter sets are relevant for this aquarium.
+     * Persisted as a string (enum name) for human-readable, refactor-safe storage.
      */
     @NotNull
-    @Size(min = 2, max = 50)
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private String type;
+    private AquariumType type;
 
     /**
      * Timestamp set automatically when the record is first inserted.

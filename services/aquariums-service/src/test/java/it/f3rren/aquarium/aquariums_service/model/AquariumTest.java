@@ -49,7 +49,7 @@ class AquariumTest {
             aquarium.setId(1L);
             aquarium.setName("Freshwater Tank");
             aquarium.setVolume(100);
-            aquarium.setType("freshwater");
+            aquarium.setType(AquariumType.FRESHWATER);
             aquarium.setCreatedAt(now);
             aquarium.setDescription("A peaceful tank");
             aquarium.setImageUrl("https://example.com/tank.jpg");
@@ -57,7 +57,7 @@ class AquariumTest {
             assertEquals(1L, aquarium.getId());
             assertEquals("Freshwater Tank", aquarium.getName());
             assertEquals(100, aquarium.getVolume());
-            assertEquals("freshwater", aquarium.getType());
+            assertEquals(AquariumType.FRESHWATER, aquarium.getType());
             assertEquals(now, aquarium.getCreatedAt());
             assertEquals("A peaceful tank", aquarium.getDescription());
             assertEquals("https://example.com/tank.jpg", aquarium.getImageUrl());
@@ -77,7 +77,7 @@ class AquariumTest {
                     1L,
                     "Saltwater Tank",
                     350,
-                    "saltwater",
+                    AquariumType.SALTWATER,
                     now,
                     "A reef aquarium",
                     "https://example.com/reef.jpg"
@@ -86,7 +86,7 @@ class AquariumTest {
             assertEquals(1L, aquarium.getId());
             assertEquals("Saltwater Tank", aquarium.getName());
             assertEquals(350, aquarium.getVolume());
-            assertEquals("saltwater", aquarium.getType());
+            assertEquals(AquariumType.SALTWATER, aquarium.getType());
             assertEquals(now, aquarium.getCreatedAt());
             assertEquals("A reef aquarium", aquarium.getDescription());
             assertEquals("https://example.com/reef.jpg", aquarium.getImageUrl());
