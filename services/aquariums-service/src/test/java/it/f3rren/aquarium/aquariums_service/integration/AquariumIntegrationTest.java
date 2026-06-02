@@ -33,7 +33,10 @@ import it.f3rren.aquarium.aquariums_service.model.AquariumType;
  * Uses a real PostgreSQL container via Testcontainers and runs all Flyway migrations.
  * Kafka is not required: {@link AquariumEventPublisher} is mocked.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration"
+)
 @Testcontainers(disabledWithoutDocker = true)
 class AquariumIntegrationTest {
 
@@ -49,10 +52,6 @@ class AquariumIntegrationTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
         registry.add("spring.jpa.properties.hibernate.dialect", () -> "org.hibernate.dialect.PostgreSQLDialect");
         registry.add("spring.flyway.enabled", () -> "true");
-        // Prevent Kafka from trying to connect to a non-existent broker
-        registry.add("spring.kafka.bootstrap-servers", () -> "localhost:9999");
-        registry.add("spring.kafka.admin.auto-create", () -> "false");
-        registry.add("spring.kafka.admin.fail-fast", () -> "false");
     }
 
     @MockBean
