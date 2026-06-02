@@ -38,11 +38,11 @@ import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 import it.f3rren.aquarium.aquariums_service.service.AquariumService;
 
 /**
- * Integration tests for AquariumController.
- * Uses @WebMvcTest to test the controller layer with MockMvc.
+ * Integration tests for the aquarium controller layer.
+ * Uses @WebMvcTest to test all four controllers with MockMvc.
  * Service and client dependencies are mocked.
  */
-@WebMvcTest(AquariumController.class)
+@WebMvcTest({AquariumController.class, WaterParameterController.class, ManualParameterController.class, TargetParameterController.class})
 class AquariumControllerTest {
 
     @Autowired

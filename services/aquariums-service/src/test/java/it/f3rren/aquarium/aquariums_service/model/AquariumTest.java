@@ -12,18 +12,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class AquariumTest {
 
     @Nested
-    @DisplayName("Convenience constructor Aquarium(String, int)")
-    class ConvenienceConstructor {
+    @DisplayName("Builder")
+    class BuilderTest {
 
         @Test
-        @DisplayName("should set name and volume; all other fields remain null/zero")
-        void shouldSetNameAndVolume() {
-            Aquarium aquarium = new Aquarium("Reef Tank", 200);
+        @DisplayName("should set only the fields provided to the builder")
+        void shouldBuildWithSelectedFields() {
+            Aquarium aquarium = Aquarium.builder()
+                    .name("Reef Tank")
+                    .volume(200)
+                    .type(AquariumType.SALTWATER)
+                    .build();
 
             assertEquals("Reef Tank", aquarium.getName());
             assertEquals(200, aquarium.getVolume());
+            assertEquals(AquariumType.SALTWATER, aquarium.getType());
             assertNull(aquarium.getId());
-            assertNull(aquarium.getType());
             assertNull(aquarium.getCreatedAt());
             assertNull(aquarium.getDescription());
             assertNull(aquarium.getImageUrl());

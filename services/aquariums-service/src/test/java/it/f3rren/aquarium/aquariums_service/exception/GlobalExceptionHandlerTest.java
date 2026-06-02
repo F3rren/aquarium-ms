@@ -20,12 +20,15 @@ import static org.mockito.Mockito.when;
 
 import it.f3rren.aquarium.aquariums_service.client.ParametersClient;
 import it.f3rren.aquarium.aquariums_service.controller.AquariumController;
+import it.f3rren.aquarium.aquariums_service.controller.ManualParameterController;
+import it.f3rren.aquarium.aquariums_service.controller.TargetParameterController;
+import it.f3rren.aquarium.aquariums_service.controller.WaterParameterController;
 import it.f3rren.aquarium.aquariums_service.service.AquariumService;
 
 /**
  * Tests for GlobalExceptionHandler, covering exception types not exercised elsewhere.
  */
-@WebMvcTest(AquariumController.class)
+@WebMvcTest({AquariumController.class, WaterParameterController.class, ManualParameterController.class, TargetParameterController.class})
 class GlobalExceptionHandlerTest {
 
     @Autowired

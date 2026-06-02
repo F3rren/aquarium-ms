@@ -21,6 +21,7 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
 @Table(name = "aquariums")
@@ -84,14 +85,4 @@ public class Aquarium {
     @Column(name = "image_url")
     private String imageUrl;
 
-    /**
-     * Convenience constructor for tests and seeders that only need name and volume.
-     *
-     * @param name   display name
-     * @param volume water volume in liters
-     */
-    public Aquarium(String name, int volume) {
-        this.name = name;
-        this.volume = volume;
-    }
 }

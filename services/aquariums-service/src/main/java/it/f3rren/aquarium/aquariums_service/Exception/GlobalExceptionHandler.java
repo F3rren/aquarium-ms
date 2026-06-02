@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +61,24 @@ public class GlobalExceptionHandler {
 
         ApiResponseDTO<Map<String, String>> response = new ApiResponseDTO<>(
                 false, "Validation failed", fieldErrors, null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles constraint violations on {@code @Validated} controller method parameters
+     * (e.g. {@code @Min}/{@code @Max} on query params). Returns 400 Bad Request.
+     * @param ex The constraint violation exception.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+                .map(cv -> cv.getPropertyPath() + ": " + cv.getMessage())
+                .findFirst()
+                .orElse("Constraint violation");
+
+        log.warn("Constraint violation: {}", message);
+
+        ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, message, null, null);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
