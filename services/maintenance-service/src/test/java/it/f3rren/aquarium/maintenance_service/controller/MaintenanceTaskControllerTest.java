@@ -99,6 +99,8 @@ class MaintenanceTaskControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.title").value("Water change"));
+
+            verify(taskService).createTask(eq(1L), any(CreateMaintenanceTaskDTO.class));
         }
 
         @Test
@@ -129,6 +131,8 @@ class MaintenanceTaskControllerTest {
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(taskService).updateTask(eq(1L), eq(1L), any(UpdateMaintenanceTaskDTO.class));
         }
 
         @Test
@@ -171,6 +175,8 @@ class MaintenanceTaskControllerTest {
 
             mockMvc.perform(delete("/aquariums/1/tasks/1"))
                     .andExpect(status().isNoContent());
+
+            verify(taskService).deleteTask(1L, 1L);
         }
 
         @Test
@@ -199,6 +205,8 @@ class MaintenanceTaskControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.isCompleted").value(true));
+
+            verify(taskService).completeTask(1L, 1L);
         }
 
         @Test

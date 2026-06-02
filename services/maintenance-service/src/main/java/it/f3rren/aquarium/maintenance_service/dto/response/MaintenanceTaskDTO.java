@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import it.f3rren.aquarium.maintenance_service.model.TaskFrequency;
+import it.f3rren.aquarium.maintenance_service.model.TaskPriority;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,8 +17,8 @@ public class MaintenanceTaskDTO {
     private Long aquariumId;
     private String title;
     private String description;
-    private String frequency;
-    private String priority;
+    private TaskFrequency frequency;
+    private TaskPriority priority;
     private Boolean isCompleted;
     private LocalDateTime dueDate;
     private LocalDateTime completedAt;

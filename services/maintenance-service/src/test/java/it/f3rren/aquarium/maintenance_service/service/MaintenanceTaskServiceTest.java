@@ -22,6 +22,8 @@ import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.mapper.MaintenanceTaskMapper;
 import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
+import it.f3rren.aquarium.maintenance_service.model.TaskFrequency;
+import it.f3rren.aquarium.maintenance_service.model.TaskPriority;
 import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +56,7 @@ class MaintenanceTaskServiceTest {
         void savesAndReturnsDto() {
             CreateMaintenanceTaskDTO dto = new CreateMaintenanceTaskDTO();
             dto.setTitle("Water change");
-            dto.setPriority("high");
+            dto.setPriority(TaskPriority.HIGH);
 
             when(taskRepository.save(any(MaintenanceTask.class))).thenReturn(sampleTask);
 
@@ -154,16 +156,16 @@ class MaintenanceTaskServiceTest {
             UpdateMaintenanceTaskDTO dto = new UpdateMaintenanceTaskDTO();
             dto.setTitle("Full update");
             dto.setDescription("Detailed description");
-            dto.setFrequency("weekly");
-            dto.setPriority("medium");
+            dto.setFrequency(TaskFrequency.WEEKLY);
+            dto.setPriority(TaskPriority.MEDIUM);
             dto.setNotes("Some notes");
 
             MaintenanceTaskDTO result = taskService.updateTask(1L, 1L, dto);
 
             assertEquals("Full update", result.getTitle());
             assertEquals("Detailed description", result.getDescription());
-            assertEquals("weekly", result.getFrequency());
-            assertEquals("medium", result.getPriority());
+            assertEquals(TaskFrequency.WEEKLY, result.getFrequency());
+            assertEquals(TaskPriority.MEDIUM, result.getPriority());
             assertEquals("Some notes", result.getNotes());
         }
 

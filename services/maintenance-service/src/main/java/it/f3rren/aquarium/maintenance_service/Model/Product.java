@@ -13,8 +13,10 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Table(name = "products")
 public class Product {
     
@@ -42,6 +44,7 @@ public class Product {
     @Column(name = "cost")
     private Double cost;
     
+    @Builder.Default
     @Column(name = "currency")
     private String currency = "€";
     
@@ -57,6 +60,7 @@ public class Product {
     @Column(name = "image_url")
     private String imageUrl;
     
+    @Builder.Default
     @Column(name = "is_favorite", nullable = false)
     private Boolean isFavorite = false;
     

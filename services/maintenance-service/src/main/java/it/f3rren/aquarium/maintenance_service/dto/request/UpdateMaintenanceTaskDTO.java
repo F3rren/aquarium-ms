@@ -6,6 +6,18 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import it.f3rren.aquarium.maintenance_service.model.TaskFrequency;
+import it.f3rren.aquarium.maintenance_service.model.TaskPriority;
+
+/**
+ * DTO for partial updates to a maintenance task.
+ * All fields are optional — only non-null fields are applied.
+ *
+ * <p><strong>Null limitation:</strong> a {@code null} field means "no change" and the existing
+ * value is preserved. Explicitly clearing an optional field requires a dedicated PATCH endpoint.</p>
+ *
+ * @author F3rren
+ */
 @Getter
 @Setter
 public class UpdateMaintenanceTaskDTO {
@@ -16,11 +28,9 @@ public class UpdateMaintenanceTaskDTO {
     @Size(max = 2000, message = "Description must be at most 2000 characters")
     private String description;
 
-    @Size(max = 50, message = "Frequency must be at most 50 characters")
-    private String frequency;
+    private TaskFrequency frequency;
 
-    @Size(max = 50, message = "Priority must be at most 50 characters")
-    private String priority;
+    private TaskPriority priority;
 
     private LocalDateTime dueDate;
 

@@ -7,6 +7,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import it.f3rren.aquarium.maintenance_service.model.TaskFrequency;
+import it.f3rren.aquarium.maintenance_service.model.TaskPriority;
+
 @Getter
 @Setter
 public class CreateMaintenanceTaskDTO {
@@ -18,11 +21,9 @@ public class CreateMaintenanceTaskDTO {
     @Size(max = 2000, message = "Description must be at most 2000 characters")
     private String description;
 
-    @Size(max = 50, message = "Frequency must be at most 50 characters")
-    private String frequency;
+    private TaskFrequency frequency;
 
-    @Size(max = 50, message = "Priority must be at most 50 characters")
-    private String priority;
+    private TaskPriority priority;
 
     private LocalDateTime dueDate;
 

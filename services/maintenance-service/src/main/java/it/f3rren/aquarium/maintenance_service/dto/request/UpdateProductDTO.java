@@ -8,6 +8,15 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * DTO for partial updates to a product record.
+ * All fields are optional — only non-null fields are applied.
+ *
+ * <p><strong>Null limitation:</strong> a {@code null} field means "no change" and the existing
+ * value is preserved. Explicitly clearing an optional field requires a dedicated PATCH endpoint.</p>
+ *
+ * @author F3rren
+ */
 @Getter
 @Setter
 public class UpdateProductDTO {
