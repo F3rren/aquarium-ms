@@ -16,7 +16,7 @@ Built with **Java 17, Spring Boot 3.3.5, Spring Cloud Gateway, Apache Kafka (KRa
 
 ---
 
-## Quick Start
+## Quick Start (local)
 
 **Only prerequisite: [Docker Desktop](https://www.docker.com/products/docker-desktop/)**
 
@@ -38,19 +38,19 @@ docker-compose up -d
 ## Architecture
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │         API Gateway :8080           │
-                    │  (routing · CORS · request logging) │
-                    └──────────────┬──────────────────────┘
-                                   │
-      ┌──────────────┬─────────────┼──────────────┬───────────────┐
-      ▼              ▼             ▼              ▼               ▼
+                   ┌─────────────────────────────────────┐
+                   │         API Gateway :8080           │
+                   │  (routing · CORS · request logging) │
+                   └──────────────┬──────────────────────┘
+                                  │
+     ┌──────────────┬─────────────┼──────────────┬───────────────┐
+     ▼              ▼             ▼              ▼               ▼
 aquariums-service  inhabitants-  species-      maintenance-   parameters-
     :8081           service       service        service        service
                      :8082         :8083          :8084          :8085
 
-                                            manual-parameters-service :8086
-                                            target-parameter-service  :8087
+                                           manual-parameters-service :8086
+                                           target-parameter-service  :8087
 ```
 
 **Synchronous (HTTP):** `inhabitants-service` → `species-service` for species enrichment. `aquariums-service` → parameter services via circuit breaker + retry.
@@ -78,7 +78,28 @@ aquariums-service  inhabitants-  species-      maintenance-   parameters-
 
 ![Aquarium Microservices Dashboard](docs/grafana-dashboard.png)
 
+- **Grafana:** http://localhost:3000 — pre-built dashboard "Aquarium Microservices - Overview"
+- **Prometheus:** http://localhost:9090 — raw metrics and target status
+
 Request rate, JVM memory, active threads, and success rate across all 7 services. Dashboard auto-provisioned on `docker-compose up`.
+
+---
+
+## Configuration
+
+Copy `.env.example` to `.env` to override local defaults — the file is gitignored and never committed.
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Default | Used by |
+|----------|---------|---------|
+| `SPRING_PROFILES_ACTIVE` | _(empty)_ | all Spring services |
+| `DB_USER` | `postgres` | postgres container + all Spring services |
+| `DB_PASSWORD` | `root` | same |
+| `GF_ADMIN_USER` | `admin` | Grafana |
+| `GF_ADMIN_PASSWORD` | `admin` | Grafana |
 
 ---
 
@@ -94,6 +115,7 @@ Request rate, JVM memory, active threads, and success rate across all 7 services
 | Messaging | Apache Kafka 3.7 (KRaft), Spring Kafka |
 | Resilience | Resilience4j (circuit breaker + retry) |
 | Containerization | Docker, Docker Compose |
+| CI/CD | GitHub Actions |
 | Metrics | Prometheus, Grafana |
 
 ---
