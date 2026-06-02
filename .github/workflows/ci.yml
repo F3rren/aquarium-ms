@@ -18,7 +18,9 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Run tests
-        run: ./mvnw test -B
+        run: |
+          chmod +x mvnw
+          ./mvnw test -B
         working-directory: services/aquariums-service
 
   test-inhabitants-service:
@@ -32,7 +34,9 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Run tests
-        run: ./mvnw test -B
+        run: |
+          chmod +x mvnw
+          ./mvnw test -B
         working-directory: services/inhabitants-service
 
   test-maintenance-service:
@@ -46,7 +50,9 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Run tests
-        run: ./mvnw test -B
+        run: |
+          chmod +x mvnw
+          ./mvnw test -B
         working-directory: services/maintenance-service
 
   test-manual-parameters-service:
@@ -60,7 +66,9 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Run tests
-        run: ./mvnw test -B
+        run: |
+          chmod +x mvnw
+          ./mvnw test -B
         working-directory: services/manual-parameters-service
 
   test-parameters-service:
@@ -74,7 +82,9 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Run tests
-        run: ./mvnw test -B
+        run: |
+          chmod +x mvnw
+          ./mvnw test -B
         working-directory: services/parameters-service
 
   test-species-service:
@@ -88,7 +98,9 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Run tests
-        run: ./mvnw test -B
+        run: |
+          chmod +x mvnw
+          ./mvnw test -B
         working-directory: services/species-service
 
   test-target-parameter-service:
@@ -102,5 +114,7 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Run tests
-        run: ./mvnw test -B
+        run: |
+          chmod +x mvnw
+          ./mvnw test -B
         working-directory: services/target-parameter-service
