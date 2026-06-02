@@ -1,6 +1,8 @@
 package it.f3rren.aquarium.parameters_service.exception;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -11,9 +13,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import it.f3rren.aquarium.parameters_service.controller.WaterParameterController;
+import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
+import it.f3rren.aquarium.parameters_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.parameters_service.service.IParameterService;
 
 /**
@@ -24,6 +32,9 @@ class GlobalExceptionHandlerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private IParameterService parameterService;
@@ -87,6 +98,64 @@ class GlobalExceptionHandlerTest {
                     .andExpect(status().isInternalServerError())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.message").value("An internal error occurred"));
+        }
+    }
+
+    @Nested
+    @DisplayName("ResourceNotFoundException → 404")
+    class ResourceNotFoundTests {
+
+        @Test
+        @DisplayName("should return 404 with error message")
+        void shouldReturn404() throws Exception {
+            when(parameterService.getLatestParameter(eq(99L)))
+                    .thenThrow(new ResourceNotFoundException("No parameters found for aquarium 99"));
+
+            mockMvc.perform(get("/aquariums/99/parameters/latest"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value("No parameters found for aquarium 99"));
+        }
+    }
+
+    @Nested
+    @DisplayName("HttpMessageNotReadableException → 400")
+    class HttpMessageNotReadableTests {
+
+        @Test
+        @DisplayName("should return 400 for non-numeric value in numeric field")
+        void shouldReturn400ForMalformedBody() throws Exception {
+            mockMvc.perform(post("/aquariums/1/parameters")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"temperature\":\"not-a-number\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value("Malformed or unreadable request body"));
+        }
+    }
+
+    @Nested
+    @DisplayName("DataIntegrityViolationException → 409")
+    class DataIntegrityTests {
+
+        @Test
+        @DisplayName("should return 409 Conflict on DB constraint violation")
+        void shouldReturn409OnConstraintViolation() throws Exception {
+            CreateParameterDTO dto = new CreateParameterDTO();
+            dto.setTemperature(25.5);
+            dto.setPh(8.2);
+            dto.setSalinity(35);
+            dto.setOrp(350);
+
+            when(parameterService.saveParameter(any(), any(CreateParameterDTO.class)))
+                    .thenThrow(new DataIntegrityViolationException("unique constraint violation"));
+
+            mockMvc.perform(post("/aquariums/1/parameters")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value("Data integrity constraint violated"));
         }
     }
 }

@@ -68,6 +68,8 @@ class WaterParameterControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.temperature").value(25.5));
+
+            verify(parameterService).saveParameter(eq(1L), any(CreateParameterDTO.class));
         }
 
         @Test
