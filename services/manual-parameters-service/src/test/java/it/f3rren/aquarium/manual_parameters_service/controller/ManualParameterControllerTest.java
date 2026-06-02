@@ -65,6 +65,8 @@ class ManualParameterControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.calcium").value(420.0));
+
+            verify(manualParameterService).saveManualParameter(eq(1L), any(CreateManualParameterDTO.class));
         }
 
         @Test
