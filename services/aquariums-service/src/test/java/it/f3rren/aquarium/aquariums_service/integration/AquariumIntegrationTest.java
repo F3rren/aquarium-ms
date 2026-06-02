@@ -30,10 +30,19 @@ import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 
 /**
  * End-to-end integration test for aquarium CRUD operations.
- * Uses a real PostgreSQL container via Testcontainers and runs all Flyway migrations.
+ * Uses a real PostgreSQL container via Testcontainers; Hibernate creates the schema.
  * Kafka is not required: {@link AquariumEventPublisher} is mocked.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "spring.kafka.bootstrap-servers=localhost:9999",
+                "spring.kafka.admin.auto-create=false",
+                "spring.kafka.admin.fail-fast=false",
+                "management.health.db.enabled=false",
+                "management.health.circuitbreakers.enabled=false"
+        }
+)
 @Testcontainers(disabledWithoutDocker = true)
 class AquariumIntegrationTest {
 
@@ -46,11 +55,11 @@ class AquariumIntegrationTest {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
+        // Create the 'core' schema before Hibernate runs DDL
+        registry.add("spring.datasource.hikari.connection-init-sql", () -> "CREATE SCHEMA IF NOT EXISTS core");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.jpa.properties.hibernate.dialect", () -> "org.hibernate.dialect.PostgreSQLDialect");
-        registry.add("spring.flyway.enabled", () -> "true");
-        // Prevent Kafka from trying to connect to a non-existent broker
-        registry.add("spring.kafka.bootstrap-servers", () -> "localhost:9999");
+        registry.add("spring.flyway.enabled", () -> "false");
     }
 
     @MockBean
