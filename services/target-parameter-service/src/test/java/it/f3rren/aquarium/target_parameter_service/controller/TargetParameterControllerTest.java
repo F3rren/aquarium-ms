@@ -56,6 +56,7 @@ class TargetParameterControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.temperature").value(26.0));
+            verify(targetParameterService).getTargetParameters(1L);
         }
 
         @Test
@@ -106,6 +107,7 @@ class TargetParameterControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.temperature").value(26.0));
+            verify(targetParameterService).saveTargetParameters(eq(1L), any(SaveTargetParameterDTO.class));
         }
 
         @Test

@@ -40,6 +40,7 @@ class TargetParameterServiceTest {
             assertNotNull(result);
             assertEquals(25.0, result.getTemperature());
             assertEquals(8.2, result.getPh());
+            verify(targetParameterRepository).findByAquariumId(1L);
         }
 
         @Test
@@ -49,6 +50,7 @@ class TargetParameterServiceTest {
             TargetParameterResponseDTO result = targetParameterService.getTargetParameters(99L);
 
             assertNull(result);
+            verify(targetParameterRepository).findByAquariumId(99L);
         }
     }
 
