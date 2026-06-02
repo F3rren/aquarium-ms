@@ -66,6 +66,16 @@ public class WebClientConfig {
         return buildRestClient(targetParametersUrl);
     }
 
+    /**
+     * Builds a {@link RestClient} with a fixed base URL and shared timeout settings.
+     *
+     * <p>Uses the JDK {@link HttpClient} as the underlying transport so that
+     * connect and read timeouts are enforced at the socket level, preventing
+     * downstream services from blocking threads indefinitely.</p>
+     *
+     * @param baseUrl the base URL of the downstream service
+     * @return a configured {@link RestClient} instance
+     */
     private RestClient buildRestClient(String baseUrl) {
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(CONNECT_TIMEOUT)

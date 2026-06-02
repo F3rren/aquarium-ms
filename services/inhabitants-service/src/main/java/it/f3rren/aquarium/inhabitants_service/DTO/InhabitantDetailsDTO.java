@@ -17,7 +17,7 @@ public class InhabitantDetailsDTO {
     private Integer quantity;
     private LocalDateTime addedDate;
     private String notes;
-    private Object details;
+    private SpeciesDetailsDTO details;
     
     // Custom fields that can override species defaults
     private String customName;

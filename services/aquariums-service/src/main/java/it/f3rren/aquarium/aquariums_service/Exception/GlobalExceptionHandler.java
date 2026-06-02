@@ -5,14 +5,17 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import it.f3rren.aquarium.aquariums_service.dto.ApiResponseDTO;
 
@@ -62,6 +65,24 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles constraint violations on {@code @Validated} controller method parameters
+     * (e.g. {@code @Min}/{@code @Max} on query params). Returns 400 Bad Request.
+     * @param ex The constraint violation exception.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+                .map(cv -> cv.getPropertyPath() + ": " + cv.getMessage())
+                .findFirst()
+                .orElse("Constraint violation");
+
+        log.warn("Constraint violation: {}", message);
+
+        ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, message, null, null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Handles illegal argument exceptions and returns a response with error details.
      * @param ex The illegal argument exception that occurred.
      * This is typically thrown when a method is called with an invalid argument.
@@ -71,6 +92,21 @@ public class GlobalExceptionHandler {
         log.warn("Illegal argument: {}", ex.getMessage());
 
         ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, ex.getMessage(), null, null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles malformed or unreadable request bodies, including JSON values that do not
+     * map to an accepted enum constant (e.g. an unknown aquarium {@code type}).
+     * Returns 400 Bad Request instead of a generic 500.
+     * @param ex the exception raised while parsing the request body.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleNotReadable(HttpMessageNotReadableException ex) {
+        log.warn("Malformed request body: {}", ex.getMostSpecificCause().getMessage());
+
+        ApiResponseDTO<Void> response = new ApiResponseDTO<>(
+                false, "Malformed or invalid request body", null, null);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -113,6 +149,18 @@ public class GlobalExceptionHandler {
 
         ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, "External service communication error", null, null);
         return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    /**
+     * Handles requests for static resources that do not exist (e.g. favicon.ico).
+     * Logged at DEBUG to avoid noise in ERROR logs.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleNoResourceFound(NoResourceFoundException ex) {
+        log.debug("Static resource not found: {}", ex.getMessage());
+
+        ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, "Resource not found", null, null);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     /**

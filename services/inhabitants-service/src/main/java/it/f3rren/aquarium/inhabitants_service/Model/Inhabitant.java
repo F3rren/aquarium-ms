@@ -2,26 +2,31 @@ package it.f3rren.aquarium.inhabitants_service.model;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import lombok.*;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Table(name = "aquarium_inhabitants")
 public class Inhabitant {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(name = "aquarium_id", nullable = false)
     private Long aquariumId;
-    
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "inhabitant_type", nullable = false)
-    private String inhabitantType; // "fish" o "coral"
+    private InhabitantType inhabitantType;
     
     @Column(name = "inhabitant_id", nullable = false)
     private Long inhabitantId;

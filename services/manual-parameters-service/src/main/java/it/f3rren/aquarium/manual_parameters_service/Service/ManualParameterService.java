@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
+import it.f3rren.aquarium.manual_parameters_service.dto.ManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
 import it.f3rren.aquarium.manual_parameters_service.repository.IManualParameterRepository;
@@ -25,7 +26,7 @@ public class ManualParameterService implements IManualParameterService {
     }
 
     @Transactional
-    public ManualParameter saveManualParameter(Long aquariumId, CreateManualParameterDTO dto) {
+    public ManualParameterDTO saveManualParameter(Long aquariumId, CreateManualParameterDTO dto) {
         ManualParameter parameter = new ManualParameter();
         parameter.setAquariumId(aquariumId);
         parameter.setCalcium(dto.getCalcium());
@@ -36,26 +37,39 @@ public class ManualParameterService implements IManualParameterService {
         parameter.setNotes(dto.getNotes());
 
         log.info("Saving manual parameter for aquarium {}", aquariumId);
-        return manualParameterRepository.save(parameter);
+        return toDTO(manualParameterRepository.save(parameter));
     }
 
     @Transactional(readOnly = true)
-    public ManualParameter getLatestManualParameter(Long aquariumId) {
-        ManualParameter parameter = manualParameterRepository.findFirstByAquariumIdOrderByMeasuredAtDesc(aquariumId);
-        if (parameter == null) {
-            throw new ResourceNotFoundException("No manual parameter found for aquarium with ID: " + aquariumId);
-        }
-        return parameter;
+    public ManualParameterDTO getLatestManualParameter(Long aquariumId) {
+        return toDTO(manualParameterRepository.findFirstByAquariumIdOrderByMeasuredAtDesc(aquariumId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No manual parameter found for aquarium with ID: " + aquariumId)));
     }
 
     @Transactional(readOnly = true)
-    public List<ManualParameter> getAllManualParameters(Long aquariumId) {
-        return manualParameterRepository.findByAquariumIdOrderByMeasuredAtDesc(aquariumId);
+    public List<ManualParameterDTO> getAllManualParameters(Long aquariumId) {
+        return manualParameterRepository.findByAquariumIdOrderByMeasuredAtDesc(aquariumId)
+                .stream().map(this::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ManualParameter> getManualParametersHistory(Long aquariumId, LocalDateTime from, LocalDateTime to) {
-        return manualParameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(
-                aquariumId, from, to);
+    public List<ManualParameterDTO> getManualParametersHistory(Long aquariumId, LocalDateTime from, LocalDateTime to) {
+        return manualParameterRepository.findByAquariumIdAndMeasuredAtBetweenOrderByMeasuredAtDesc(aquariumId, from, to)
+                .stream().map(this::toDTO).toList();
+    }
+
+    private ManualParameterDTO toDTO(ManualParameter parameter) {
+        ManualParameterDTO dto = new ManualParameterDTO();
+        dto.setId(parameter.getId());
+        dto.setAquariumId(parameter.getAquariumId());
+        dto.setCalcium(parameter.getCalcium());
+        dto.setMagnesium(parameter.getMagnesium());
+        dto.setKh(parameter.getKh());
+        dto.setNitrate(parameter.getNitrate());
+        dto.setPhosphate(parameter.getPhosphate());
+        dto.setMeasuredAt(parameter.getMeasuredAt());
+        dto.setNotes(parameter.getNotes());
+        return dto;
     }
 }

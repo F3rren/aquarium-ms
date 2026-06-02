@@ -3,6 +3,16 @@ package it.f3rren.aquarium.inhabitants_service.dto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+/**
+ * DTO for partial updates to an inhabitant record.
+ * All fields are optional — only non-null fields are applied.
+ *
+ * <p><strong>Null limitation:</strong> a {@code null} field means "no change" and the existing
+ * value is preserved. Explicitly clearing an optional field (e.g. {@code notes}) requires a
+ * dedicated PATCH endpoint.</p>
+ *
+ * @author F3rren
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

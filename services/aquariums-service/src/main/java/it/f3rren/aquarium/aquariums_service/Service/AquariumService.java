@@ -12,17 +12,18 @@ import org.springframework.transaction.annotation.Transactional;
 import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
+import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
 
 /**
- * Service class for managing Aquarium entities.
- * Provides operations for creating, retrieving, updating, and deleting Aquarium entities.
- * Also handles basic CRUD operations and transactions.
- * Utilizes Spring Data JPA for database interactions.
- * Caches and transactions are managed by Spring.
- * Logs are managed by SLF4J.
- * @Service annotation marks this class as a Spring service component.
+ * Default implementation of {@link IAquariumService}.
+ *
+ * <p>Handles all business logic for aquarium lifecycle management: creation with input
+ * sanitization (trim), partial updates via {@link java.util.Optional}, and existence
+ * checks before delete. All write operations are wrapped in a transaction; reads use
+ * {@code readOnly = true} for performance.</p>
+ *
  * @author F3rren
  */
 @Service
@@ -31,9 +32,11 @@ public class AquariumService implements IAquariumService {
     private static final Logger log = LoggerFactory.getLogger(AquariumService.class);
 
     private final IAquariumRepository aquariumRepository;
+    private final AquariumEventPublisher eventPublisher;
 
-    public AquariumService(IAquariumRepository aquariumRepository) {
+    public AquariumService(IAquariumRepository aquariumRepository, AquariumEventPublisher eventPublisher) {
         this.aquariumRepository = aquariumRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -46,12 +49,21 @@ public class AquariumService implements IAquariumService {
         Aquarium aquarium = new Aquarium();
         aquarium.setName(dto.getName().trim());
         aquarium.setVolume(dto.getVolume());
-        aquarium.setType(dto.getType() != null ? dto.getType().trim() : null);
+        aquarium.setType(dto.getType());
         aquarium.setDescription(dto.getDescription());
         aquarium.setImageUrl(dto.getImageUrl());
 
-        log.info("Creating aquarium: {}", dto.getName());
-        return aquariumRepository.save(aquarium);
+        Aquarium saved = aquariumRepository.save(aquarium);
+        log.info("Aquarium created with ID: {}", saved.getId());
+
+        // The event publish must never compromise the committed write. A failure here
+        // is logged explicitly so the inconsistency is visible instead of silent.
+        try {
+            eventPublisher.publishCreated(saved.getId());
+        } catch (Exception ex) {
+            log.error("Failed to publish CREATED event for aquarium ID: {}", saved.getId(), ex);
+        }
+        return saved;
     }
 
     /**
@@ -92,12 +104,13 @@ public class AquariumService implements IAquariumService {
         // Partial update: only non-null fields are applied, preserving existing values
         Optional.ofNullable(dto.getName()).map(String::trim).ifPresent(existing::setName);
         Optional.ofNullable(dto.getVolume()).ifPresent(existing::setVolume);
-        Optional.ofNullable(dto.getType()).map(String::trim).ifPresent(existing::setType);
+        Optional.ofNullable(dto.getType()).ifPresent(existing::setType);
         Optional.ofNullable(dto.getDescription()).ifPresent(existing::setDescription);
         Optional.ofNullable(dto.getImageUrl()).ifPresent(existing::setImageUrl);
 
-        log.info("Updating aquarium with ID: {}", id);
-        return aquariumRepository.save(existing);
+        Aquarium updated = aquariumRepository.save(existing);
+        log.info("Aquarium updated with ID: {}", updated.getId());
+        return updated;
     }
 
     /**
@@ -110,7 +123,14 @@ public class AquariumService implements IAquariumService {
         if (!aquariumRepository.existsById(id)) {
             throw new ResourceNotFoundException("Aquarium not found with ID: " + id);
         }
-        log.info("Deleting aquarium with ID: {}", id);
         aquariumRepository.deleteById(id);
+        log.info("Aquarium deleted with ID: {}", id);
+
+        // As with create, a publish failure must not hide the fact that the row was deleted.
+        try {
+            eventPublisher.publishDeleted(id);
+        } catch (Exception ex) {
+            log.error("Failed to publish DELETED event for aquarium ID: {}", id, ex);
+        }
     }
 }

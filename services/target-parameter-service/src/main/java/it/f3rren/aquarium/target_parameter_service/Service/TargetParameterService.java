@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
+import it.f3rren.aquarium.target_parameter_service.dto.TargetParameterResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.model.TargetParameter;
 import it.f3rren.aquarium.target_parameter_service.repository.ITargetParameterRepository;
 
@@ -20,32 +21,42 @@ public class TargetParameterService implements ITargetParameterService {
         this.targetParameterRepository = targetParameterRepository;
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public TargetParameter getTargetParameters(Long aquariumId) {
-        log.info("Recupero target parameters per acquario id={}", aquariumId);
-        return targetParameterRepository.findByAquariumId(aquariumId);
+    public TargetParameterResponseDTO getTargetParameters(Long aquariumId) {
+        log.info("Retrieving target parameters for aquarium id={}", aquariumId);
+        return targetParameterRepository.findByAquariumId(aquariumId)
+                .map(this::toDTO)
+                .orElse(null);
     }
 
+    @Override
     @Transactional
-    public TargetParameter saveTargetParameters(Long aquariumId, SaveTargetParameterDTO dto) {
-        TargetParameter existing = targetParameterRepository.findByAquariumId(aquariumId);
+    public TargetParameterResponseDTO saveTargetParameters(Long aquariumId, SaveTargetParameterDTO dto) {
+        TargetParameter target = targetParameterRepository.findByAquariumId(aquariumId)
+                .orElseGet(() -> {
+                    log.info("Creating target parameters for aquarium id={}", aquariumId);
+                    TargetParameter t = new TargetParameter();
+                    t.setAquariumId(aquariumId);
+                    return t;
+                });
 
-        if (existing != null) {
-            log.info("Aggiornamento target parameters per acquario id={}", aquariumId);
-            existing.setTemperature(dto.getTemperature());
-            existing.setPh(dto.getPh());
-            existing.setSalinity(dto.getSalinity());
-            existing.setOrp(dto.getOrp());
-            return targetParameterRepository.save(existing);
-        } else {
-            log.info("Creazione target parameters per acquario id={}", aquariumId);
-            TargetParameter target = new TargetParameter();
-            target.setAquariumId(aquariumId);
-            target.setTemperature(dto.getTemperature());
-            target.setPh(dto.getPh());
-            target.setSalinity(dto.getSalinity());
-            target.setOrp(dto.getOrp());
-            return targetParameterRepository.save(target);
-        }
+        log.info("Saving target parameters for aquarium id={}", aquariumId);
+        target.setTemperature(dto.getTemperature());
+        target.setPh(dto.getPh());
+        target.setSalinity(dto.getSalinity());
+        target.setOrp(dto.getOrp());
+
+        return toDTO(targetParameterRepository.save(target));
+    }
+
+    private TargetParameterResponseDTO toDTO(TargetParameter target) {
+        return new TargetParameterResponseDTO(
+                target.getId(),
+                target.getAquariumId(),
+                target.getTemperature(),
+                target.getPh(),
+                target.getSalinity(),
+                target.getOrp());
     }
 }

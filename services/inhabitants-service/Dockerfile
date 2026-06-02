@@ -1,10 +1,11 @@
 FROM eclipse-temurin:17-jdk-alpine AS builder
-RUN apk add --no-cache maven
 WORKDIR /app
+COPY mvnw .
+COPY .mvn .mvn
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
 COPY src src
-RUN mvn clean package -DskipTests
+RUN ./mvnw clean package -DskipTests -Dmaven.compiler.release=17
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app

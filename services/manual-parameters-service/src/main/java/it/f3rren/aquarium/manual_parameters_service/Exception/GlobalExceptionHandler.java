@@ -1,16 +1,20 @@
 package it.f3rren.aquarium.manual_parameters_service.exception;
 
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import it.f3rren.aquarium.manual_parameters_service.dto.ApiResponseDTO;
 
@@ -39,11 +43,41 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ApiResponseDTO<>(false, e.getMessage(), null, null), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleDateTimeParseException(DateTimeParseException e) {
+        log.warn("Invalid date format: {}", e.getMessage());
+        return new ResponseEntity<>(
+                new ApiResponseDTO<>(false, "Invalid date format. Expected ISO-8601 (e.g. 2024-01-15T10:30:00)", null, null),
+                HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponseDTO<Void>> handleTypeMismatchException(MethodArgumentTypeMismatchException e) {
         String msg = "Invalid value '" + e.getValue() + "' for parameter '" + e.getName() + "'";
         log.warn("Type mismatch: {}", msg);
         return new ResponseEntity<>(new ApiResponseDTO<>(false, msg, null, null), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleNoResourceFound(NoResourceFoundException e) {
+        log.debug("Static resource not found: {}", e.getMessage());
+        return new ResponseEntity<>(new ApiResponseDTO<>(false, "Resource not found", null, null), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleNotReadable(HttpMessageNotReadableException ex) {
+        log.warn("Malformed or unreadable request body: {}", ex.getMessage());
+        return new ResponseEntity<>(
+                new ApiResponseDTO<>(false, "Malformed or unreadable request body", null, null),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Data integrity constraint violated: {}", ex.getMessage());
+        return new ResponseEntity<>(
+                new ApiResponseDTO<>(false, "Data integrity constraint violated", null, null),
+                HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(Exception.class)

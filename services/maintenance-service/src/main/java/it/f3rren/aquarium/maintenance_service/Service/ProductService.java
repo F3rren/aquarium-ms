@@ -8,8 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import it.f3rren.aquarium.maintenance_service.dto.CreateProductDTO;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.ProductFilter;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
+import it.f3rren.aquarium.maintenance_service.mapper.ProductMapper;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.model.Product;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
@@ -21,13 +24,15 @@ public class ProductService implements IProductService {
     private static final Logger log = LoggerFactory.getLogger(ProductService.class);
 
     private final IProductRepository productRepository;
+    private final ProductMapper productMapper;
 
-    public ProductService(IProductRepository productRepository) {
+    public ProductService(IProductRepository productRepository, ProductMapper productMapper) {
         this.productRepository = productRepository;
+        this.productMapper = productMapper;
     }
 
     @Transactional
-    public Product createProduct(CreateProductDTO dto) {
+    public ProductDTO createProduct(CreateProductDTO dto) {
         Product product = new Product();
         product.setName(dto.getName());
         product.setCategory(dto.getCategory());
@@ -44,64 +49,46 @@ public class ProductService implements IProductService {
         product.setUsageFrequency(dto.getUsageFrequency());
 
         log.info("Creating product: {}", dto.getName());
-        return productRepository.save(product);
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional(readOnly = true)
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<ProductDTO> getProducts(ProductFilter filter) {
+        if (Boolean.TRUE.equals(filter.getFavorites())) {
+            return productMapper.toDTOList(productRepository.findByIsFavoriteTrueOrderByNameAsc());
+        } else if (Boolean.TRUE.equals(filter.getExpired())) {
+            return productMapper.toDTOList(productRepository.findByExpiryDateBefore(LocalDate.now()));
+        } else if (Boolean.TRUE.equals(filter.getExpiringSoon())) {
+            LocalDate today = LocalDate.now();
+            return productMapper.toDTOList(productRepository.findByExpiryDateBetween(today, today.plusDays(30)));
+        } else if (Boolean.TRUE.equals(filter.getLowStock())) {
+            return productMapper.toDTOList(productRepository.findLowStockProducts());
+        } else if (Boolean.TRUE.equals(filter.getShouldUseAgain())) {
+            return productMapper.toDTOList(productRepository.findProductsToUseAgain());
+        } else if (filter.getCategory() != null) {
+            ProductCategory cat = ProductCategory.valueOf(filter.getCategory().toUpperCase());
+            return productMapper.toDTOList(productRepository.findByCategoryOrderByNameAsc(cat));
+        } else if (filter.getBrand() != null) {
+            return productMapper.toDTOList(productRepository.findByBrandOrderByNameAsc(filter.getBrand()));
+        } else if (filter.getSearch() != null) {
+            return productMapper.toDTOList(productRepository.findByNameContainingIgnoreCaseOrderByNameAsc(filter.getSearch()));
+        }
+        return productMapper.toDTOList(productRepository.findAll());
     }
 
     @Transactional(readOnly = true)
-    public Product getProductById(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
+    public ProductDTO getProductById(Long id) {
+        return productMapper.toDTO(productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id)));
     }
 
     @Transactional(readOnly = true)
-    public List<Product> getProductsByCategory(ProductCategory category) {
-        return productRepository.findByCategoryOrderByNameAsc(category);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getFavoriteProducts() {
-        return productRepository.findByIsFavoriteTrueOrderByNameAsc();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getProductsByBrand(String brand) {
-        return productRepository.findByBrandOrderByNameAsc(brand);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getExpiredProducts() {
-        return productRepository.findByExpiryDateBefore(LocalDate.now());
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getProductsExpiringSoon() {
-        LocalDate today = LocalDate.now();
-        LocalDate in30Days = today.plusDays(30);
-        return productRepository.findByExpiryDateBetween(today, in30Days);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getLowStockProducts() {
-        return productRepository.findLowStockProducts();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> searchProductsByName(String name) {
-        return productRepository.findByNameContainingIgnoreCaseOrderByNameAsc(name);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Product> getProductsToUseAgain() {
-        return productRepository.findProductsToUseAgain();
+    public List<ProductDTO> getProductsByCategory(ProductCategory category) {
+        return productMapper.toDTOList(productRepository.findByCategoryOrderByNameAsc(category));
     }
 
     @Transactional
-    public Product updateProduct(Long id, UpdateProductDTO dto) {
+    public ProductDTO updateProduct(Long id, UpdateProductDTO dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
 
@@ -121,39 +108,39 @@ public class ProductService implements IProductService {
         if (dto.getLastUsed() != null) product.setLastUsed(dto.getLastUsed());
 
         log.info("Updating product {}", id);
-        return productRepository.save(product);
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional
-    public Product markAsUsed(Long id) {
+    public ProductDTO markAsUsed(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
 
         product.setLastUsed(LocalDate.now());
         log.info("Marking product {} as used", id);
-        return productRepository.save(product);
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional
-    public Product toggleFavorite(Long id) {
+    public ProductDTO toggleFavorite(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
 
         product.setIsFavorite(!product.getIsFavorite());
         log.info("Toggling favorite for product {} -> {}", id, product.getIsFavorite());
-        return productRepository.save(product);
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional
-    public Product updateQuantity(Long id, Double quantityChange) {
+    public ProductDTO updateQuantity(Long id, Double quantityChange) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
 
-        Double currentQuantity = product.getQuantity() != null ? product.getQuantity() : 0.0;
+        double currentQuantity = product.getQuantity() != null ? product.getQuantity() : 0.0;
         product.setQuantity(currentQuantity + quantityChange);
 
         log.info("Updating quantity for product {}: {} -> {}", id, currentQuantity, product.getQuantity());
-        return productRepository.save(product);
+        return productMapper.toDTO(productRepository.save(product));
     }
 
     @Transactional

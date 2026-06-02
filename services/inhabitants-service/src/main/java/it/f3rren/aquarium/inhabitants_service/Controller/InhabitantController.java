@@ -15,13 +15,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.f3rren.aquarium.inhabitants_service.dto.ApiResponseDTOInhabitantDetailsList;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.inhabitants_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.CreateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.UpdateInhabitantDTO;
-import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
+import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
 import it.f3rren.aquarium.inhabitants_service.service.IInhabitantService;
 
 @RestController
@@ -37,6 +41,7 @@ public class InhabitantController {
 
     @GetMapping("/{id}/inhabitants")
     @Operation(summary = "Get inhabitants by aquarium ID", description = "Retrieve details of inhabitants in a specific aquarium")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOInhabitantDetailsList.class)))
     public ResponseEntity<ApiResponseDTO<List<InhabitantDetailsDTO>>> getAquariumInhabitants(@PathVariable Long id) {
         List<InhabitantDetailsDTO> inhabitants = inhabitantService.getInhabitantsByAquariumId(id);
 
@@ -47,21 +52,21 @@ public class InhabitantController {
                 Map.of(
                         "aquariumId", id,
                         "totalCount", inhabitants.size(),
-                        "fishCount", inhabitants.stream().filter(i -> "fish".equals(i.getType())).count(),
-                        "coralCount", inhabitants.stream().filter(i -> "coral".equals(i.getType())).count()));
+                        "fishCount", inhabitants.stream().filter(i -> InhabitantType.FISH.getValue().equals(i.getType())).count(),
+                        "coralCount", inhabitants.stream().filter(i -> InhabitantType.CORAL.getValue().equals(i.getType())).count()));
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/inhabitants")
     @Operation(summary = "Add an inhabitant to an aquarium", description = "Add a new inhabitant to a specific aquarium")
-    public ResponseEntity<ApiResponseDTO<Inhabitant>> addInhabitantToAquarium(
+    public ResponseEntity<ApiResponseDTO<InhabitantDetailsDTO>> addInhabitantToAquarium(
             @PathVariable Long id,
             @Valid @RequestBody CreateInhabitantDTO dto) {
 
-        Inhabitant saved = inhabitantService.addInhabitant(id, dto);
+        InhabitantDetailsDTO saved = inhabitantService.addInhabitant(id, dto);
 
-        ApiResponseDTO<Inhabitant> response = new ApiResponseDTO<>(
+        ApiResponseDTO<InhabitantDetailsDTO> response = new ApiResponseDTO<>(
                 true,
                 "Inhabitant added successfully",
                 saved,
@@ -72,14 +77,14 @@ public class InhabitantController {
 
     @PutMapping("/{aquariumId}/inhabitants/{inhabitantId}")
     @Operation(summary = "Update an inhabitant", description = "Update quantity, notes, custom name, current size or other custom fields of an inhabitant")
-    public ResponseEntity<ApiResponseDTO<Inhabitant>> updateInhabitant(
+    public ResponseEntity<ApiResponseDTO<InhabitantDetailsDTO>> updateInhabitant(
             @PathVariable Long aquariumId,
             @PathVariable Long inhabitantId,
             @Valid @RequestBody UpdateInhabitantDTO dto) {
 
-        Inhabitant updated = inhabitantService.updateInhabitant(aquariumId, inhabitantId, dto);
+        InhabitantDetailsDTO updated = inhabitantService.updateInhabitant(aquariumId, inhabitantId, dto);
 
-        ApiResponseDTO<Inhabitant> response = new ApiResponseDTO<>(
+        ApiResponseDTO<InhabitantDetailsDTO> response = new ApiResponseDTO<>(
                 true,
                 "Inhabitant updated successfully",
                 updated,
@@ -90,18 +95,12 @@ public class InhabitantController {
 
     @DeleteMapping("/{aquariumId}/inhabitants/{inhabitantId}")
     @Operation(summary = "Remove an inhabitant from an aquarium", description = "Remove an inhabitant from a specific aquarium")
-    public ResponseEntity<ApiResponseDTO<Void>> removeInhabitantFromAquarium(
+    public ResponseEntity<Void> removeInhabitantFromAquarium(
             @PathVariable Long aquariumId,
             @PathVariable Long inhabitantId) {
 
         inhabitantService.removeInhabitant(aquariumId, inhabitantId);
 
-        ApiResponseDTO<Void> response = new ApiResponseDTO<>(
-                true,
-                "Inhabitant removed successfully",
-                null,
-                null);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 }

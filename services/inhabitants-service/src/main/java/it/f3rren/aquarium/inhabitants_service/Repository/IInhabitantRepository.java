@@ -8,5 +8,6 @@ import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
 
 public interface IInhabitantRepository extends JpaRepository<Inhabitant, Long> {
     List<Inhabitant> findByAquariumId(Long aquariumId);
-    List<Inhabitant> findByAquariumIdAndInhabitantType(Long aquariumId, String inhabitantType);
+
+    void deleteAllByAquariumId(Long aquariumId);
 }

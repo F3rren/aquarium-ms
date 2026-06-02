@@ -6,8 +6,10 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Table(name = "target_parameters")
 public class TargetParameter {
 

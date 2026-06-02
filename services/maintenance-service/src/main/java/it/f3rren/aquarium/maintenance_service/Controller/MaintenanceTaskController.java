@@ -8,12 +8,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOMaintenanceTaskList;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
-import it.f3rren.aquarium.maintenance_service.dto.CreateMaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateMaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.service.IMaintenanceTaskService;
 
 @RestController
@@ -29,11 +33,12 @@ public class MaintenanceTaskController {
 
     @GetMapping
     @Operation(summary = "Get all maintenance tasks for an aquarium", description = "Retrieve tasks, optionally filtered by status")
-    public ResponseEntity<ApiResponseDTO<List<MaintenanceTask>>> getAllTasks(
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOMaintenanceTaskList.class)))
+    public ResponseEntity<ApiResponseDTO<List<MaintenanceTaskDTO>>> getAllTasks(
             @PathVariable Long id,
             @RequestParam(required = false) String status) {
 
-        List<MaintenanceTask> tasks;
+        List<MaintenanceTaskDTO> tasks;
 
         if ("pending".equals(status)) {
             tasks = taskService.getPendingTasks(id);
@@ -43,7 +48,7 @@ public class MaintenanceTaskController {
             tasks = taskService.getAllTasks(id);
         }
 
-        ApiResponseDTO<List<MaintenanceTask>> response = new ApiResponseDTO<>(
+        ApiResponseDTO<List<MaintenanceTaskDTO>> response = new ApiResponseDTO<>(
                 true,
                 "Tasks retrieved successfully",
                 tasks,
@@ -54,13 +59,13 @@ public class MaintenanceTaskController {
 
     @PostMapping
     @Operation(summary = "Create a new maintenance task", description = "Create a new task for a specific aquarium")
-    public ResponseEntity<ApiResponseDTO<MaintenanceTask>> createTask(
+    public ResponseEntity<ApiResponseDTO<MaintenanceTaskDTO>> createTask(
             @PathVariable Long id,
             @Valid @RequestBody CreateMaintenanceTaskDTO dto) {
 
-        MaintenanceTask created = taskService.createTask(id, dto);
+        MaintenanceTaskDTO created = taskService.createTask(id, dto);
 
-        ApiResponseDTO<MaintenanceTask> response = new ApiResponseDTO<>(
+        ApiResponseDTO<MaintenanceTaskDTO> response = new ApiResponseDTO<>(
                 true,
                 "Task created successfully",
                 created,
@@ -71,14 +76,14 @@ public class MaintenanceTaskController {
 
     @PutMapping("/{taskId}")
     @Operation(summary = "Update a maintenance task", description = "Update details of a specific task")
-    public ResponseEntity<ApiResponseDTO<MaintenanceTask>> updateTask(
+    public ResponseEntity<ApiResponseDTO<MaintenanceTaskDTO>> updateTask(
             @PathVariable Long id,
             @PathVariable Long taskId,
             @Valid @RequestBody UpdateMaintenanceTaskDTO dto) {
 
-        MaintenanceTask updated = taskService.updateTask(id, taskId, dto);
+        MaintenanceTaskDTO updated = taskService.updateTask(id, taskId, dto);
 
-        ApiResponseDTO<MaintenanceTask> response = new ApiResponseDTO<>(
+        ApiResponseDTO<MaintenanceTaskDTO> response = new ApiResponseDTO<>(
                 true,
                 "Task updated successfully",
                 updated,
@@ -89,30 +94,24 @@ public class MaintenanceTaskController {
 
     @DeleteMapping("/{taskId}")
     @Operation(summary = "Delete a maintenance task", description = "Delete a specific task")
-    public ResponseEntity<ApiResponseDTO<Void>> deleteTask(
+    public ResponseEntity<Void> deleteTask(
             @PathVariable Long id,
             @PathVariable Long taskId) {
 
         taskService.deleteTask(id, taskId);
 
-        ApiResponseDTO<Void> response = new ApiResponseDTO<>(
-                true,
-                "Task deleted successfully",
-                null,
-                null);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{taskId}/complete")
     @Operation(summary = "Mark a task as completed", description = "Mark a specific task as completed")
-    public ResponseEntity<ApiResponseDTO<MaintenanceTask>> completeTask(
+    public ResponseEntity<ApiResponseDTO<MaintenanceTaskDTO>> completeTask(
             @PathVariable Long id,
             @PathVariable Long taskId) {
 
-        MaintenanceTask completed = taskService.completeTask(id, taskId);
+        MaintenanceTaskDTO completed = taskService.completeTask(id, taskId);
 
-        ApiResponseDTO<MaintenanceTask> response = new ApiResponseDTO<>(
+        ApiResponseDTO<MaintenanceTaskDTO> response = new ApiResponseDTO<>(
                 true,
                 "Task completed successfully",
                 completed,

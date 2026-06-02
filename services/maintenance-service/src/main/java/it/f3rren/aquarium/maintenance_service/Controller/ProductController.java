@@ -8,13 +8,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOProductCategoryArray;
+import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOProductList;
 import jakarta.validation.Valid;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
-import it.f3rren.aquarium.maintenance_service.dto.CreateProductDTO;
-import it.f3rren.aquarium.maintenance_service.dto.QuantityChangeDTO;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateProductDTO;
-import it.f3rren.aquarium.maintenance_service.model.Product;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.ProductFilter;
+import it.f3rren.aquarium.maintenance_service.dto.request.QuantityChangeDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateProductDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
 import it.f3rren.aquarium.maintenance_service.service.IProductService;
 
@@ -31,7 +37,8 @@ public class ProductController {
 
     @GetMapping
     @Operation(summary = "Get all products", description = "Retrieve products, optionally filtered by category, brand, or search term")
-    public ResponseEntity<ApiResponseDTO<List<Product>>> getAllProducts(
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOProductList.class)))
+    public ResponseEntity<ApiResponseDTO<List<ProductDTO>>> getAllProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) String search,
@@ -41,30 +48,10 @@ public class ProductController {
             @RequestParam(required = false) Boolean lowStock,
             @RequestParam(required = false) Boolean shouldUseAgain) {
 
-        List<Product> products;
+        ProductFilter filter = new ProductFilter(category, brand, search, favorites, expired, expiringSoon, lowStock, shouldUseAgain);
+        List<ProductDTO> products = productService.getProducts(filter);
 
-        if (favorites != null && favorites) {
-            products = productService.getFavoriteProducts();
-        } else if (expired != null && expired) {
-            products = productService.getExpiredProducts();
-        } else if (expiringSoon != null && expiringSoon) {
-            products = productService.getProductsExpiringSoon();
-        } else if (lowStock != null && lowStock) {
-            products = productService.getLowStockProducts();
-        } else if (shouldUseAgain != null && shouldUseAgain) {
-            products = productService.getProductsToUseAgain();
-        } else if (category != null) {
-            ProductCategory cat = ProductCategory.valueOf(category.toUpperCase());
-            products = productService.getProductsByCategory(cat);
-        } else if (brand != null) {
-            products = productService.getProductsByBrand(brand);
-        } else if (search != null) {
-            products = productService.searchProductsByName(search);
-        } else {
-            products = productService.getAllProducts();
-        }
-
-        ApiResponseDTO<List<Product>> response = new ApiResponseDTO<>(
+        ApiResponseDTO<List<ProductDTO>> response = new ApiResponseDTO<>(
                 true,
                 "Products retrieved successfully",
                 products,
@@ -75,6 +62,7 @@ public class ProductController {
 
     @GetMapping("/categories")
     @Operation(summary = "Get all product categories", description = "Retrieve the list of all available product categories")
+    @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOProductCategoryArray.class)))
     public ResponseEntity<ApiResponseDTO<ProductCategory[]>> getCategories() {
         ProductCategory[] categories = ProductCategory.values();
 
@@ -89,10 +77,10 @@ public class ProductController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get product by ID", description = "Retrieve a specific product by its ID")
-    public ResponseEntity<ApiResponseDTO<Product>> getProductById(@PathVariable Long id) {
-        Product product = productService.getProductById(id);
+    public ResponseEntity<ApiResponseDTO<ProductDTO>> getProductById(@PathVariable Long id) {
+        ProductDTO product = productService.getProductById(id);
 
-        ApiResponseDTO<Product> response = new ApiResponseDTO<>(
+        ApiResponseDTO<ProductDTO> response = new ApiResponseDTO<>(
                 true,
                 "Product retrieved successfully",
                 product,
@@ -103,10 +91,10 @@ public class ProductController {
 
     @PostMapping
     @Operation(summary = "Create a new product", description = "Create a new product")
-    public ResponseEntity<ApiResponseDTO<Product>> createProduct(@Valid @RequestBody CreateProductDTO dto) {
-        Product created = productService.createProduct(dto);
+    public ResponseEntity<ApiResponseDTO<ProductDTO>> createProduct(@Valid @RequestBody CreateProductDTO dto) {
+        ProductDTO created = productService.createProduct(dto);
 
-        ApiResponseDTO<Product> response = new ApiResponseDTO<>(
+        ApiResponseDTO<ProductDTO> response = new ApiResponseDTO<>(
                 true,
                 "Product created successfully",
                 created,
@@ -117,13 +105,13 @@ public class ProductController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing product", description = "Update details of a specific product")
-    public ResponseEntity<ApiResponseDTO<Product>> updateProduct(
+    public ResponseEntity<ApiResponseDTO<ProductDTO>> updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody UpdateProductDTO dto) {
 
-        Product updated = productService.updateProduct(id, dto);
+        ProductDTO updated = productService.updateProduct(id, dto);
 
-        ApiResponseDTO<Product> response = new ApiResponseDTO<>(
+        ApiResponseDTO<ProductDTO> response = new ApiResponseDTO<>(
                 true,
                 "Product updated successfully",
                 updated,
@@ -134,10 +122,10 @@ public class ProductController {
 
     @PatchMapping("/{id}/mark-used")
     @Operation(summary = "Mark product as used", description = "Update the last used date of a product to today")
-    public ResponseEntity<ApiResponseDTO<Product>> markAsUsed(@PathVariable Long id) {
-        Product updated = productService.markAsUsed(id);
+    public ResponseEntity<ApiResponseDTO<ProductDTO>> markAsUsed(@PathVariable Long id) {
+        ProductDTO updated = productService.markAsUsed(id);
 
-        ApiResponseDTO<Product> response = new ApiResponseDTO<>(
+        ApiResponseDTO<ProductDTO> response = new ApiResponseDTO<>(
                 true,
                 "Product marked as used",
                 updated,
@@ -148,10 +136,10 @@ public class ProductController {
 
     @PatchMapping("/{id}/toggle-favorite")
     @Operation(summary = "Toggle favorite status", description = "Toggle the favorite status of a product")
-    public ResponseEntity<ApiResponseDTO<Product>> toggleFavorite(@PathVariable Long id) {
-        Product updated = productService.toggleFavorite(id);
+    public ResponseEntity<ApiResponseDTO<ProductDTO>> toggleFavorite(@PathVariable Long id) {
+        ProductDTO updated = productService.toggleFavorite(id);
 
-        ApiResponseDTO<Product> response = new ApiResponseDTO<>(
+        ApiResponseDTO<ProductDTO> response = new ApiResponseDTO<>(
                 true,
                 "Favorite status toggled",
                 updated,
@@ -162,13 +150,13 @@ public class ProductController {
 
     @PatchMapping("/{id}/quantity")
     @Operation(summary = "Update product quantity", description = "Add or subtract from product quantity")
-    public ResponseEntity<ApiResponseDTO<Product>> updateQuantity(
+    public ResponseEntity<ApiResponseDTO<ProductDTO>> updateQuantity(
             @PathVariable Long id,
             @Valid @RequestBody QuantityChangeDTO dto) {
 
-        Product updated = productService.updateQuantity(id, dto.getChange());
+        ProductDTO updated = productService.updateQuantity(id, dto.getChange());
 
-        ApiResponseDTO<Product> response = new ApiResponseDTO<>(
+        ApiResponseDTO<ProductDTO> response = new ApiResponseDTO<>(
                 true,
                 "Quantity updated successfully",
                 updated,
@@ -179,15 +167,9 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a product", description = "Delete a specific product")
-    public ResponseEntity<ApiResponseDTO<Void>> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
 
-        ApiResponseDTO<Void> response = new ApiResponseDTO<>(
-                true,
-                "Product deleted successfully",
-                null,
-                null);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 }

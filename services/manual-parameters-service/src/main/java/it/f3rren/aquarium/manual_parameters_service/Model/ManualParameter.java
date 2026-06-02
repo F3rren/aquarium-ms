@@ -10,8 +10,10 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Table(name = "manual_parameters")
 public class ManualParameter {
 

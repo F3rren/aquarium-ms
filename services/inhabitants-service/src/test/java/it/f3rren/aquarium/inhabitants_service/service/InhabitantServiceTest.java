@@ -13,8 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import it.f3rren.aquarium.inhabitants_service.dto.CoralDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.CreateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.FishDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
@@ -22,6 +24,8 @@ import it.f3rren.aquarium.inhabitants_service.dto.UpdateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
 import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
+import it.f3rren.aquarium.inhabitants_service.client.SpeciesClient;
+import it.f3rren.aquarium.inhabitants_service.mapper.InhabitantMapper;
 import it.f3rren.aquarium.inhabitants_service.repository.IInhabitantRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,31 +35,46 @@ class InhabitantServiceTest {
     private IInhabitantRepository inhabitantRepository;
 
     @Mock
-    private FishService fishService;
+    private SpeciesClient speciesClient;
 
-    @Mock
-    private CoralService coralService;
+    @Spy
+    private InhabitantMapper inhabitantMapper = new InhabitantMapper();
 
     @InjectMocks
     private InhabitantService inhabitantService;
 
     private Inhabitant sampleFishInhabitant;
+    private Inhabitant sampleCoralInhabitant;
     private FishDTO sampleFish;
+    private CoralDTO sampleCoral;
 
     @BeforeEach
     void setUp() {
         sampleFishInhabitant = new Inhabitant();
         sampleFishInhabitant.setId(1L);
         sampleFishInhabitant.setAquariumId(10L);
-        sampleFishInhabitant.setInhabitantType("fish");
+        sampleFishInhabitant.setInhabitantType(InhabitantType.FISH);
         sampleFishInhabitant.setInhabitantId(100L);
         sampleFishInhabitant.setQuantity(2);
         sampleFishInhabitant.setAddedDate(LocalDateTime.now());
+
+        sampleCoralInhabitant = new Inhabitant();
+        sampleCoralInhabitant.setId(2L);
+        sampleCoralInhabitant.setAquariumId(10L);
+        sampleCoralInhabitant.setInhabitantType(InhabitantType.CORAL);
+        sampleCoralInhabitant.setInhabitantId(200L);
+        sampleCoralInhabitant.setQuantity(1);
+        sampleCoralInhabitant.setAddedDate(LocalDateTime.now());
 
         sampleFish = new FishDTO();
         sampleFish.setId(100L);
         sampleFish.setCommonName("Clownfish");
         sampleFish.setScientificName("Amphiprioninae");
+
+        sampleCoral = new CoralDTO();
+        sampleCoral.setId(200L);
+        sampleCoral.setCommonName("Hammer Coral");
+        sampleCoral.setScientificName("Euphyllia ancora");
     }
 
     @Nested
@@ -64,7 +83,7 @@ class InhabitantServiceTest {
         @Test
         void returnsEnrichedDtoList() {
             when(inhabitantRepository.findByAquariumId(10L)).thenReturn(List.of(sampleFishInhabitant));
-            when(fishService.getFishById(100L)).thenReturn(sampleFish);
+            when(speciesClient.getFishById(100L)).thenReturn(sampleFish);
 
             List<InhabitantDetailsDTO> result = inhabitantService.getInhabitantsByAquariumId(10L);
 
@@ -87,11 +106,60 @@ class InhabitantServiceTest {
         void usesCustomNameOverSpeciesName() {
             sampleFishInhabitant.setCustomName("Nemo");
             when(inhabitantRepository.findByAquariumId(10L)).thenReturn(List.of(sampleFishInhabitant));
-            when(fishService.getFishById(100L)).thenReturn(sampleFish);
+            when(speciesClient.getFishById(100L)).thenReturn(sampleFish);
 
             List<InhabitantDetailsDTO> result = inhabitantService.getInhabitantsByAquariumId(10L);
 
             assertEquals("Nemo", result.get(0).getCommonName());
+        }
+
+        @Test
+        void returnsEnrichedDtoForCoral() {
+            when(inhabitantRepository.findByAquariumId(10L)).thenReturn(List.of(sampleCoralInhabitant));
+            when(speciesClient.getCoralById(200L)).thenReturn(sampleCoral);
+
+            List<InhabitantDetailsDTO> result = inhabitantService.getInhabitantsByAquariumId(10L);
+
+            assertEquals(1, result.size());
+            assertEquals("Hammer Coral", result.get(0).getCommonName());
+            assertEquals("Euphyllia ancora", result.get(0).getScientificName());
+            assertEquals("coral", result.get(0).getType());
+            assertEquals(sampleCoral, result.get(0).getDetails());
+        }
+
+        @Test
+        void usesCustomNameForCoral() {
+            sampleCoralInhabitant.setCustomName("My Hammer");
+            when(inhabitantRepository.findByAquariumId(10L)).thenReturn(List.of(sampleCoralInhabitant));
+            when(speciesClient.getCoralById(200L)).thenReturn(sampleCoral);
+
+            List<InhabitantDetailsDTO> result = inhabitantService.getInhabitantsByAquariumId(10L);
+
+            assertEquals("My Hammer", result.get(0).getCommonName());
+        }
+
+        @Test
+        void returnsDtoWithoutSpeciesDetailsWhenSpeciesNotFound() {
+            when(inhabitantRepository.findByAquariumId(10L)).thenReturn(List.of(sampleFishInhabitant));
+            when(speciesClient.getFishById(100L)).thenThrow(new ResourceNotFoundException("Fish not found"));
+
+            List<InhabitantDetailsDTO> result = inhabitantService.getInhabitantsByAquariumId(10L);
+
+            assertEquals(1, result.size());
+            assertNull(result.get(0).getCommonName());
+            assertNull(result.get(0).getDetails());
+        }
+
+        @Test
+        void returnsDtoWithoutSpeciesDetailsWhenRuntimeExceptionOccurs() {
+            when(inhabitantRepository.findByAquariumId(10L)).thenReturn(List.of(sampleFishInhabitant));
+            when(speciesClient.getFishById(100L)).thenThrow(new RuntimeException("Connection timeout"));
+
+            List<InhabitantDetailsDTO> result = inhabitantService.getInhabitantsByAquariumId(10L);
+
+            assertEquals(1, result.size());
+            assertNull(result.get(0).getCommonName());
+            assertNull(result.get(0).getDetails());
         }
     }
 
@@ -99,20 +167,18 @@ class InhabitantServiceTest {
     class AddInhabitant {
 
         @Test
-        void savesAndReturnsInhabitant() {
+        void savesAndReturnsDtoForFish() {
             CreateInhabitantDTO dto = new CreateInhabitantDTO();
             dto.setInhabitantType(InhabitantType.FISH);
             dto.setInhabitantId(100L);
             dto.setQuantity(1);
 
-            when(fishService.getFishById(100L)).thenReturn(sampleFish);
+            when(speciesClient.getFishById(100L)).thenReturn(sampleFish);
             when(inhabitantRepository.save(any(Inhabitant.class))).thenAnswer(i -> i.getArgument(0));
 
-            Inhabitant result = inhabitantService.addInhabitant(10L, dto);
+            InhabitantDetailsDTO result = inhabitantService.addInhabitant(10L, dto);
 
-            assertEquals(10L, result.getAquariumId());
-            assertEquals("fish", result.getInhabitantType());
-            assertEquals(100L, result.getInhabitantId());
+            assertEquals("fish", result.getType());
             verify(inhabitantRepository).save(any(Inhabitant.class));
         }
 
@@ -122,11 +188,30 @@ class InhabitantServiceTest {
             dto.setInhabitantType(InhabitantType.FISH);
             dto.setInhabitantId(999L);
 
-            when(fishService.getFishById(999L)).thenThrow(new ResourceNotFoundException("Fish not found"));
+            when(speciesClient.getFishById(999L)).thenThrow(new ResourceNotFoundException("Fish not found"));
 
             assertThrows(ResourceNotFoundException.class,
                     () -> inhabitantService.addInhabitant(10L, dto));
             verify(inhabitantRepository, never()).save(any());
+        }
+
+        @Test
+        void savesAndReturnsDtoForCoral() {
+            CreateInhabitantDTO dto = new CreateInhabitantDTO();
+            dto.setInhabitantType(InhabitantType.CORAL);
+            dto.setInhabitantId(200L);
+            dto.setQuantity(3);
+            dto.setCustomName("My Hammer");
+
+            when(speciesClient.getCoralById(200L)).thenReturn(sampleCoral);
+            when(inhabitantRepository.save(any(Inhabitant.class))).thenAnswer(i -> i.getArgument(0));
+
+            InhabitantDetailsDTO result = inhabitantService.addInhabitant(10L, dto);
+
+            assertEquals("coral", result.getType());
+            assertEquals(3, result.getQuantity());
+            verify(speciesClient).getCoralById(200L);
+            verify(inhabitantRepository).save(any(Inhabitant.class));
         }
     }
 
@@ -155,7 +240,7 @@ class InhabitantServiceTest {
         void throwsWhenInhabitantBelongsToDifferentAquarium() {
             when(inhabitantRepository.findById(1L)).thenReturn(Optional.of(sampleFishInhabitant));
 
-            assertThrows(ResourceNotFoundException.class,
+            assertThrows(IllegalArgumentException.class,
                     () -> inhabitantService.removeInhabitant(99L, 1L));
             verify(inhabitantRepository, never()).deleteById(any());
         }
@@ -165,7 +250,7 @@ class InhabitantServiceTest {
     class UpdateInhabitant {
 
         @Test
-        void updatesOnlyNonNullFields() {
+        void updatesOnlyNonNullFieldsAndReturnsDto() {
             when(inhabitantRepository.findById(1L)).thenReturn(Optional.of(sampleFishInhabitant));
             when(inhabitantRepository.save(any(Inhabitant.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -173,7 +258,7 @@ class InhabitantServiceTest {
             dto.setQuantity(5);
             dto.setNotes("Updated notes");
 
-            Inhabitant result = inhabitantService.updateInhabitant(10L, 1L, dto);
+            InhabitantDetailsDTO result = inhabitantService.updateInhabitant(10L, 1L, dto);
 
             assertEquals(5, result.getQuantity());
             assertEquals("Updated notes", result.getNotes());

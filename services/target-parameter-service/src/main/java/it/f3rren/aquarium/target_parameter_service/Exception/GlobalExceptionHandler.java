@@ -5,12 +5,15 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import it.f3rren.aquarium.target_parameter_service.dto.ApiResponseDTO;
 
@@ -44,6 +47,24 @@ public class GlobalExceptionHandler {
         String msg = "Invalid value '" + e.getValue() + "' for parameter '" + e.getName() + "'";
         log.warn("Type mismatch: {}", msg);
         return new ResponseEntity<>(new ApiResponseDTO<>(false, msg, null, null), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleNoResourceFound(NoResourceFoundException e) {
+        log.debug("Static resource not found: {}", e.getMessage());
+        return new ResponseEntity<>(new ApiResponseDTO<>(false, "Resource not found", null, null), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        log.warn("Malformed request body: {}", e.getMessage());
+        return new ResponseEntity<>(new ApiResponseDTO<>(false, "Malformed or unreadable request body", null, null), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        log.warn("Data integrity violation: {}", e.getMessage());
+        return new ResponseEntity<>(new ApiResponseDTO<>(false, "Data integrity violation", null, null), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(Exception.class)

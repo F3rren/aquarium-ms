@@ -20,19 +20,22 @@ import static org.mockito.Mockito.when;
 
 import it.f3rren.aquarium.aquariums_service.client.ParametersClient;
 import it.f3rren.aquarium.aquariums_service.controller.AquariumController;
-import it.f3rren.aquarium.aquariums_service.service.AquariumService;
+import it.f3rren.aquarium.aquariums_service.controller.ManualParameterController;
+import it.f3rren.aquarium.aquariums_service.controller.TargetParameterController;
+import it.f3rren.aquarium.aquariums_service.controller.WaterParameterController;
+import it.f3rren.aquarium.aquariums_service.service.IAquariumService;
 
 /**
  * Tests for GlobalExceptionHandler, covering exception types not exercised elsewhere.
  */
-@WebMvcTest(AquariumController.class)
+@WebMvcTest({AquariumController.class, WaterParameterController.class, ManualParameterController.class, TargetParameterController.class})
 class GlobalExceptionHandlerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private AquariumService aquariumService;
+    private IAquariumService aquariumService;
 
     @MockBean
     private ParametersClient parametersClient;
@@ -98,6 +101,35 @@ class GlobalExceptionHandlerTest {
             mockMvc.perform(get("/aquariums/1/water-parameters")
                             .param("limit", "999"))
                     .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+    }
+
+    @Nested
+    @DisplayName("MethodArgumentTypeMismatchException")
+    class TypeMismatchTests {
+
+        @Test
+        @DisplayName("should return 400 for non-numeric ID")
+        void shouldReturn400ForInvalidIdType() throws Exception {
+            mockMvc.perform(get("/aquariums/abc"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+    }
+
+    @Nested
+    @DisplayName("Generic Exception")
+    class GenericExceptionTests {
+
+        @Test
+        @DisplayName("should return 500 for unexpected exception")
+        void shouldReturn500ForUnexpectedException() throws Exception {
+            when(aquariumService.getAquariumById(anyLong()))
+                    .thenThrow(new RuntimeException("unexpected error"));
+
+            mockMvc.perform(get("/aquariums/1"))
+                    .andExpect(status().isInternalServerError())
                     .andExpect(jsonPath("$.success").value(false));
         }
     }

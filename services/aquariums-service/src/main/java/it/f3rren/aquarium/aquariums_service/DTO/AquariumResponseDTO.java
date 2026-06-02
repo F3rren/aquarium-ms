@@ -3,11 +3,16 @@ package it.f3rren.aquarium.aquariums_service.dto;
 import java.time.LocalDateTime;
 
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
+import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 import lombok.*;
 
 /**
- * DTO representing the response for an aquarium.
- * It is used to encapsulate the data of an aquarium for API responses.
+ * Read-only DTO returned by all aquarium endpoints.
+ *
+ * <p>Decouples the API contract from the {@link Aquarium} entity so that
+ * internal model changes do not affect the public interface.
+ * Use the {@link #fromEntity(Aquarium)} factory method to construct instances.</p>
+ *
  * @author F3rren
  */
 @Data
@@ -16,45 +21,32 @@ import lombok.*;
 @Builder
 public class AquariumResponseDTO {
 
-    /**
-     * The ID of the aquarium. Not null because of @NotNull annotations.
-     */
+    /** Database-assigned identifier of the aquarium. */
     private Long id;
 
-    /**
-     * The name of the aquarium. Not null because of @NotNull annotations.
-     */
+    /** Display name of the aquarium. */
     private String name;
 
-    /**
-     * The volume of the aquarium. Not null because of @NotNull annotations.
-     */
+    /** Water volume in liters. */
     private int volume;
 
-    /**
-     * The type of the aquarium. Not null because of @NotNull annotations.
-     */
-    private String type;
+    /** Aquarium type: {@code "saltwater"} or {@code "freshwater"}. */
+    private AquariumType type;
 
-    /**
-     * The creation date of the aquarium. Not null because of @NotNull annotations.
-     */
+    /** Timestamp of when the aquarium was first created in the system. */
     private LocalDateTime createdAt;
 
-    /**
-     * The description of the aquarium. Not null because of @NotNull annotations.
-     */
+    /** Optional free-text description provided by the user. */
     private String description;
 
-    /**
-     * The URL of the aquarium's image. Not null because of @NotNull annotations.
-     */
+    /** Optional URL pointing to an image of the aquarium. */
     private String imageUrl;
 
     /**
-     * Constructs an AquariumResponseDTO from an Aquarium entity.
-     * @param aquarium The Aquarium entity to convert.
-     * @return AquariumResponseDTO with data from the Aquarium entity.
+     * Maps an {@link Aquarium} entity to its response representation.
+     *
+     * @param aquarium the entity to convert; must not be {@code null}
+     * @return a populated {@link AquariumResponseDTO}
      */
     public static AquariumResponseDTO fromEntity(Aquarium aquarium) {
         return AquariumResponseDTO.builder()

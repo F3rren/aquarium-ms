@@ -10,8 +10,10 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Table(name = "water_parameters")
 public class Parameter {
     

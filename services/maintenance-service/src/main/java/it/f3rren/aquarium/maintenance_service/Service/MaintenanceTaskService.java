@@ -8,8 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import it.f3rren.aquarium.maintenance_service.dto.CreateMaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.dto.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
+import it.f3rren.aquarium.maintenance_service.mapper.MaintenanceTaskMapper;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
 import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;
@@ -20,13 +22,15 @@ public class MaintenanceTaskService implements IMaintenanceTaskService {
     private static final Logger log = LoggerFactory.getLogger(MaintenanceTaskService.class);
 
     private final IMaintenanceTaskRepository taskRepository;
+    private final MaintenanceTaskMapper taskMapper;
 
-    public MaintenanceTaskService(IMaintenanceTaskRepository taskRepository) {
+    public MaintenanceTaskService(IMaintenanceTaskRepository taskRepository, MaintenanceTaskMapper taskMapper) {
         this.taskRepository = taskRepository;
+        this.taskMapper = taskMapper;
     }
 
     @Transactional
-    public MaintenanceTask createTask(Long aquariumId, CreateMaintenanceTaskDTO dto) {
+    public MaintenanceTaskDTO createTask(Long aquariumId, CreateMaintenanceTaskDTO dto) {
         MaintenanceTask task = new MaintenanceTask();
         task.setAquariumId(aquariumId);
         task.setTitle(dto.getTitle());
@@ -38,31 +42,34 @@ public class MaintenanceTaskService implements IMaintenanceTaskService {
         task.setIsCompleted(false);
 
         log.info("Creating task '{}' for aquarium {}", dto.getTitle(), aquariumId);
-        return taskRepository.save(task);
+        return taskMapper.toDTO(taskRepository.save(task));
     }
 
     @Transactional(readOnly = true)
-    public List<MaintenanceTask> getAllTasks(Long aquariumId) {
-        return taskRepository.findByAquariumIdOrderByDueDateAsc(aquariumId);
+    public List<MaintenanceTaskDTO> getAllTasks(Long aquariumId) {
+        return taskRepository.findByAquariumIdOrderByDueDateAsc(aquariumId)
+                .stream().map(taskMapper::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<MaintenanceTask> getPendingTasks(Long aquariumId) {
-        return taskRepository.findByAquariumIdAndIsCompletedFalseOrderByDueDateAsc(aquariumId);
+    public List<MaintenanceTaskDTO> getPendingTasks(Long aquariumId) {
+        return taskRepository.findByAquariumIdAndIsCompletedFalseOrderByDueDateAsc(aquariumId)
+                .stream().map(taskMapper::toDTO).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<MaintenanceTask> getTasksByStatus(Long aquariumId, Boolean isCompleted) {
-        return taskRepository.findByAquariumIdAndIsCompletedOrderByDueDateAsc(aquariumId, isCompleted);
+    public List<MaintenanceTaskDTO> getTasksByStatus(Long aquariumId, Boolean isCompleted) {
+        return taskRepository.findByAquariumIdAndIsCompletedOrderByDueDateAsc(aquariumId, isCompleted)
+                .stream().map(taskMapper::toDTO).toList();
     }
 
     @Transactional
-    public MaintenanceTask updateTask(Long aquariumId, Long taskId, UpdateMaintenanceTaskDTO dto) {
+    public MaintenanceTaskDTO updateTask(Long aquariumId, Long taskId, UpdateMaintenanceTaskDTO dto) {
         MaintenanceTask task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
 
         if (!task.getAquariumId().equals(aquariumId)) {
-            throw new ResourceNotFoundException("Task " + taskId + " does not belong to aquarium " + aquariumId);
+            throw new IllegalArgumentException("Task " + taskId + " does not belong to aquarium " + aquariumId);
         }
 
         if (dto.getTitle() != null) task.setTitle(dto.getTitle());
@@ -73,22 +80,22 @@ public class MaintenanceTaskService implements IMaintenanceTaskService {
         if (dto.getNotes() != null) task.setNotes(dto.getNotes());
 
         log.info("Updating task {} in aquarium {}", taskId, aquariumId);
-        return taskRepository.save(task);
+        return taskMapper.toDTO(taskRepository.save(task));
     }
 
     @Transactional
-    public MaintenanceTask completeTask(Long aquariumId, Long taskId) {
+    public MaintenanceTaskDTO completeTask(Long aquariumId, Long taskId) {
         MaintenanceTask task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
 
         if (!task.getAquariumId().equals(aquariumId)) {
-            throw new ResourceNotFoundException("Task " + taskId + " does not belong to aquarium " + aquariumId);
+            throw new IllegalArgumentException("Task " + taskId + " does not belong to aquarium " + aquariumId);
         }
 
         task.setIsCompleted(true);
         task.setCompletedAt(LocalDateTime.now());
         log.info("Completing task {} in aquarium {}", taskId, aquariumId);
-        return taskRepository.save(task);
+        return taskMapper.toDTO(taskRepository.save(task));
     }
 
     @Transactional
@@ -97,7 +104,7 @@ public class MaintenanceTaskService implements IMaintenanceTaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
 
         if (!task.getAquariumId().equals(aquariumId)) {
-            throw new ResourceNotFoundException("Task " + taskId + " does not belong to aquarium " + aquariumId);
+            throw new IllegalArgumentException("Task " + taskId + " does not belong to aquarium " + aquariumId);
         }
 
         log.info("Deleting task {} from aquarium {}", taskId, aquariumId);
