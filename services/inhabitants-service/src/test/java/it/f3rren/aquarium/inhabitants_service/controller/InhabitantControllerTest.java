@@ -98,6 +98,8 @@ class InhabitantControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.type").value("fish"));
+
+            verify(inhabitantService).addInhabitant(eq(1L), any(CreateInhabitantDTO.class));
         }
 
         @Test
@@ -145,6 +147,8 @@ class InhabitantControllerTest {
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(inhabitantService).updateInhabitant(eq(1L), eq(1L), any(UpdateInhabitantDTO.class));
         }
 
         @Test
@@ -187,6 +191,8 @@ class InhabitantControllerTest {
 
             mockMvc.perform(delete("/aquariums/1/inhabitants/1"))
                     .andExpect(status().isNoContent());
+
+            verify(inhabitantService).removeInhabitant(1L, 1L);
         }
 
         @Test

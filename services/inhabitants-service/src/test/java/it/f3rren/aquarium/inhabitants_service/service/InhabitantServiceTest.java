@@ -53,7 +53,7 @@ class InhabitantServiceTest {
         sampleFishInhabitant = new Inhabitant();
         sampleFishInhabitant.setId(1L);
         sampleFishInhabitant.setAquariumId(10L);
-        sampleFishInhabitant.setInhabitantType("fish");
+        sampleFishInhabitant.setInhabitantType(InhabitantType.FISH);
         sampleFishInhabitant.setInhabitantId(100L);
         sampleFishInhabitant.setQuantity(2);
         sampleFishInhabitant.setAddedDate(LocalDateTime.now());
@@ -61,7 +61,7 @@ class InhabitantServiceTest {
         sampleCoralInhabitant = new Inhabitant();
         sampleCoralInhabitant.setId(2L);
         sampleCoralInhabitant.setAquariumId(10L);
-        sampleCoralInhabitant.setInhabitantType("coral");
+        sampleCoralInhabitant.setInhabitantType(InhabitantType.CORAL);
         sampleCoralInhabitant.setInhabitantId(200L);
         sampleCoralInhabitant.setQuantity(1);
         sampleCoralInhabitant.setAddedDate(LocalDateTime.now());

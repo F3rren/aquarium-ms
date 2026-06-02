@@ -11,7 +11,7 @@ public class InhabitantMapper {
     public InhabitantDetailsDTO toDetailsDTO(Inhabitant inhabitant) {
         InhabitantDetailsDTO dto = new InhabitantDetailsDTO();
         dto.setId(inhabitant.getId());
-        dto.setType(inhabitant.getInhabitantType());
+        dto.setType(inhabitant.getInhabitantType().getValue());
         dto.setQuantity(inhabitant.getQuantity());
         dto.setAddedDate(inhabitant.getAddedDate());
         dto.setNotes(inhabitant.getNotes());

@@ -44,7 +44,7 @@ public class InhabitantService implements IInhabitantService {
             InhabitantDetailsDTO dto = inhabitantMapper.toDetailsDTO(relation);
 
             try {
-                InhabitantType type = InhabitantType.fromValue(relation.getInhabitantType());
+                InhabitantType type = relation.getInhabitantType();
                 if (type == InhabitantType.FISH) {
                     FishDTO fish = speciesClient.getFishById(relation.getInhabitantId());
                     dto.setCommonName(relation.getCustomName() != null ? relation.getCustomName() : fish.getCommonName());
@@ -81,13 +81,13 @@ public class InhabitantService implements IInhabitantService {
 
         Inhabitant inhabitant = new Inhabitant();
         inhabitant.setAquariumId(aquariumId);
-        inhabitant.setInhabitantType(type.getValue());
+        inhabitant.setInhabitantType(type);
         inhabitant.setInhabitantId(dto.getInhabitantId());
         inhabitant.setQuantity(dto.getQuantity() != null ? dto.getQuantity() : 1);
         inhabitant.setNotes(dto.getNotes());
         inhabitant.setCustomName(dto.getCustomName());
 
-        log.info("Adding {} (speciesId={}) to aquarium {}", type.getValue(), dto.getInhabitantId(), aquariumId);
+        log.info("Adding {} (speciesId={}) to aquarium {}", type, dto.getInhabitantId(), aquariumId);
         return inhabitantMapper.toDetailsDTO(inhabitantRepository.save(inhabitant));
     }
 
