@@ -6,11 +6,13 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Table(name = "corals", schema = "inhabitants")
 public class Coral {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -31,25 +33,29 @@ public class Coral {
     @Column(name = "max_size", nullable = false)
     private int maxSize;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "difficulty", nullable = false)
-    private String difficulty;
+    private Difficulty difficulty;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "light_requirement", nullable = false)
-    private String lightRequirement;
+    private LightRequirement lightRequirement;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "flow_requirement", nullable = false)
-    private String flowRequirement;
+    private FlowRequirement flowRequirement;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "placement", nullable = false)
-    private String placement;
+    private CoralPlacement placement;
 
     @Column(name = "aggressive", nullable = false)
     private boolean isAggressive;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "feeding", nullable = false)
-    private String feeding;
+    private CoralFeeding feeding;
 
     @Column(name = "description", nullable = false)
     private String description;
-
-}   
+}

@@ -6,8 +6,10 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Table(name = "fish", schema = "inhabitants")
 public class Fish {
 
@@ -18,7 +20,7 @@ public class Fish {
 
     @Column(name = "common_name", nullable = false)
     private String commonName;
-    
+
     @Column(name = "scientific_name", nullable = false)
     private String scientificName;
 
@@ -31,17 +33,20 @@ public class Fish {
     @Column(name = "max_size", nullable = false)
     private int maxSize;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "difficulty", nullable = false)
-    private String difficulty;
+    private Difficulty difficulty;
 
     @Column(name = "reef_safe", nullable = false)
     private boolean isReefSafe;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "temperament", nullable = false)
-    private String temperament;
+    private FishTemperament temperament;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "diet", nullable = false)
-    private String diet;
+    private FishDiet diet;
 
     @Column(name = "image_url", nullable = true)
     private String imageUrl;
@@ -49,7 +54,7 @@ public class Fish {
     @Column(name = "description", nullable = true)
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "water_type", nullable = true)
-    private String waterType;
-
+    private WaterType waterType;
 }

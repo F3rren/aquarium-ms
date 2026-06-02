@@ -70,13 +70,13 @@ public class SpeciesService implements ISpeciesService {
                 fish.getFamily(),
                 fish.getMinTankSize(),
                 fish.getMaxSize(),
-                fish.getDifficulty(),
+                fish.getDifficulty().getValue(),
                 fish.isReefSafe(),
-                fish.getTemperament(),
-                fish.getDiet(),
+                fish.getTemperament().getValue(),
+                fish.getDiet().getValue(),
                 fish.getImageUrl(),
                 fish.getDescription(),
-                fish.getWaterType());
+                fish.getWaterType() != null ? fish.getWaterType().getValue() : null);
     }
 
     private CoralResponseDTO toCoralDTO(Coral coral) {
@@ -87,12 +87,12 @@ public class SpeciesService implements ISpeciesService {
                 coral.getType(),
                 coral.getMinTankSize(),
                 coral.getMaxSize(),
-                coral.getDifficulty(),
-                coral.getLightRequirement(),
-                coral.getFlowRequirement(),
-                coral.getPlacement(),
+                coral.getDifficulty().getValue(),
+                coral.getLightRequirement().getValue(),
+                coral.getFlowRequirement().getValue(),
+                coral.getPlacement().getValue(),
                 coral.isAggressive(),
-                coral.getFeeding(),
+                coral.getFeeding().getValue(),
                 coral.getDescription());
     }
 }
