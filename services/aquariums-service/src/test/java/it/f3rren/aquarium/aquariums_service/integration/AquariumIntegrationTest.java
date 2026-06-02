@@ -51,6 +51,8 @@ class AquariumIntegrationTest {
         registry.add("spring.flyway.enabled", () -> "true");
         // Prevent Kafka from trying to connect to a non-existent broker
         registry.add("spring.kafka.bootstrap-servers", () -> "localhost:9999");
+        registry.add("spring.kafka.admin.auto-create", () -> "false");
+        registry.add("spring.kafka.admin.fail-fast", () -> "false");
     }
 
     @MockBean
