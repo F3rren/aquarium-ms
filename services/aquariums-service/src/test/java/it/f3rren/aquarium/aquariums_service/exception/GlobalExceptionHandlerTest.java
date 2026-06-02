@@ -23,7 +23,7 @@ import it.f3rren.aquarium.aquariums_service.controller.AquariumController;
 import it.f3rren.aquarium.aquariums_service.controller.ManualParameterController;
 import it.f3rren.aquarium.aquariums_service.controller.TargetParameterController;
 import it.f3rren.aquarium.aquariums_service.controller.WaterParameterController;
-import it.f3rren.aquarium.aquariums_service.service.AquariumService;
+import it.f3rren.aquarium.aquariums_service.service.IAquariumService;
 
 /**
  * Tests for GlobalExceptionHandler, covering exception types not exercised elsewhere.
@@ -35,7 +35,7 @@ class GlobalExceptionHandlerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AquariumService aquariumService;
+    private IAquariumService aquariumService;
 
     @MockBean
     private ParametersClient parametersClient;

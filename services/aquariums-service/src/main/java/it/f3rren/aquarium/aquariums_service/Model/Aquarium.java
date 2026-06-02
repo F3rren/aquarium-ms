@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.validator.constraints.URL;
 
 /**
  * JPA entity representing a physical aquarium in the system.
@@ -24,6 +25,7 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
 @Table(name = "aquariums")
 public class Aquarium {
 
@@ -81,6 +83,7 @@ public class Aquarium {
      * Optional URL pointing to an image of the aquarium.
      * Must be a valid http/https URL. Maximum 2000 characters.
      */
+    @URL
     @Size(max = 2000)
     @Column(name = "image_url")
     private String imageUrl;

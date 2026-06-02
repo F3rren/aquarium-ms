@@ -7,7 +7,12 @@ import lombok.*;
 /**
  * DTO class for updating aquarium details.
  * All fields are optional — only non-null fields are applied (partial update).
- * Lombok annotations are used for code generation.
+ *
+ * <p><strong>Null limitation:</strong> it is not possible to explicitly reset a field to
+ * {@code null} via this DTO. A field left {@code null} in the request body is treated as
+ * "no change" and the existing value is preserved. If you need to clear an optional field
+ * (e.g. {@code description} or {@code imageUrl}), a dedicated PATCH endpoint is required.</p>
+ *
  * @author F3rren
  */
 @Data

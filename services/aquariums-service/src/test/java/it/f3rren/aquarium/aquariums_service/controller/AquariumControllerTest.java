@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -35,7 +36,7 @@ import it.f3rren.aquarium.aquariums_service.dto.WaterParameterDTO;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.model.AquariumType;
-import it.f3rren.aquarium.aquariums_service.service.AquariumService;
+import it.f3rren.aquarium.aquariums_service.service.IAquariumService;
 
 /**
  * Integration tests for the aquarium controller layer.
@@ -52,7 +53,7 @@ class AquariumControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private AquariumService aquariumService;
+    private IAquariumService aquariumService;
 
     @MockBean
     private ParametersClient parametersClient;
@@ -279,7 +280,7 @@ class AquariumControllerTest {
     }
 
     // ========================
-    // Parameter validation
+    // Parameter validation — limit boundary (#11)
     // ========================
 
     @Nested
@@ -287,10 +288,43 @@ class AquariumControllerTest {
     class ParameterValidation {
 
         @Test
-        @DisplayName("should return 400 when limit exceeds 100")
-        void shouldReturn400ForLimitTooHigh() throws Exception {
+        @DisplayName("should return 400 when limit is 0 (below minimum)")
+        void shouldReturn400ForLimitZero() throws Exception {
             mockMvc.perform(get("/aquariums/1/water-parameters")
-                            .param("limit", "999"))
+                            .param("limit", "0"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+
+        @Test
+        @DisplayName("should return 200 when limit is 1 (minimum boundary)")
+        void shouldReturn200ForLimitOne() throws Exception {
+            when(parametersClient.getWaterParametersByAquarium(eq(1L), eq(1)))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", List.of(), null));
+
+            mockMvc.perform(get("/aquariums/1/water-parameters")
+                            .param("limit", "1"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+
+        @Test
+        @DisplayName("should return 200 when limit is 100 (maximum boundary)")
+        void shouldReturn200ForLimitHundred() throws Exception {
+            when(parametersClient.getWaterParametersByAquarium(eq(1L), eq(100)))
+                    .thenReturn(new ApiResponseDTO<>(true, "ok", List.of(), null));
+
+            mockMvc.perform(get("/aquariums/1/water-parameters")
+                            .param("limit", "100"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.success").value(true));
+        }
+
+        @Test
+        @DisplayName("should return 400 when limit is 101 (above maximum)")
+        void shouldReturn400ForLimitJustAboveMax() throws Exception {
+            mockMvc.perform(get("/aquariums/1/water-parameters")
+                            .param("limit", "101"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
         }
@@ -306,7 +340,7 @@ class AquariumControllerTest {
     }
 
     // ========================
-    // Water Parameters proxy
+    // Water Parameters proxy (#10 — verify delegation)
     // ========================
 
     @Nested
@@ -316,8 +350,7 @@ class AquariumControllerTest {
         @Test
         @DisplayName("should proxy to ParametersClient and return 201")
         void shouldAddAndReturn201() throws Exception {
-            WaterParameterDTO param =
-                    new WaterParameterDTO();
+            WaterParameterDTO param = new WaterParameterDTO();
             param.setTemperature(25.0);
 
             when(parametersClient.addWaterParameter(eq(1L), any()))
@@ -328,6 +361,8 @@ class AquariumControllerTest {
                             .content(objectMapper.writeValueAsString(param)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(parametersClient).addWaterParameter(eq(1L), any());
         }
     }
 
@@ -344,11 +379,13 @@ class AquariumControllerTest {
             mockMvc.perform(get("/aquariums/1/water-parameters/latest"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(parametersClient).getLatestWaterParameter(1L);
         }
     }
 
     // ========================
-    // Manual Parameters proxy
+    // Manual Parameters proxy (#10 — verify delegation)
     // ========================
 
     @Nested
@@ -358,8 +395,7 @@ class AquariumControllerTest {
         @Test
         @DisplayName("should proxy to ParametersClient and return 201")
         void shouldAddAndReturn201() throws Exception {
-            ManualParameterDTO param =
-                    new ManualParameterDTO();
+            ManualParameterDTO param = new ManualParameterDTO();
             param.setCalcium(420.0);
             param.setMeasuredAt(LocalDateTime.of(2025, 1, 1, 12, 0));
 
@@ -371,6 +407,8 @@ class AquariumControllerTest {
                             .content(objectMapper.writeValueAsString(param)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(parametersClient).addManualParameter(eq(1L), any());
         }
     }
 
@@ -387,6 +425,8 @@ class AquariumControllerTest {
             mockMvc.perform(get("/aquariums/1/manual-parameters"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(parametersClient).getAllManualParameters(1L);
         }
     }
 
@@ -403,6 +443,8 @@ class AquariumControllerTest {
             mockMvc.perform(get("/aquariums/1/manual-parameters/latest"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(parametersClient).getLatestManualParameter(1L);
         }
     }
 
@@ -421,11 +463,13 @@ class AquariumControllerTest {
                             .param("to", "2025-12-31T23:59:59"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(parametersClient).getManualParametersHistory(eq(1L), any(), any());
         }
     }
 
     // ========================
-    // Target Parameters proxy
+    // Target Parameters proxy (#10 — verify delegation)
     // ========================
 
     @Nested
@@ -441,6 +485,8 @@ class AquariumControllerTest {
             mockMvc.perform(get("/aquariums/1/target-parameters"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(parametersClient).getTargetParameters(1L);
         }
     }
 
@@ -451,8 +497,7 @@ class AquariumControllerTest {
         @Test
         @DisplayName("should proxy to ParametersClient and return 201")
         void shouldSaveAndReturn201() throws Exception {
-            TargetParameterDTO target =
-                    new TargetParameterDTO();
+            TargetParameterDTO target = new TargetParameterDTO();
             target.setTemperature(26.0);
 
             when(parametersClient.saveTargetParameters(eq(1L), any()))
@@ -463,6 +508,8 @@ class AquariumControllerTest {
                             .content(objectMapper.writeValueAsString(target)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.success").value(true));
+
+            verify(parametersClient).saveTargetParameters(eq(1L), any());
         }
     }
 }
