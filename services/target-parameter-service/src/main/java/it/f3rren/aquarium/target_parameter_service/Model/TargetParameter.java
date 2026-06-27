@@ -18,7 +18,7 @@ public class TargetParameter {
     @Column(name = "id", nullable = false)
     private Long id;
     
-    @Column(name = "aquarium_id", nullable = false, unique = true)
+    @Column(name = "aquarium_id", nullable = false, unique = true, updatable = false)
     private Long aquariumId;
     
     @Column(name = "temperature")

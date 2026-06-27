@@ -22,7 +22,7 @@ public class MaintenanceTask {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "aquarium_id", nullable = false)
+    @Column(name = "aquarium_id", nullable = false, updatable = false)
     private Long aquariumId;
 
     @Column(name = "title", nullable = false)
@@ -50,7 +50,7 @@ public class MaintenanceTask {
     private LocalDateTime completedAt;
     
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
     @Column(name = "notes")

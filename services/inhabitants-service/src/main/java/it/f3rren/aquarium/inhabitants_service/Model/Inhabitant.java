@@ -20,7 +20,7 @@ public class Inhabitant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "aquarium_id", nullable = false)
+    @Column(name = "aquarium_id", nullable = false, updatable = false)
     private Long aquariumId;
 
     @NotNull
@@ -35,7 +35,7 @@ public class Inhabitant {
     private Integer quantity;
     
     @CreationTimestamp
-    @Column(name = "added_date")
+    @Column(name = "added_date", updatable = false)
     private LocalDateTime addedDate;
     
     @Column(name = "notes", length = 1000)
