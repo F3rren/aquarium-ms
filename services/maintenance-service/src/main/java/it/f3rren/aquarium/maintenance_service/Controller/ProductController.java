@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOProductCategoryArray;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOProductList;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import org.springframework.validation.annotation.Validated;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
@@ -41,9 +42,9 @@ public class ProductController {
     @Operation(summary = "Get all products", description = "Retrieve products, optionally filtered by category, brand, or search term")
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOProductList.class)))
     public ResponseEntity<ApiResponseDTO<List<ProductDTO>>> getAllProducts(
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String brand,
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false) @Size(max = 50) String category,
+            @RequestParam(required = false) @Size(max = 100) String brand,
+            @RequestParam(required = false) @Size(max = 100) String search,
             @RequestParam(required = false) Boolean favorites,
             @RequestParam(required = false) Boolean expired,
             @RequestParam(required = false) Boolean expiringSoon,
