@@ -33,16 +33,7 @@ import it.f3rren.aquarium.aquariums_service.model.AquariumType;
  * Uses a real PostgreSQL container via Testcontainers; Hibernate creates the schema.
  * Kafka is not required: {@link AquariumEventPublisher} is mocked.
  */
-@SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {
-                "spring.kafka.bootstrap-servers=localhost:9999",
-                "spring.kafka.admin.auto-create=false",
-                "spring.kafka.admin.fail-fast=false",
-                "management.health.db.enabled=false",
-                "management.health.circuitbreakers.enabled=false"
-        }
-)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers(disabledWithoutDocker = true)
 class AquariumIntegrationTest {
 
