@@ -72,7 +72,6 @@ services:
       dockerfile: Dockerfile
     container_name: aquariums-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
@@ -94,7 +93,6 @@ services:
       dockerfile: Dockerfile
     container_name: maintenance-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
@@ -117,7 +115,6 @@ services:
       dockerfile: Dockerfile
     container_name: inhabitants-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
@@ -140,7 +137,6 @@ services:
       dockerfile: Dockerfile
     container_name: species-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
@@ -160,7 +156,6 @@ services:
       dockerfile: Dockerfile
     container_name: parameters-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
@@ -182,7 +177,6 @@ services:
       dockerfile: Dockerfile
     container_name: manual-parameters-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
@@ -204,7 +198,6 @@ services:
       dockerfile: Dockerfile
     container_name: target-parameters-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
@@ -227,7 +220,6 @@ services:
       dockerfile: Dockerfile
     container_name: api-gateway
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SERVER_PORT: 8080
       AQUARIUMS_SERVICE_URL: http://aquariums-service:8081
       INHABITANTS_SERVICE_URL: http://inhabitants-service:8082
