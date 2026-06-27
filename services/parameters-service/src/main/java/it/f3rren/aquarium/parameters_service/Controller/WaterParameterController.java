@@ -15,6 +15,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.parameters_service.dto.ApiResponseDTOParameterList;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.validation.annotation.Validated;
 import it.f3rren.aquarium.parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
@@ -50,7 +53,7 @@ public class WaterParameterController {
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<ParameterDTO>>> getParametersByAquarium(
             @PathVariable Long id,
-            @RequestParam(required = false, defaultValue = "10") Integer limit) {
+            @RequestParam(required = false, defaultValue = "10") @Min(1) @Max(100) Integer limit) {
 
         List<ParameterDTO> parameters = parameterService.getParametersByAquariumId(id, limit);
 
@@ -73,7 +76,7 @@ public class WaterParameterController {
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<ParameterDTO>>> getParametersHistory(
             @PathVariable Long id,
-            @RequestParam(required = false) String period,
+            @RequestParam(required = false) @Pattern(regexp = "^(day|week|month)$") String period,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
 

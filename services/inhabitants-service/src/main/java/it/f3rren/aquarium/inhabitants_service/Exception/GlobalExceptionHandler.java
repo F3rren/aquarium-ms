@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponseDTO<Void>> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Illegal argument: {}", ex.getMessage());
         return new ResponseEntity<>(
-                new ApiResponseDTO<>(false, ex.getMessage(), null, null),
+                new ApiResponseDTO<>(false, "Invalid argument", null, null),
                 HttpStatus.BAD_REQUEST);
     }
 

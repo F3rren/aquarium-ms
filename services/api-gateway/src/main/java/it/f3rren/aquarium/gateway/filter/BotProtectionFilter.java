@@ -40,23 +40,22 @@ public class BotProtectionFilter implements GlobalFilter, Ordered {
         String userAgent = exchange.getRequest().getHeaders().getFirst("User-Agent");
 
         if (userAgent == null || userAgent.isBlank()) {
-            return blockRequest(exchange, "missing-user-agent");
+            return blockRequest(exchange);
         }
 
         String uaLower = userAgent.toLowerCase();
         boolean isKnownBot = props.getBlockedUserAgentPatterns().stream()
                 .anyMatch(pattern -> uaLower.contains(pattern.toLowerCase()));
         if (isKnownBot) {
-            return blockRequest(exchange, "known-bot-user-agent");
+            return blockRequest(exchange);
         }
 
         return chain.filter(exchange);
     }
 
-    private Mono<Void> blockRequest(ServerWebExchange exchange, String reason) {
+    private Mono<Void> blockRequest(ServerWebExchange exchange) {
         blockedBotsCounter.increment();
         exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-        exchange.getResponse().getHeaders().add("X-Blocked-Reason", reason);
         return exchange.getResponse().setComplete();
     }
 
