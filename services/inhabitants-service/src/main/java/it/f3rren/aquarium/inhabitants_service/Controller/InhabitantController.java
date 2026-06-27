@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.inhabitants_service.dto.ApiResponseDTOInhabitantDetailsList;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 import it.f3rren.aquarium.inhabitants_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.CreateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
@@ -28,6 +29,7 @@ import it.f3rren.aquarium.inhabitants_service.dto.UpdateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
 import it.f3rren.aquarium.inhabitants_service.service.IInhabitantService;
 
+@Validated
 @RestController
 @RequestMapping("/aquariums")
 @Tag(name = "Inhabitant", description = "API for managing inhabitants")

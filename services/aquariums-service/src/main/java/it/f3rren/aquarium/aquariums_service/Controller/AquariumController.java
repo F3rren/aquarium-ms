@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Controller for CRUD operations on aquariums.
@@ -28,6 +29,7 @@ import jakarta.validation.Valid;
  *
  * @author f3rren
  */
+@Validated
 @RestController
 @RequestMapping("/aquariums")
 @Tag(name = "Aquarium", description = "API for managing aquariums")

@@ -14,11 +14,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.manual_parameters_service.dto.ApiResponseDTOManualParameterList;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 import it.f3rren.aquarium.manual_parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.dto.ManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.service.IManualParameterService;
 
+@Validated
 @RestController
 @RequestMapping("/aquariums/{aquariumId}/parameters/manual")
 @Tag(name = "ManualParameter", description = "API for managing manual parameters")

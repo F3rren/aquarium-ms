@@ -10,7 +10,9 @@ import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.TargetParameterResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.service.ITargetParameterService;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @RestController
 @RequestMapping("/aquariums/{aquariumId}/settings/targets")
 @Tag(name = "TargetParameter", description = "API for managing target parameters")

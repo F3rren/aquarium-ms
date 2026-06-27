@@ -15,11 +15,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.parameters_service.dto.ApiResponseDTOParameterList;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 import it.f3rren.aquarium.parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
 import it.f3rren.aquarium.parameters_service.dto.ParameterDTO;
 import it.f3rren.aquarium.parameters_service.service.IParameterService;
 
+@Validated
 @RestController
 @RequestMapping("/aquariums/{id}/parameters")
 @Tag(name = "WaterParameter", description = "API for managing water parameters")

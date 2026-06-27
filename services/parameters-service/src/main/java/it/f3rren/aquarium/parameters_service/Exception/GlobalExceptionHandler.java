@@ -14,9 +14,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import it.f3rren.aquarium.parameters_service.dto.ApiResponseDTO;
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -78,6 +80,22 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 new ApiResponseDTO<>(false, "Data integrity constraint violated", null, null),
                 HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+                .map(cv -> cv.getPropertyPath() + ": " + cv.getMessage())
+                .findFirst()
+                .orElse("Constraint violation");
+        log.warn("Constraint violation: {}", message);
+        return new ResponseEntity<>(new ApiResponseDTO<>(false, message, null, null), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RestClientException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleRestClientException(RestClientException ex) {
+        log.error("Inter-service communication error: {}", ex.getMessage());
+        return new ResponseEntity<>(new ApiResponseDTO<>(false, "External service communication error", null, null), HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(Exception.class)
