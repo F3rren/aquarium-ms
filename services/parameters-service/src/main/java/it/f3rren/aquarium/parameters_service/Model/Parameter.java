@@ -22,7 +22,7 @@ public class Parameter {
     @Column(name = "id", nullable = false)
     private Long id;
     
-    @Column(name = "aquarium_id", nullable = false)
+    @Column(name = "aquarium_id", nullable = false, updatable = false)
     private Long aquariumId;
     
     @Column(name = "temperature", nullable = false)
@@ -38,6 +38,6 @@ public class Parameter {
     private Integer orp;
     
     @CreationTimestamp
-    @Column(name = "measured_at", nullable = false)
+    @Column(name = "measured_at", nullable = false, updatable = false)
     private LocalDateTime measuredAt;
 }

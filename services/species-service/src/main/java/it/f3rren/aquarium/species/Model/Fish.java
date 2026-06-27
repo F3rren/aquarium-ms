@@ -48,13 +48,13 @@ public class Fish {
     @Column(name = "diet", nullable = false)
     private FishDiet diet;
 
-    @Column(name = "image_url", nullable = true)
+    @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "description", nullable = true)
+    @Column(name = "description")
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "water_type", nullable = true)
+    @Column(name = "water_type")
     private WaterType waterType;
 }
