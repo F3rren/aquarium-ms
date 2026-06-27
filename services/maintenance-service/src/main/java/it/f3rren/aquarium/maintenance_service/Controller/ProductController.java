@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOProductCategoryArray;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOProductList;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.ProductFilter;
@@ -24,6 +25,7 @@ import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
 import it.f3rren.aquarium.maintenance_service.service.IProductService;
 
+@Validated
 @RestController
 @RequestMapping("/products")
 @Tag(name = "Product", description = "API for managing aquarium products")

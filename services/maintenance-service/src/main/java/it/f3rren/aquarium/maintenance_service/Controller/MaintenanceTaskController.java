@@ -14,12 +14,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTOMaintenanceTaskList;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.service.IMaintenanceTaskService;
 
+@Validated
 @RestController
 @RequestMapping("/aquariums/{id}/tasks")
 @Tag(name = "MaintenanceTask", description = "API for managing maintenance tasks")
