@@ -1,5 +1,6 @@
 package it.f3rren.aquarium.maintenance_service.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -41,8 +42,8 @@ public class Product {
     @Column(name = "unit")
     private String unit; // ml, g, pcs, etc.
     
-    @Column(name = "cost")
-    private Double cost;
+    @Column(name = "cost", precision = 10, scale = 2)
+    private BigDecimal cost;
     
     @Builder.Default
     @Column(name = "currency")
