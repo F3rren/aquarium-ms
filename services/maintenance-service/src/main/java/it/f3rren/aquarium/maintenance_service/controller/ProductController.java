@@ -26,6 +26,7 @@ import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
 import it.f3rren.aquarium.maintenance_service.service.IProductService;
 
+
 @Validated
 @RestController
 @RequestMapping("/products")
