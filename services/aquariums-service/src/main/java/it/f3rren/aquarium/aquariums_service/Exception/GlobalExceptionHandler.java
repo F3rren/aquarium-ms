@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -124,6 +125,22 @@ public class GlobalExceptionHandler {
         log.warn("Type mismatch: {}", message);
 
         ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, message, null, null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles sort/filter parameters (e.g. {@code ?sort=}) that reference a property which
+     * does not exist on the target entity. Spring Data resolves {@code Pageable} sort fields
+     * directly against the entity's properties, so any unrecognized value — including
+     * unrelated free-form input like fuzzing payloads — reaches this far. Returns 400 Bad
+     * Request instead of a generic 500.
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handlePropertyReference(PropertyReferenceException ex) {
+        log.warn("Invalid sort property: {}", ex.getPropertyName());
+
+        ApiResponseDTO<Void> response = new ApiResponseDTO<>(
+                false, "Invalid sort property: " + ex.getPropertyName(), null, null);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
