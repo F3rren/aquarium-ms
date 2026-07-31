@@ -3,5 +3,10 @@
 -- Hibernate's schema validation on startup fails against any database still carrying the
 -- old column type; this migration brings existing installations in line with V1's current
 -- (and the entity's actual) type, without requiring a destructive volume reset.
+--
+-- Originally shipped as V3; renumbered to V4 after a checksum collision with a different,
+-- locally-applied V3 on at least one database. ALTER COLUMN ... TYPE to a type the column
+-- already has is a harmless no-op, so this is safe to apply regardless of whether that other
+-- V3 already fixed the same column.
 ALTER TABLE maintenance.products
     ALTER COLUMN cost TYPE DOUBLE PRECISION USING cost::double precision;
