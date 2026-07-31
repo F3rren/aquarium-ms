@@ -79,7 +79,7 @@ public class ParametersClient {
     public ApiResponseDTO<WaterParameterDTO> addWaterParameter(Long aquariumId, WaterParameterDTO parameter) {
         parameter.setAquariumId(aquariumId);
         return waterParametersRestClient.post()
-                .uri("/water-parameters")
+                .uri("/aquariums/{aquariumId}/parameters", aquariumId)
                 .body(parameter)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
@@ -97,7 +97,7 @@ public class ParametersClient {
     public ApiResponseDTO<List<WaterParameterDTO>> getWaterParametersByAquarium(Long aquariumId, Integer limit) {
         return waterParametersRestClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/water-parameters/aquarium/{aquariumId}")
+                        .path("/aquariums/{aquariumId}/parameters")
                         .queryParam("limit", limit)
                         .build(aquariumId))
                 .retrieve()
@@ -114,7 +114,7 @@ public class ParametersClient {
     @Retry(name = WATER_CB)
     public ApiResponseDTO<WaterParameterDTO> getLatestWaterParameter(Long aquariumId) {
         return waterParametersRestClient.get()
-                .uri("/water-parameters/aquarium/{aquariumId}/latest", aquariumId)
+                .uri("/aquariums/{aquariumId}/parameters/latest", aquariumId)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -133,7 +133,7 @@ public class ParametersClient {
     public ApiResponseDTO<List<WaterParameterDTO>> getWaterParametersHistory(Long aquariumId, String period, String from, String to) {
         return waterParametersRestClient.get()
                 .uri(uriBuilder -> {
-                    var builder = uriBuilder.path("/water-parameters/aquarium/{aquariumId}/history");
+                    var builder = uriBuilder.path("/aquariums/{aquariumId}/parameters/history");
                     if (period != null) {
                         builder.queryParam("period", period);
                     }
@@ -165,7 +165,7 @@ public class ParametersClient {
     public ApiResponseDTO<ManualParameterDTO> addManualParameter(Long aquariumId, ManualParameterDTO parameter) {
         parameter.setAquariumId(aquariumId);
         return manualParametersRestClient.post()
-                .uri("/manual-parameters")
+                .uri("/aquariums/{aquariumId}/parameters/manual", aquariumId)
                 .body(parameter)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
@@ -180,8 +180,10 @@ public class ParametersClient {
     @CircuitBreaker(name = MANUAL_CB, fallbackMethod = "fallbackGetLatestManualParameter")
     @Retry(name = MANUAL_CB)
     public ApiResponseDTO<ManualParameterDTO> getLatestManualParameter(Long aquariumId) {
+        // manual-parameters-service's bare GET /aquariums/{id}/parameters/manual *is* "latest" -
+        // there is no separate /latest sub-route for this service (unlike water-parameters).
         return manualParametersRestClient.get()
-                .uri("/manual-parameters/aquarium/{aquariumId}/latest", aquariumId)
+                .uri("/aquariums/{aquariumId}/parameters/manual", aquariumId)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -195,8 +197,10 @@ public class ParametersClient {
     @CircuitBreaker(name = MANUAL_CB, fallbackMethod = "fallbackGetAllManualParameters")
     @Retry(name = MANUAL_CB)
     public ApiResponseDTO<List<ManualParameterDTO>> getAllManualParameters(Long aquariumId) {
+        // manual-parameters-service has no dedicated "get all" route: /history without from/to
+        // is what returns the full, unfiltered list.
         return manualParametersRestClient.get()
-                .uri("/manual-parameters/aquarium/{aquariumId}", aquariumId)
+                .uri("/aquariums/{aquariumId}/parameters/manual/history", aquariumId)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -214,7 +218,7 @@ public class ParametersClient {
     public ApiResponseDTO<List<ManualParameterDTO>> getManualParametersHistory(Long aquariumId, String from, String to) {
         return manualParametersRestClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/manual-parameters/aquarium/{aquariumId}/history")
+                        .path("/aquariums/{aquariumId}/parameters/manual/history")
                         .queryParam("from", from)
                         .queryParam("to", to)
                         .build(aquariumId))
@@ -236,7 +240,7 @@ public class ParametersClient {
     @Retry(name = TARGET_CB)
     public ApiResponseDTO<TargetParameterDTO> getTargetParameters(Long aquariumId) {
         return targetParametersRestClient.get()
-                .uri("/target-parameters/aquarium/{aquariumId}", aquariumId)
+                .uri("/aquariums/{aquariumId}/settings/targets", aquariumId)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -252,7 +256,7 @@ public class ParametersClient {
     @Retry(name = TARGET_CB)
     public ApiResponseDTO<TargetParameterDTO> saveTargetParameters(Long aquariumId, TargetParameterDTO targetParameter) {
         return targetParametersRestClient.post()
-                .uri("/target-parameters/aquarium/{aquariumId}", aquariumId)
+                .uri("/aquariums/{aquariumId}/settings/targets", aquariumId)
                 .body(targetParameter)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
