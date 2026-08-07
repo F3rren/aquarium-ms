@@ -1,0 +1,64 @@
+# Homepage services — https://gethomepage.dev/configs/services/
+#
+# href        : link opened in the browser. Only services published to a host port have one;
+#               the core microservices are internal-only on the aquarium-network, so they
+#               expose no browser link and are reached through the API Gateway.
+# siteMonitor : HTTP health check performed BY the homepage container over the internal
+#               Docker network (service name + internal port), independent of host-port publishing.
+
+- Gateway & Docs:
+    - API Gateway:
+        icon: si-springboot
+        href: http://localhost:8080/swagger-ui.html
+        description: Gateway + aggregated Swagger (set SWAGGER_ENABLED=true to expose docs)
+        siteMonitor: http://api-gateway:8080/actuator/health
+
+- Core Services:
+    - Aquariums:
+        icon: mdi-fishbowl-outline
+        description: Tanks · CRUD + transactional outbox (internal)
+        siteMonitor: http://aquariums-service:8081/actuator/health
+    - Inhabitants:
+        icon: mdi-fish
+        description: Tank inhabitants · species enrichment (internal)
+        siteMonitor: http://inhabitants-service:8082/actuator/health
+    - Species:
+        icon: mdi-book-open-variant
+        description: Fish & coral catalog (internal)
+        siteMonitor: http://species-service:8083/actuator/health
+    - Maintenance:
+        icon: mdi-wrench
+        description: Tasks & products · anomaly alerts (internal)
+        siteMonitor: http://maintenance-service:8084/actuator/health
+    - Parameters:
+        icon: mdi-thermometer
+        description: Water parameters · CQRS read/write (internal)
+        siteMonitor: http://parameters-service:8085/actuator/health
+    - Manual Parameters:
+        icon: mdi-clipboard-edit-outline
+        description: Manually entered readings (internal)
+        siteMonitor: http://manual-parameters-service:8086/actuator/health
+    - Target Parameters:
+        icon: mdi-target
+        description: Target parameter ranges (internal)
+        siteMonitor: http://target-parameters-service:8087/actuator/health
+
+- Observability:
+    - Grafana:
+        icon: si-grafana
+        href: http://localhost:3000
+        description: Dashboards · login admin / GF_ADMIN_PASSWORD
+        siteMonitor: http://grafana:3000/api/health
+    - Prometheus:
+        icon: si-prometheus
+        href: http://localhost:9090
+        description: Metrics & scrape-target status
+        siteMonitor: http://prometheus:9090/-/healthy
+        widget:
+          type: prometheus
+          url: http://prometheus:9090
+    - Kafka UI:
+        icon: si-apachekafka
+        href: http://localhost:8090
+        description: Topics, consumers, DLT · login admin / KAFKA_UI_PASSWORD
+        siteMonitor: http://kafka-ui:8080

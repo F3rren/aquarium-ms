@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: aquarium_ms
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-root}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -38,8 +38,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       CLUSTER_ID: 4L6g3nShT-eMCtK--X86sw
-    ports:
-      - "9092:9092"
     networks:
       - aquarium-network
     restart: unless-stopped
@@ -56,6 +54,9 @@ services:
     environment:
       - KAFKA_CLUSTERS_0_NAME=aquarium-kafka
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - AUTH_TYPE=LOGIN_FORM
+      - SPRING_SECURITY_USER_NAME=${KAFKA_UI_USER:-admin}
+      - SPRING_SECURITY_USER_PASSWORD=${KAFKA_UI_PASSWORD}
     ports:
       - "8090:8080"
     depends_on:
@@ -72,14 +73,11 @@ services:
       dockerfile: Dockerfile
     container_name: aquariums-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SERVER_PORT: 8081
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8081:8081"
     depends_on:
       postgres:
         condition: service_healthy
@@ -94,14 +92,11 @@ services:
       dockerfile: Dockerfile
     container_name: maintenance-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SERVER_PORT: 8084
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8084:8084"
     depends_on:
       postgres:
         condition: service_healthy
@@ -117,15 +112,12 @@ services:
       dockerfile: Dockerfile
     container_name: inhabitants-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SERVER_PORT: 8082
       SPECIES_SERVICE_URL: http://species-service:8083/species
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8082:8082"
     depends_on:
       postgres:
         condition: service_healthy
@@ -140,13 +132,10 @@ services:
       dockerfile: Dockerfile
     container_name: species-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SERVER_PORT: 8083
-    ports:
-      - "8083:8083"
     depends_on:
       postgres:
         condition: service_healthy
@@ -160,14 +149,11 @@ services:
       dockerfile: Dockerfile
     container_name: parameters-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SERVER_PORT: 8085
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8085:8085"
     depends_on:
       postgres:
         condition: service_healthy
@@ -182,14 +168,11 @@ services:
       dockerfile: Dockerfile
     container_name: manual-parameters-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SERVER_PORT: 8086
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8086:8086"
     depends_on:
       postgres:
         condition: service_healthy
@@ -204,14 +187,11 @@ services:
       dockerfile: Dockerfile
     container_name: target-parameters-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aquarium_ms
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SERVER_PORT: 8087
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8087:8087"
     depends_on:
       postgres:
         condition: service_healthy
@@ -227,8 +207,8 @@ services:
       dockerfile: Dockerfile
     container_name: api-gateway
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       SERVER_PORT: 8080
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
       AQUARIUMS_SERVICE_URL: http://aquariums-service:8081
       INHABITANTS_SERVICE_URL: http://inhabitants-service:8082
       SPECIES_SERVICE_URL: http://species-service:8083
@@ -236,7 +216,6 @@ services:
       PARAMETERS_SERVICE_URL: http://parameters-service:8085
       MANUAL_PARAMETERS_SERVICE_URL: http://manual-parameters-service:8086
       TARGET_PARAMETERS_SERVICE_URL: http://target-parameters-service:8087
-      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
     ports:
       - "8080:8080"
     depends_on:
@@ -276,13 +255,32 @@ services:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=${GF_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana-data:/var/lib/grafana
       - ./observability/grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
+    networks:
+      - aquarium-network
+    restart: unless-stopped
+
+  # ── Dashboard ─────────────────────────────────────────────────────────────────
+  # Static, read-only landing page aggregating every service, its health, and the
+  # observability tools. Config lives in ./observability/homepage/*.yaml.
+  # NOTE: intentionally does NOT mount /var/run/docker.sock — container-status via the
+  # Docker socket grants host-root-equivalent access. Health is checked over HTTP instead
+  # (siteMonitor -> each service's /actuator/health). See services.yaml for the opt-in note.
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS:-localhost:3001}
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./observability/homepage:/app/config
     networks:
       - aquarium-network
     restart: unless-stopped
