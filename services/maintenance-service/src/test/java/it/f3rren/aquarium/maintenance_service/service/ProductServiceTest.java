@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -279,7 +280,7 @@ class ProductServiceTest {
             dto.setBrand("Aquatic");
             dto.setQuantity(200.0);
             dto.setUnit("ml");
-            dto.setCost(15.99);
+            dto.setCost(BigDecimal.valueOf(15.99));
             dto.setCurrency("$");
             dto.setNotes("Updated notes");
             dto.setImageUrl("https://example.com/img.jpg");

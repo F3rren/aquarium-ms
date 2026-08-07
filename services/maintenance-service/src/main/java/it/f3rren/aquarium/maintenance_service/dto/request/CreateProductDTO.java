@@ -1,5 +1,6 @@
 package it.f3rren.aquarium.maintenance_service.dto.request;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
@@ -31,7 +32,7 @@ public class CreateProductDTO {
     private String unit;
 
     @Positive(message = "Cost must be positive")
-    private Double cost;
+    private BigDecimal cost;
 
     @Size(max = 10, message = "Currency must be at most 10 characters")
     private String currency;

@@ -104,10 +104,6 @@ public class RateLimitingFilter implements GlobalFilter, Ordered {
     }
 
     private String extractClientIp(ServerWebExchange exchange) {
-        String forwarded = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
         InetSocketAddress addr = exchange.getRequest().getRemoteAddress();
         return addr != null ? addr.getAddress().getHostAddress() : "unknown";
     }

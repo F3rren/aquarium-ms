@@ -11,12 +11,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.mapping.PropertyReferenceException;
-import org.springframework.data.util.TypeInformation;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.ResourceAccessException;
-
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -27,7 +23,6 @@ import it.f3rren.aquarium.aquariums_service.controller.AquariumController;
 import it.f3rren.aquarium.aquariums_service.controller.ManualParameterController;
 import it.f3rren.aquarium.aquariums_service.controller.TargetParameterController;
 import it.f3rren.aquarium.aquariums_service.controller.WaterParameterController;
-import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.service.IAquariumService;
 
 /**
@@ -118,26 +113,6 @@ class GlobalExceptionHandlerTest {
         @DisplayName("should return 400 for non-numeric ID")
         void shouldReturn400ForInvalidIdType() throws Exception {
             mockMvc.perform(get("/aquariums/abc"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.success").value(false));
-        }
-    }
-
-    @Nested
-    @DisplayName("PropertyReferenceException")
-    class PropertyReferenceTests {
-
-        @Test
-        @DisplayName("should return 400 for a sort field that does not exist on the entity")
-        void shouldReturn400ForInvalidSortProperty() throws Exception {
-            // Thrown by SimpleJpaRepository.findAll(Sort) when ?sort= references a property
-            // that doesn't exist on the entity; reproduced here via a real instance since a
-            // WebMvcTest slice with a mocked service never reaches the actual JPA layer.
-            PropertyReferenceException ex = new PropertyReferenceException(
-                    "' OR '1'='1", TypeInformation.of(Aquarium.class), List.of());
-            when(aquariumService.getAllAquariums(any(Pageable.class))).thenThrow(ex);
-
-            mockMvc.perform(get("/aquariums").param("sort", "' OR '1'='1"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
         }

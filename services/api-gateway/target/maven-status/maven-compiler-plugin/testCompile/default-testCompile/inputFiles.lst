@@ -1,1 +1,5 @@
-C:\Users\Utente\Desktop\aquarium-ms\services\api-gateway\src\test\java\it\f3rren\aquarium\gateway\ApiGatewayApplicationTests.java
+C:\Users\Utente\Desktop\Progetti informatici\aquarium-ms\services\api-gateway\src\test\java\it\f3rren\aquarium\gateway\ApiGatewayApplicationTests.java
+C:\Users\Utente\Desktop\Progetti informatici\aquarium-ms\services\api-gateway\src\test\java\it\f3rren\aquarium\gateway\filter\BotProtectionFilterTest.java
+C:\Users\Utente\Desktop\Progetti informatici\aquarium-ms\services\api-gateway\src\test\java\it\f3rren\aquarium\gateway\filter\LoggingGlobalFilterTest.java
+C:\Users\Utente\Desktop\Progetti informatici\aquarium-ms\services\api-gateway\src\test\java\it\f3rren\aquarium\gateway\filter\RateLimitingFilterTest.java
+C:\Users\Utente\Desktop\Progetti informatici\aquarium-ms\services\api-gateway\src\test\java\it\f3rren\aquarium\gateway\filter\SecurityHeadersFilterTest.java

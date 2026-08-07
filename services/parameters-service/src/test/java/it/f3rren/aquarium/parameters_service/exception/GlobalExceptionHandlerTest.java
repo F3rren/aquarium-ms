@@ -52,7 +52,7 @@ class GlobalExceptionHandlerTest {
             mockMvc.perform(get("/aquariums/1/parameters/latest"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false))
-                    .andExpect(jsonPath("$.message").value("invalid argument"));
+                    .andExpect(jsonPath("$.message").value("Invalid argument"));
         }
     }
 

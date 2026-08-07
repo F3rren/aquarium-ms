@@ -1,0 +1,339 @@
+### ============================================================
+### Aquarium MS — REST Client requests
+### All requests go through the API Gateway (port 8080), which
+### routes to the individual microservices. See routing table in
+### services/api-gateway/src/main/resources/application.yml
+### ============================================================
+
+@gateway = http://localhost:8080
+@aquariumId = 1
+@taskId = 1
+@productId = 1
+@inhabitantId = 1
+@fishId = 1
+@coralId = 1
+
+
+### ============================================================
+### AQUARIUMS  (aquariums-service, port 8081)
+### Gateway route: /aquariums/**  (catch-all, evaluated last)
+### ============================================================
+
+### List aquariums (paginated)
+GET {{gateway}}/aquariums?page=0&size=20&sort=id
+Content-Type: application/json
+
+### Get aquarium by id
+GET {{gateway}}/aquariums/{{aquariumId}}
+Content-Type: application/json
+
+### Create aquarium
+POST {{gateway}}/aquariums
+Content-Type: application/json
+
+{
+  "name": "Reef Tank 120L",
+  "volume": 120,
+  "type": "saltwater",
+  "description": "SPS-dominant reef tank",
+  "imageUrl": "https://example.com/images/reef-tank.jpg"
+}
+
+### Update aquarium (partial update — only send fields to change)
+PUT {{gateway}}/aquariums/{{aquariumId}}
+Content-Type: application/json
+
+{
+  "name": "Reef Tank 120L - Updated",
+  "volume": 130,
+  "type": "saltwater",
+  "description": "Updated description",
+  "imageUrl": "https://example.com/images/reef-tank-2.jpg"
+}
+
+### Delete aquarium
+DELETE {{gateway}}/aquariums/{{aquariumId}}
+
+
+### ============================================================
+### INHABITANTS  (inhabitants-service, port 8082)
+### Gateway route: /aquariums/*/inhabitants/**
+### ============================================================
+
+### List inhabitants of an aquarium
+GET {{gateway}}/aquariums/{{aquariumId}}/inhabitants
+Content-Type: application/json
+
+### Add inhabitant to an aquarium
+POST {{gateway}}/aquariums/{{aquariumId}}/inhabitants
+Content-Type: application/json
+
+{
+  "inhabitantType": "fish",
+  "inhabitantId": {{fishId}},
+  "quantity": 3,
+  "notes": "Added to the display tank",
+  "customName": "Clownfish trio"
+}
+
+### Update inhabitant (partial update — only send fields to change)
+PUT {{gateway}}/aquariums/{{aquariumId}}/inhabitants/{{inhabitantId}}
+Content-Type: application/json
+
+{
+  "quantity": 4,
+  "notes": "One more added",
+  "customName": "Clownfish quartet",
+  "currentSize": 6,
+  "customDifficulty": "easy",
+  "customTemperament": "peaceful",
+  "customDiet": "omnivore",
+  "isReefSafe": true,
+  "customMinTankSize": 80
+}
+
+### Remove inhabitant
+DELETE {{gateway}}/aquariums/{{aquariumId}}/inhabitants/{{inhabitantId}}
+
+
+### ============================================================
+### SPECIES  (species-service, port 8083)
+### Gateway route: /species/**
+### ============================================================
+
+### List all fish species
+GET {{gateway}}/species/fish
+Content-Type: application/json
+
+### Get fish species by id
+GET {{gateway}}/species/fish/{{fishId}}
+Content-Type: application/json
+
+### List all coral species
+GET {{gateway}}/species/corals
+Content-Type: application/json
+
+### Get coral species by id
+GET {{gateway}}/species/corals/{{coralId}}
+Content-Type: application/json
+
+
+### ============================================================
+### MAINTENANCE TASKS  (maintenance-service, port 8084)
+### Gateway route: /aquariums/*/tasks/**
+### ============================================================
+
+### List tasks (optional status filter: pending | completed)
+GET {{gateway}}/aquariums/{{aquariumId}}/tasks
+Content-Type: application/json
+
+### List only pending tasks
+GET {{gateway}}/aquariums/{{aquariumId}}/tasks?status=pending
+Content-Type: application/json
+
+### Create task
+POST {{gateway}}/aquariums/{{aquariumId}}/tasks
+Content-Type: application/json
+
+{
+  "title": "Water change 20%",
+  "description": "Weekly partial water change",
+  "frequency": "weekly",
+  "priority": "medium",
+  "dueDate": "2026-08-01T10:00:00",
+  "notes": "Use RODI water"
+}
+
+### Update task (partial update — only send fields to change)
+PUT {{gateway}}/aquariums/{{aquariumId}}/tasks/{{taskId}}
+Content-Type: application/json
+
+{
+  "title": "Water change 25%",
+  "priority": "high",
+  "dueDate": "2026-08-02T10:00:00"
+}
+
+### Mark task as completed
+POST {{gateway}}/aquariums/{{aquariumId}}/tasks/{{taskId}}/complete
+
+### Delete task
+DELETE {{gateway}}/aquariums/{{aquariumId}}/tasks/{{taskId}}
+
+
+### ============================================================
+### PRODUCTS  (maintenance-service, port 8084)
+### Gateway route: /products/**
+### ============================================================
+
+### List / filter products
+GET {{gateway}}/products
+Content-Type: application/json
+
+### Filter products (category, brand, search, favorites, expired, expiringSoon, lowStock, shouldUseAgain)
+GET {{gateway}}/products?category=FOOD&favorites=true&expiringSoon=false
+Content-Type: application/json
+
+### List all product categories
+GET {{gateway}}/products/categories
+Content-Type: application/json
+
+### Get product by id
+GET {{gateway}}/products/{{productId}}
+Content-Type: application/json
+
+### Create product
+POST {{gateway}}/products
+Content-Type: application/json
+
+{
+  "name": "Reef Salt Mix",
+  "category": "WATER_TREATMENT",
+  "brand": "Red Sea",
+  "quantity": 20,
+  "unit": "kg",
+  "cost": 45.90,
+  "currency": "EUR",
+  "purchaseDate": "2026-06-01",
+  "expiryDate": "2027-06-01",
+  "notes": "Keep sealed in a dry place",
+  "imageUrl": "https://example.com/images/salt-mix.jpg",
+  "isFavorite": false,
+  "usageFrequency": 4
+}
+
+### Update product (partial update — only send fields to change)
+PUT {{gateway}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "quantity": 15,
+  "notes": "Half bag left"
+}
+
+### Mark product as used today
+PATCH {{gateway}}/products/{{productId}}/mark-used
+
+### Toggle favorite flag
+PATCH {{gateway}}/products/{{productId}}/toggle-favorite
+
+### Change product quantity (positive to add, negative to subtract)
+PATCH {{gateway}}/products/{{productId}}/quantity
+Content-Type: application/json
+
+{
+  "change": -1.5
+}
+
+### Delete product
+DELETE {{gateway}}/products/{{productId}}
+
+
+### ============================================================
+### WATER PARAMETERS (measured)  (parameters-service, port 8085)
+### Gateway route: /aquariums/*/parameters/**
+### ============================================================
+
+### Add water parameter reading
+POST {{gateway}}/aquariums/{{aquariumId}}/parameters
+Content-Type: application/json
+
+{
+  "temperature": 25.5,
+  "ph": 8.1,
+  "salinity": 35,
+  "orp": 350
+}
+
+### List water parameters (default limit 10, max 100)
+GET {{gateway}}/aquariums/{{aquariumId}}/parameters?limit=10
+Content-Type: application/json
+
+### Get latest water parameter
+GET {{gateway}}/aquariums/{{aquariumId}}/parameters/latest
+Content-Type: application/json
+
+### Water parameter history by period (day | week | month)
+GET {{gateway}}/aquariums/{{aquariumId}}/parameters/history?period=week
+Content-Type: application/json
+
+### Water parameter history by explicit date range
+GET {{gateway}}/aquariums/{{aquariumId}}/parameters/history?from=2026-07-01T00:00:00&to=2026-07-23T23:59:59
+Content-Type: application/json
+
+
+### ============================================================
+### MANUAL PARAMETERS (hand-tested)  (manual-parameters-service, port 8086)
+### Gateway route: /aquariums/*/parameters/manual/**
+### ============================================================
+
+### Add manual parameter reading
+POST {{gateway}}/aquariums/{{aquariumId}}/parameters/manual
+Content-Type: application/json
+
+{
+  "calcium": 420.0,
+  "magnesium": 1350.0,
+  "kh": 8.5,
+  "nitrate": 5.0,
+  "phosphate": 0.03,
+  "notes": "Tested with Hanna checker"
+}
+
+### Get latest manual parameter
+GET {{gateway}}/aquariums/{{aquariumId}}/parameters/manual
+Content-Type: application/json
+
+### Manual parameter history (optional from/to range)
+GET {{gateway}}/aquariums/{{aquariumId}}/parameters/manual/history?from=2026-07-01T00:00:00&to=2026-07-23T23:59:59
+Content-Type: application/json
+
+
+### ============================================================
+### TARGET PARAMETERS  (target-parameter-service, port 8087)
+### Gateway route: /aquariums/*/settings/targets/**
+### ============================================================
+
+### Get target parameters
+GET {{gateway}}/aquariums/{{aquariumId}}/settings/targets
+Content-Type: application/json
+
+### Save / update target parameters
+POST {{gateway}}/aquariums/{{aquariumId}}/settings/targets
+Content-Type: application/json
+
+{
+  "temperature": 25.5,
+  "ph": 8.2,
+  "salinity": 35,
+  "orp": 350
+}
+
+
+### ============================================================
+### API GATEWAY — aggregated OpenAPI docs
+### ============================================================
+
+### Aggregated Swagger UI (disabled by default — run gateway with SWAGGER_ENABLED=true)
+GET {{gateway}}/swagger-ui.html
+
+### Aquariums-service OpenAPI doc
+GET {{gateway}}/aquariums-service/v3/api-docs
+
+### Inhabitants-service OpenAPI doc
+GET {{gateway}}/inhabitants-service/v3/api-docs
+
+### Species-service OpenAPI doc
+GET {{gateway}}/species-service/v3/api-docs
+
+### Maintenance-service OpenAPI doc
+GET {{gateway}}/maintenance-service/v3/api-docs
+
+### Parameters-service OpenAPI doc
+GET {{gateway}}/parameters-service/v3/api-docs
+
+### Manual-parameters-service OpenAPI doc
+GET {{gateway}}/manual-parameters-service/v3/api-docs
+
+### Target-parameters-service OpenAPI doc
+GET {{gateway}}/target-parameters-service/v3/api-docs

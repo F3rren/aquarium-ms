@@ -1,5 +1,6 @@
 package it.f3rren.aquarium.maintenance_service.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -18,7 +19,7 @@ public class ProductDTO {
     private String brand;
     private Double quantity;
     private String unit;
-    private Double cost;
+    private BigDecimal cost;
     private String currency;
     private LocalDate purchaseDate;
     private LocalDate expiryDate;

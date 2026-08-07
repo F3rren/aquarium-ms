@@ -1,0 +1,19 @@
+# Homepage bookmarks — https://gethomepage.dev/configs/bookmarks/
+- Repositories:
+    - aquarium-ms:
+        - abbr: MS
+          href: https://github.com/F3rren/aquarium-ms
+    - aquarium-interface:
+        - abbr: UI
+          href: https://github.com/F3rren/aquarium-interface
+
+- Quick links:
+    - Swagger UI:
+        - abbr: API
+          href: http://localhost:8080/swagger-ui.html
+    - Grafana:
+        - abbr: GF
+          href: http://localhost:3000
+    - Kafka UI:
+        - abbr: KA
+          href: http://localhost:8090
