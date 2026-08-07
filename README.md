@@ -28,10 +28,16 @@ docker-compose up -d
 
 | Service | URL |
 |---------|-----|
+| Homepage (dashboard) | http://localhost:3001 |
 | API Gateway + Swagger UI | http://localhost:8080/swagger-ui.html |
 | Kafka UI | http://localhost:8090 |
 | Grafana | http://localhost:3000 (admin / admin) |
 | Prometheus | http://localhost:9090 |
+
+> **Homepage** is a static landing page (`ghcr.io/gethomepage/homepage`) aggregating every
+> service, its live health, and the observability tools. Config lives in
+> `observability/homepage/*.yaml`. It deliberately does **not** mount the Docker socket —
+> health is checked over HTTP against each service's `/actuator/health` instead.
 
 ---
 

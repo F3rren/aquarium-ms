@@ -266,6 +266,25 @@ services:
       - aquarium-network
     restart: unless-stopped
 
+  # ── Dashboard ─────────────────────────────────────────────────────────────────
+  # Static, read-only landing page aggregating every service, its health, and the
+  # observability tools. Config lives in ./observability/homepage/*.yaml.
+  # NOTE: intentionally does NOT mount /var/run/docker.sock — container-status via the
+  # Docker socket grants host-root-equivalent access. Health is checked over HTTP instead
+  # (siteMonitor -> each service's /actuator/health). See services.yaml for the opt-in note.
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS:-localhost:3001}
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./observability/homepage:/app/config
+    networks:
+      - aquarium-network
+    restart: unless-stopped
+
 networks:
   aquarium-network:
     driver: bridge

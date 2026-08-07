@@ -1,0 +1,19 @@
+# Homepage dashboard settings — https://gethomepage.dev/configs/settings/
+title: Aquarium MS
+description: Service dashboard for the aquarium microservices stack
+theme: dark
+color: slate
+headerStyle: boxed
+hideVersion: true
+
+# Groups are rendered in this order; layout controls how each group is drawn.
+layout:
+  Gateway & Docs:
+    style: row
+    columns: 2
+  Core Services:
+    style: row
+    columns: 4
+  Observability:
+    style: row
+    columns: 3
