@@ -40,6 +40,9 @@ desktop.ini
 # ─── Docker ───────────────────────────────────────────────────────────────────
 .docker/
 
+# ─── Homepage dashboard runtime output (config YAML is tracked, logs are not) ──
+observability/homepage/logs/
+
 # ─── Test artifacts ───────────────────────────────────────────────────────────
 surefire-reports/
 failsafe-reports/

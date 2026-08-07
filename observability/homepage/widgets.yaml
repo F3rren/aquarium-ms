@@ -1,0 +1,15 @@
+# Homepage info widgets (top of the page) — https://gethomepage.dev/configs/info-widgets/
+- greeting:
+    text_size: xl
+    text: Aquarium MS
+
+- datetime:
+    text_size: xl
+    format:
+      dateStyle: short
+      timeStyle: short
+      hourCycle: h23
+
+- search:
+    provider: duckduckgo
+    target: _blank
