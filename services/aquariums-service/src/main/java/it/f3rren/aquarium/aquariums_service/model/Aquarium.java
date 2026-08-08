@@ -88,4 +88,13 @@ public class Aquarium {
     @Column(name = "image_url")
     private String imageUrl;
 
+    /**
+     * Id of the user who created this aquarium, taken from the gateway-injected
+     * {@code X-User-Id} header - never accepted from client-supplied request bodies. Used to
+     * enforce ownership on write operations; see {@link it.f3rren.aquarium.aquariums_service.service.AquariumService}.
+     */
+    @NotNull
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
+
 }

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
+import it.f3rren.aquarium.aquariums_service.exception.ForbiddenException;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
@@ -42,16 +43,18 @@ public class AquariumService implements IAquariumService {
     /**
      * Creates a new Aquarium entity.
      * @param dto DTO containing Aquarium creation details.
+     * @param ownerId id of the user creating this aquarium.
      * @return Created Aquarium entity.
      */
     @Transactional
-    public Aquarium createAquarium(CreateAquariumDTO dto) {
+    public Aquarium createAquarium(CreateAquariumDTO dto, Long ownerId) {
         Aquarium aquarium = new Aquarium();
         aquarium.setName(dto.getName().trim());
         aquarium.setVolume(dto.getVolume());
         aquarium.setType(dto.getType());
         aquarium.setDescription(dto.getDescription());
         aquarium.setImageUrl(dto.getImageUrl());
+        aquarium.setOwnerId(ownerId);
 
         Aquarium saved = aquariumRepository.save(aquarium);
         log.info("Aquarium created with ID: {}", saved.getId());
@@ -93,13 +96,16 @@ public class AquariumService implements IAquariumService {
      * Only non-null fields in the DTO are applied (partial update).
      * @param id ID of the Aquarium entity to update.
      * @param dto DTO containing Aquarium update details.
+     * @param ownerId id of the caller; must match the aquarium's owner.
      * @return Updated Aquarium entity.
      * @throws ResourceNotFoundException if the Aquarium entity is not found.
+     * @throws ForbiddenException if the caller does not own the aquarium.
      */
     @Transactional
-    public Aquarium updateAquarium(Long id, UpdateAquariumDTO dto) {
+    public Aquarium updateAquarium(Long id, UpdateAquariumDTO dto, Long ownerId) {
         Aquarium existing = aquariumRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Aquarium not found with ID: " + id));
+        requireOwnership(existing, ownerId);
 
         // Partial update: only non-null fields are applied, preserving existing values
         Optional.ofNullable(dto.getName()).map(String::trim).ifPresent(existing::setName);
@@ -116,13 +122,16 @@ public class AquariumService implements IAquariumService {
     /**
      * Deletes an Aquarium entity by its ID.
      * @param id ID of the Aquarium entity to delete.
+     * @param ownerId id of the caller; must match the aquarium's owner.
      * @throws ResourceNotFoundException if the Aquarium entity is not found.
+     * @throws ForbiddenException if the caller does not own the aquarium.
      */
     @Transactional
-    public void deleteAquarium(Long id) {
-        if (!aquariumRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Aquarium not found with ID: " + id);
-        }
+    public void deleteAquarium(Long id, Long ownerId) {
+        Aquarium existing = aquariumRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Aquarium not found with ID: " + id));
+        requireOwnership(existing, ownerId);
+
         aquariumRepository.deleteById(id);
         log.info("Aquarium deleted with ID: {}", id);
 
@@ -131,6 +140,16 @@ public class AquariumService implements IAquariumService {
             eventPublisher.publishDeleted(id);
         } catch (Exception ex) {
             log.error("Failed to publish DELETED event for aquarium ID: {}", id, ex);
+        }
+    }
+
+    /**
+     * Denies write access to an aquarium the caller doesn't own. {@link #getAquariumById}
+     * deliberately does not call this - see its javadoc.
+     */
+    private void requireOwnership(Aquarium aquarium, Long ownerId) {
+        if (!aquarium.getOwnerId().equals(ownerId)) {
+            throw new ForbiddenException("Aquarium " + aquarium.getId() + " is not owned by user " + ownerId);
         }
     }
 }

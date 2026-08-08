@@ -42,6 +42,9 @@ public class AquariumResponseDTO {
     /** Optional URL pointing to an image of the aquarium. */
     private String imageUrl;
 
+    /** Id of the user who created this aquarium. */
+    private Long ownerId;
+
     /**
      * Maps an {@link Aquarium} entity to its response representation.
      *
@@ -57,6 +60,7 @@ public class AquariumResponseDTO {
                 .createdAt(aquarium.getCreatedAt())
                 .description(aquarium.getDescription())
                 .imageUrl(aquarium.getImageUrl())
+                .ownerId(aquarium.getOwnerId())
                 .build();
     }
 }

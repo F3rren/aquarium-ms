@@ -216,6 +216,9 @@ services:
       PARAMETERS_SERVICE_URL: http://parameters-service:8085
       MANUAL_PARAMETERS_SERVICE_URL: http://manual-parameters-service:8086
       TARGET_PARAMETERS_SERVICE_URL: http://target-parameters-service:8087
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_USER_A_PASSWORD: ${AUTH_USER_A_PASSWORD}
+      AUTH_USER_B_PASSWORD: ${AUTH_USER_B_PASSWORD}
     ports:
       - "8080:8080"
     depends_on:

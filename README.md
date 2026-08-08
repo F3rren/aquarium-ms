@@ -41,6 +41,26 @@ docker-compose up -d
 
 ---
 
+## Authentication
+
+Every gateway route requires a valid JWT (`Authorization: Bearer <token>`) except `/auth/login`, `/actuator`, `/swagger-ui`, and `/v3/api-docs` — deny-by-default, enforced once at the edge by `JwtAuthFilter` in `api-gateway`. None of the seven downstream services validate a token themselves; they trust the `X-User-Id` header the gateway injects (and strips from the raw request first, so a caller can't set it directly to impersonate someone else) — safe only because those services are reachable exclusively through the gateway on the Docker network, never on a published host port.
+
+There are two fixed test identities, not a real user system — just enough to give a security scan two distinct identities to compare:
+
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "userA", "password": "'"$AUTH_USER_A_PASSWORD"'"}'
+# => {"token": "...", "userId": "1"}
+
+curl http://localhost:8080/aquariums \
+  -H "Authorization: Bearer <token from above>"
+```
+
+**Authentication vs. authorization — an intentional gap.** `aquariums-service` enforces both, but not on the same endpoint: `PUT`/`DELETE /aquariums/{id}` check that the caller actually owns the aquarium (403 if not); `GET /aquariums/{id}` only requires *a* valid identity, not the *right* one — any authenticated user can read any aquarium by id, regardless of who created it. This is a deliberate IDOR (Insecure Direct Object Reference) test fixture, left in place on purpose so a security scan (e.g. [Sentinel](https://github.com/F3rren/Sentinel)'s IDOR module) has something real to find: authenticate as both `userA` and `userB`, create an aquarium as one, and try reading it as the other.
+
+---
+
 ## Architecture
 
 ```
@@ -106,6 +126,9 @@ cp .env.example .env
 | `DB_PASSWORD` | `root` | same |
 | `GF_ADMIN_USER` | `admin` | Grafana |
 | `GF_ADMIN_PASSWORD` | `admin` | Grafana |
+| `JWT_SECRET` | _(required, no default)_ | api-gateway — signs/validates every JWT it issues |
+| `AUTH_USER_A_PASSWORD` | _(required, no default)_ | api-gateway — password for the `userA` test identity |
+| `AUTH_USER_B_PASSWORD` | _(required, no default)_ | api-gateway — password for the `userB` test identity |
 
 ---
 

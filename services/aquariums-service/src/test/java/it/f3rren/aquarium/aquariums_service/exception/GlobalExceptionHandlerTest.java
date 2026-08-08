@@ -119,6 +119,41 @@ class GlobalExceptionHandlerTest {
     }
 
     @Nested
+    @DisplayName("ForbiddenException")
+    class ForbiddenTests {
+
+        @Test
+        @DisplayName("should return 403 when caller does not own the resource")
+        void shouldReturn403() throws Exception {
+            when(aquariumService.updateAquarium(anyLong(), any(), anyLong()))
+                    .thenThrow(new ForbiddenException("Aquarium 1 is not owned by user 2"));
+
+            mockMvc.perform(put("/aquariums/1")
+                            .header("X-User-Id", "2")
+                            .contentType("application/json")
+                            .content("{\"name\":\"New Name\"}"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value("Aquarium 1 is not owned by user 2"));
+        }
+    }
+
+    @Nested
+    @DisplayName("MissingRequestHeaderException")
+    class MissingHeaderTests {
+
+        @Test
+        @DisplayName("should return 400 when X-User-Id is missing")
+        void shouldReturn400() throws Exception {
+            mockMvc.perform(post("/aquariums")
+                            .contentType("application/json")
+                            .content("{\"name\":\"Tank\",\"volume\":100,\"type\":\"FRESHWATER\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+    }
+
+    @Nested
     @DisplayName("Generic Exception")
     class GenericExceptionTests {
 

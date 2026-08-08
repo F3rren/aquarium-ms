@@ -33,6 +33,7 @@ import it.f3rren.aquarium.aquariums_service.dto.ManualParameterDTO;
 import it.f3rren.aquarium.aquariums_service.dto.TargetParameterDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.WaterParameterDTO;
+import it.f3rren.aquarium.aquariums_service.exception.ForbiddenException;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.model.AquariumType;
@@ -69,6 +70,7 @@ class AquariumControllerTest {
         sampleAquarium.setType(AquariumType.SALTWATER);
         sampleAquarium.setDescription("A reef aquarium");
         sampleAquarium.setCreatedAt(LocalDateTime.of(2025, 1, 1, 12, 0));
+        sampleAquarium.setOwnerId(1L);
     }
 
     // ========================
@@ -172,9 +174,10 @@ class AquariumControllerTest {
             dto.setVolume(150);
             dto.setType(AquariumType.FRESHWATER);
 
-            when(aquariumService.createAquarium(any(CreateAquariumDTO.class))).thenReturn(sampleAquarium);
+            when(aquariumService.createAquarium(any(CreateAquariumDTO.class), eq(1L))).thenReturn(sampleAquarium);
 
             mockMvc.perform(post("/aquariums")
+                            .header("X-User-Id", "1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isCreated())
@@ -189,6 +192,7 @@ class AquariumControllerTest {
             // name is blank — should fail @NotBlank validation
 
             mockMvc.perform(post("/aquariums")
+                            .header("X-User-Id", "1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isBadRequest())
@@ -203,8 +207,24 @@ class AquariumControllerTest {
             String body = "{\"name\":\"Tank\",\"volume\":100,\"type\":\"invalid-type\"}";
 
             mockMvc.perform(post("/aquariums")
+                            .header("X-User-Id", "1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(body))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+
+        @Test
+        @DisplayName("should return 400 when X-User-Id header is missing")
+        void shouldReturn400WhenOwnerHeaderMissing() throws Exception {
+            CreateAquariumDTO dto = new CreateAquariumDTO();
+            dto.setName("New Tank");
+            dto.setVolume(150);
+            dto.setType(AquariumType.FRESHWATER);
+
+            mockMvc.perform(post("/aquariums")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.success").value(false));
         }
@@ -224,9 +244,10 @@ class AquariumControllerTest {
             UpdateAquariumDTO dto = new UpdateAquariumDTO();
             dto.setName("Updated Name");
 
-            when(aquariumService.updateAquarium(eq(1L), any(UpdateAquariumDTO.class))).thenReturn(sampleAquarium);
+            when(aquariumService.updateAquarium(eq(1L), any(UpdateAquariumDTO.class), eq(1L))).thenReturn(sampleAquarium);
 
             mockMvc.perform(put("/aquariums/1")
+                            .header("X-User-Id", "1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isOk())
@@ -239,13 +260,31 @@ class AquariumControllerTest {
             UpdateAquariumDTO dto = new UpdateAquariumDTO();
             dto.setName("Updated");
 
-            when(aquariumService.updateAquarium(eq(99L), any(UpdateAquariumDTO.class)))
+            when(aquariumService.updateAquarium(eq(99L), any(UpdateAquariumDTO.class), eq(1L)))
                     .thenThrow(new ResourceNotFoundException("Aquarium not found with ID: 99"));
 
             mockMvc.perform(put("/aquariums/99")
+                            .header("X-User-Id", "1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+
+        @Test
+        @DisplayName("should return 403 when caller does not own the aquarium")
+        void shouldReturn403WhenNotOwner() throws Exception {
+            UpdateAquariumDTO dto = new UpdateAquariumDTO();
+            dto.setName("Updated");
+
+            when(aquariumService.updateAquarium(eq(1L), any(UpdateAquariumDTO.class), eq(2L)))
+                    .thenThrow(new ForbiddenException("Aquarium 1 is not owned by user 2"));
+
+            mockMvc.perform(put("/aquariums/1")
+                            .header("X-User-Id", "2")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.success").value(false));
         }
     }
@@ -261,9 +300,9 @@ class AquariumControllerTest {
         @Test
         @DisplayName("should delete aquarium and return 204 No Content")
         void shouldDelete() throws Exception {
-            doNothing().when(aquariumService).deleteAquarium(1L);
+            doNothing().when(aquariumService).deleteAquarium(1L, 1L);
 
-            mockMvc.perform(delete("/aquariums/1"))
+            mockMvc.perform(delete("/aquariums/1").header("X-User-Id", "1"))
                     .andExpect(status().isNoContent());
         }
 
@@ -271,11 +310,42 @@ class AquariumControllerTest {
         @DisplayName("should return 404 when aquarium not found")
         void shouldReturn404() throws Exception {
             doThrow(new ResourceNotFoundException("Aquarium not found with ID: 99"))
-                    .when(aquariumService).deleteAquarium(99L);
+                    .when(aquariumService).deleteAquarium(99L, 1L);
 
-            mockMvc.perform(delete("/aquariums/99"))
+            mockMvc.perform(delete("/aquariums/99").header("X-User-Id", "1"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.success").value(false));
+        }
+
+        @Test
+        @DisplayName("should return 403 when caller does not own the aquarium")
+        void shouldReturn403WhenNotOwner() throws Exception {
+            doThrow(new ForbiddenException("Aquarium 1 is not owned by user 2"))
+                    .when(aquariumService).deleteAquarium(1L, 2L);
+
+            mockMvc.perform(delete("/aquariums/1").header("X-User-Id", "2"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.success").value(false));
+        }
+    }
+
+    // ========================
+    // IDOR test fixture — GET does not enforce ownership by design
+    // ========================
+
+    @Nested
+    @DisplayName("GET /aquariums/{id} does not enforce ownership (intentional)")
+    class GetDoesNotCheckOwnership {
+
+        @Test
+        @DisplayName("returns the aquarium regardless of which caller requests it")
+        void returnsAquariumForAnyCaller() throws Exception {
+            when(aquariumService.getAquariumById(1L)).thenReturn(sampleAquarium);
+
+            // No X-User-Id header at all is still accepted here - see AquariumService.getAquariumById.
+            mockMvc.perform(get("/aquariums/1"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.id").value(1));
         }
     }
 

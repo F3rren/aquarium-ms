@@ -2,3 +2,13 @@ spring:
   cloud:
     gateway:
       routes: []
+
+# Test-only values so the full application context can start without real secrets/env vars.
+jwt:
+  secret: test-secret-not-for-production-use
+auth:
+  test-users:
+    a:
+      password: test-password-a
+    b:
+      password: test-password-b

@@ -84,16 +84,19 @@ public class AquariumController {
     }
 
     /**
-     * Creates a new aquarium.
+     * Creates a new aquarium, owned by the caller identified by the gateway-injected
+     * {@code X-User-Id} header.
      *
+     * @param ownerId id of the authenticated caller (from the gateway, never client-supplied JSON)
      * @param dto Aquarium details to be created
      * @return ResponseEntity containing created aquarium details
      */
     @PostMapping
     @Operation(summary = "Create a new aquarium", description = "Receive and save a new aquarium")
     public ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> createAquarium(
+            @RequestHeader("X-User-Id") Long ownerId,
             @Valid @RequestBody CreateAquariumDTO dto) {
-        Aquarium savedAquarium = aquariumService.createAquarium(dto);
+        Aquarium savedAquarium = aquariumService.createAquarium(dto, ownerId);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponseDTO.success("Aquarium created successfully",
@@ -101,33 +104,36 @@ public class AquariumController {
     }
 
     /**
-     * Updates an existing aquarium.
+     * Updates an existing aquarium. Only the owner may update it.
      *
-     * @param id  ID of the aquarium to update
-     * @param dto Updated aquarium details
+     * @param id      ID of the aquarium to update
+     * @param ownerId id of the authenticated caller; must match the aquarium's owner
+     * @param dto     Updated aquarium details
      * @return ResponseEntity containing updated aquarium details
      */
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing aquarium", description = "Modify details of a specific aquarium")
     public ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> updateAquarium(
             @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long ownerId,
             @Valid @RequestBody UpdateAquariumDTO dto) {
-        Aquarium updatedAquarium = aquariumService.updateAquarium(id, dto);
+        Aquarium updatedAquarium = aquariumService.updateAquarium(id, dto, ownerId);
 
         return ResponseEntity.ok(ApiResponseDTO.success("Aquarium updated successfully",
                 AquariumResponseDTO.fromEntity(updatedAquarium)));
     }
 
     /**
-     * Deletes an aquarium by its ID.
+     * Deletes an aquarium by its ID. Only the owner may delete it.
      *
-     * @param id ID of the aquarium to delete
+     * @param id      ID of the aquarium to delete
+     * @param ownerId id of the authenticated caller; must match the aquarium's owner
      * @return 204 No Content on success
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an aquarium", description = "Remove a specific aquarium")
-    public ResponseEntity<Void> deleteAquarium(@PathVariable Long id) {
-        aquariumService.deleteAquarium(id);
+    public ResponseEntity<Void> deleteAquarium(@PathVariable Long id, @RequestHeader("X-User-Id") Long ownerId) {
+        aquariumService.deleteAquarium(id, ownerId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientException;
@@ -41,6 +42,32 @@ public class GlobalExceptionHandler {
 
         ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, ex.getMessage(), null, null);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Handles an authenticated caller acting on a resource it does not own.
+     * Returns 403 Forbidden, distinct from 401 (not authenticated at all) and 404 (resource
+     * doesn't exist) - the resource does exist, the caller just isn't authorized on it.
+     */
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleForbidden(ForbiddenException ex) {
+        log.warn("Forbidden: {}", ex.getMessage());
+
+        ApiResponseDTO<Void> response = new ApiResponseDTO<>(false, ex.getMessage(), null, null);
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * Handles a request missing a required header (e.g. {@code X-User-Id}, normally injected by
+     * the gateway). Returns 400 Bad Request instead of a generic 500.
+     */
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ApiResponseDTO<Void>> handleMissingHeader(MissingRequestHeaderException ex) {
+        log.warn("Missing required header: {}", ex.getHeaderName());
+
+        ApiResponseDTO<Void> response = new ApiResponseDTO<>(
+                false, "Missing required header: " + ex.getHeaderName(), null, null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     /**
