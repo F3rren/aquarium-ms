@@ -199,3 +199,26 @@ bot-protection:
     - /actuator
     - /swagger-ui
     - /v3/api-docs
+
+# No default for jwt.secret: a missing JWT_SECRET must fail startup rather than sign tokens
+# with a predictable key. Any length works - it's SHA-256-hashed into a valid HS256 key
+# regardless (see JwtTokenProvider) - but treat it exactly like a database password: never
+# commit a real value, only ever set it via the environment.
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+  excluded-paths:
+    - /actuator
+    - /swagger-ui
+    - /v3/api-docs
+    - /auth/login
+
+# Two fixed test identities for POST /auth/login - not a real user system, see AuthController.
+auth:
+  test-users:
+    a:
+      username: ${AUTH_USER_A_USERNAME:userA}
+      password: ${AUTH_USER_A_PASSWORD}
+    b:
+      username: ${AUTH_USER_B_USERNAME:userB}
+      password: ${AUTH_USER_B_PASSWORD}

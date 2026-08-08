@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
+import it.f3rren.aquarium.aquariums_service.exception.ForbiddenException;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
 import it.f3rren.aquarium.aquariums_service.model.AquariumType;
@@ -54,6 +55,7 @@ class AquariumServiceTest {
         sampleAquarium.setVolume(200);
         sampleAquarium.setType(AquariumType.SALTWATER);
         sampleAquarium.setDescription("A beautiful reef aquarium");
+        sampleAquarium.setOwnerId(1L);
     }
 
     // ========================
@@ -75,7 +77,7 @@ class AquariumServiceTest {
 
             when(aquariumRepository.save(any(Aquarium.class))).thenReturn(sampleAquarium);
 
-            Aquarium result = aquariumService.createAquarium(dto);
+            Aquarium result = aquariumService.createAquarium(dto, 1L);
 
             assertNotNull(result);
             assertEquals("Reef Tank", result.getName());
@@ -98,7 +100,25 @@ class AquariumServiceTest {
                 return saved;
             });
 
-            aquariumService.createAquarium(dto);
+            aquariumService.createAquarium(dto, 1L);
+            verify(aquariumRepository).save(any(Aquarium.class));
+        }
+
+        @Test
+        @DisplayName("should persist the given ownerId on the saved entity")
+        void shouldPersistOwnerId() {
+            CreateAquariumDTO dto = new CreateAquariumDTO();
+            dto.setName("Owned Tank");
+            dto.setVolume(100);
+            dto.setType(AquariumType.FRESHWATER);
+
+            when(aquariumRepository.save(any(Aquarium.class))).thenAnswer(invocation -> {
+                Aquarium saved = invocation.getArgument(0);
+                assertEquals(5L, saved.getOwnerId());
+                return saved;
+            });
+
+            aquariumService.createAquarium(dto, 5L);
             verify(aquariumRepository).save(any(Aquarium.class));
         }
     }
@@ -195,7 +215,7 @@ class AquariumServiceTest {
             dto.setName("Updated Name");
             // volume, type, description left null — should not change
 
-            Aquarium result = aquariumService.updateAquarium(1L, dto);
+            Aquarium result = aquariumService.updateAquarium(1L, dto, 1L);
 
             assertEquals("Updated Name", result.getName());
             assertEquals(200, result.getVolume()); // unchanged
@@ -216,7 +236,7 @@ class AquariumServiceTest {
             dto.setDescription("New desc");
             dto.setImageUrl("https://example.com/img.jpg");
 
-            Aquarium result = aquariumService.updateAquarium(1L, dto);
+            Aquarium result = aquariumService.updateAquarium(1L, dto, 1L);
 
             assertEquals("New Name", result.getName());
             assertEquals(500, result.getVolume());
@@ -234,7 +254,20 @@ class AquariumServiceTest {
             dto.setName("New Name");
 
             assertThrows(ResourceNotFoundException.class,
-                    () -> aquariumService.updateAquarium(99L, dto));
+                    () -> aquariumService.updateAquarium(99L, dto, 1L));
+        }
+
+        @Test
+        @DisplayName("should throw ForbiddenException when caller does not own the aquarium")
+        void shouldThrowWhenNotOwner() {
+            when(aquariumRepository.findById(1L)).thenReturn(Optional.of(sampleAquarium));
+
+            UpdateAquariumDTO dto = new UpdateAquariumDTO();
+            dto.setName("New Name");
+
+            assertThrows(ForbiddenException.class,
+                    () -> aquariumService.updateAquarium(1L, dto, 2L));
+            verify(aquariumRepository, never()).save(any());
         }
     }
 
@@ -247,11 +280,11 @@ class AquariumServiceTest {
     class DeleteAquarium {
 
         @Test
-        @DisplayName("should delete aquarium when found")
+        @DisplayName("should delete aquarium when found and owned by the caller")
         void shouldDeleteWhenFound() {
-            when(aquariumRepository.existsById(1L)).thenReturn(true);
+            when(aquariumRepository.findById(1L)).thenReturn(Optional.of(sampleAquarium));
 
-            aquariumService.deleteAquarium(1L);
+            aquariumService.deleteAquarium(1L, 1L);
 
             verify(aquariumRepository, times(1)).deleteById(1L);
         }
@@ -259,10 +292,21 @@ class AquariumServiceTest {
         @Test
         @DisplayName("should throw ResourceNotFoundException when not found")
         void shouldThrowWhenNotFound() {
-            when(aquariumRepository.existsById(99L)).thenReturn(false);
+            when(aquariumRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThrows(ResourceNotFoundException.class,
-                    () -> aquariumService.deleteAquarium(99L));
+                    () -> aquariumService.deleteAquarium(99L, 1L));
+
+            verify(aquariumRepository, never()).deleteById(any());
+        }
+
+        @Test
+        @DisplayName("should throw ForbiddenException when caller does not own the aquarium")
+        void shouldThrowWhenNotOwner() {
+            when(aquariumRepository.findById(1L)).thenReturn(Optional.of(sampleAquarium));
+
+            assertThrows(ForbiddenException.class,
+                    () -> aquariumService.deleteAquarium(1L, 2L));
 
             verify(aquariumRepository, never()).deleteById(any());
         }

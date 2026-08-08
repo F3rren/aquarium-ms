@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,10 +63,16 @@ class AquariumIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private static HttpHeaders ownerHeader(String userId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-User-Id", userId);
+        return headers;
+    }
+
     @Test
     @DisplayName("full CRUD lifecycle: create → read → update → delete → 404")
     void fullCrudLifecycle() {
-        // 1. Create
+        // 1. Create (owned by user "1" - the gateway would inject this header in production)
         CreateAquariumDTO createDto = new CreateAquariumDTO();
         createDto.setName("Integration Tank");
         createDto.setVolume(150);
@@ -73,7 +80,7 @@ class AquariumIntegrationTest {
 
         ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> createResp = restTemplate.exchange(
                 "/aquariums", HttpMethod.POST,
-                new HttpEntity<>(createDto),
+                new HttpEntity<>(createDto, ownerHeader("1")),
                 new ParameterizedTypeReference<>() {});
 
         assertThat(createResp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -108,7 +115,7 @@ class AquariumIntegrationTest {
 
         ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> updateResp = restTemplate.exchange(
                 "/aquariums/" + id, HttpMethod.PUT,
-                new HttpEntity<>(updateDto),
+                new HttpEntity<>(updateDto, ownerHeader("1")),
                 new ParameterizedTypeReference<>() {});
 
         assertThat(updateResp.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -131,7 +138,8 @@ class AquariumIntegrationTest {
         assertThat(listBody.getSuccess()).isTrue();
 
         // 5. Delete
-        restTemplate.delete("/aquariums/" + id);
+        restTemplate.exchange("/aquariums/" + id, HttpMethod.DELETE,
+                new HttpEntity<>(null, ownerHeader("1")), Void.class);
 
         // 6. Read after delete → 404
         ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> afterDeleteResp = restTemplate.exchange(
