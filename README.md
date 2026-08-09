@@ -121,14 +121,24 @@ cp .env.example .env
 
 | Variable | Default | Used by |
 |----------|---------|---------|
-| `SPRING_PROFILES_ACTIVE` | _(empty)_ | all Spring services |
 | `DB_USER` | `postgres` | postgres container + all Spring services |
-| `DB_PASSWORD` | `root` | same |
+| `DB_PASSWORD` | _(required, no default)_ | same |
 | `GF_ADMIN_USER` | `admin` | Grafana |
-| `GF_ADMIN_PASSWORD` | `admin` | Grafana |
+| `GF_ADMIN_PASSWORD` | _(required, no default)_ | Grafana |
+| `KAFKA_UI_USER` | `admin` | Kafka UI |
+| `KAFKA_UI_PASSWORD` | _(required, no default)_ | Kafka UI |
+| `SWAGGER_ENABLED` | `false` | api-gateway — exposes Swagger UI; local development only |
 | `JWT_SECRET` | _(required, no default)_ | api-gateway — signs/validates every JWT it issues |
 | `AUTH_USER_A_PASSWORD` | _(required, no default)_ | api-gateway — password for the `userA` test identity |
 | `AUTH_USER_B_PASSWORD` | _(required, no default)_ | api-gateway — password for the `userB` test identity |
+| `RATE_LIMIT_ENABLED` | `true` | api-gateway — general per-IP throttling on every routed request |
+| `AUTH_RATE_LIMIT_ENABLED` | `true` | api-gateway — brute-force protection specifically on `POST /auth/login` |
+| `HOMEPAGE_ALLOWED_HOSTS` | `localhost:3001` | homepage dashboard — host header(s) it accepts |
+
+> **Note:** the `dev` Spring profile (relaxed Flyway/validation, verbose logging - see each
+> service's `application-dev.properties`) is not wired through `docker-compose.yml` at all; it's
+> meant for running a single service directly from an IDE against locally-running infra, not for
+> the full Docker Compose stack. `SPRING_PROFILES_ACTIVE` has no effect here.
 
 ---
 
