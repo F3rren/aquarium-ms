@@ -222,3 +222,12 @@ auth:
     b:
       username: ${AUTH_USER_B_USERNAME:userB}
       password: ${AUTH_USER_B_PASSWORD}
+  # Brute-force protection for /auth/login specifically - see LoginRateLimitFilter for why this
+  # can't just be the rate-limit.* block above (GlobalFilters never see this endpoint).
+  rate-limit:
+    enabled: ${AUTH_RATE_LIMIT_ENABLED:true}
+    capacity: ${AUTH_RATE_LIMIT_CAPACITY:5}
+    refill-tokens: ${AUTH_RATE_LIMIT_REFILL_TOKENS:5}
+    refill-seconds: ${AUTH_RATE_LIMIT_REFILL_SECONDS:60}
+    cleanup-interval-ms: ${AUTH_RATE_LIMIT_CLEANUP_INTERVAL_MS:300000}
+    bucket-ttl-minutes: ${AUTH_RATE_LIMIT_BUCKET_TTL_MINUTES:10}
