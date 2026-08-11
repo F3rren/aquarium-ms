@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AuthControllerTest {
@@ -65,5 +68,46 @@ class AuthControllerTest {
         StepVerifier.create(controller.login(request))
                 .assertNext(response -> assertThat(response.getBody()).containsEntry("userId", "2"))
                 .verifyComplete();
+    }
+
+    @Test
+    void listUsersRejectsAMissingBearerToken() {
+        var response = controller.listUsers(null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).containsEntry("error", "missing_bearer_token");
+    }
+
+    @Test
+    void listUsersRejectsAMalformedAuthorizationHeader() {
+        var response = controller.listUsers("not-a-bearer-token");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void listUsersRejectsAnInvalidToken() {
+        var response = controller.listUsers("Bearer garbage");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getBody()).containsEntry("error", "invalid_or_expired_token");
+    }
+
+    @Test
+    void listUsersReturnsBothTestIdentitiesForAnyValidToken() {
+        // No role check at all: a token for the ordinary userA identity is enough - this is the
+        // intentional BFLA fixture's whole point (see AuthController#listUsers).
+        String token = tokenProvider.issueToken("1");
+
+        var response = controller.listUsers("Bearer " + token);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        @SuppressWarnings("unchecked")
+        var users = (List<Map<String, String>>) response.getBody().get("users");
+        assertThat(users).containsExactlyInAnyOrder(
+                Map.of("username", "userA", "id", "1"),
+                Map.of("username", "userB", "id", "2")
+        );
     }
 }
