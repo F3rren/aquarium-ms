@@ -73,7 +73,7 @@ class AquariumTest {
     class AllArgsConstructor {
 
         @Test
-        @DisplayName("should populate all eight fields from constructor arguments")
+        @DisplayName("should populate all nine fields from constructor arguments")
         void shouldPopulateAllFields() {
             LocalDateTime now = LocalDateTime.of(2025, 6, 15, 10, 30);
 
@@ -85,7 +85,8 @@ class AquariumTest {
                     now,
                     "A reef aquarium",
                     "https://example.com/reef.jpg",
-                    7L
+                    7L,
+                    "staff-approved"
             );
 
             assertEquals(1L, aquarium.getId());
@@ -96,6 +97,7 @@ class AquariumTest {
             assertEquals("A reef aquarium", aquarium.getDescription());
             assertEquals("https://example.com/reef.jpg", aquarium.getImageUrl());
             assertEquals(7L, aquarium.getOwnerId());
+            assertEquals("staff-approved", aquarium.getVerified());
         }
     }
 }

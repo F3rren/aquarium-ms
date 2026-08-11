@@ -55,6 +55,9 @@ public class AquariumService implements IAquariumService {
         aquarium.setDescription(dto.getDescription());
         aquarium.setImageUrl(dto.getImageUrl());
         aquarium.setOwnerId(ownerId);
+        // Intentional Mass Assignment / BOPLA fixture (see Aquarium#verified): bound directly
+        // from client input, with no check that the caller is actually authorized to set it.
+        aquarium.setVerified(dto.getVerified());
 
         Aquarium saved = aquariumRepository.save(aquarium);
         log.info("Aquarium created with ID: {}", saved.getId());

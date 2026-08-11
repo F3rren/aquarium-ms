@@ -121,6 +121,25 @@ class AquariumServiceTest {
             aquariumService.createAquarium(dto, 5L);
             verify(aquariumRepository).save(any(Aquarium.class));
         }
+
+        @Test
+        @DisplayName("binds a client-supplied 'verified' straight onto the entity (intentional Mass Assignment fixture)")
+        void bindsVerifiedDirectlyFromClientInput() {
+            CreateAquariumDTO dto = new CreateAquariumDTO();
+            dto.setName("Unreviewed Tank");
+            dto.setVolume(100);
+            dto.setType(AquariumType.FRESHWATER);
+            dto.setVerified("staff-approved");
+
+            when(aquariumRepository.save(any(Aquarium.class))).thenAnswer(invocation -> {
+                Aquarium saved = invocation.getArgument(0);
+                assertEquals("staff-approved", saved.getVerified());
+                return saved;
+            });
+
+            aquariumService.createAquarium(dto, 1L);
+            verify(aquariumRepository).save(any(Aquarium.class));
+        }
     }
 
     // ========================

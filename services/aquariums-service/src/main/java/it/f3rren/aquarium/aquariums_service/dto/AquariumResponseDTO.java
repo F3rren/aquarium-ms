@@ -45,6 +45,9 @@ public class AquariumResponseDTO {
     /** Id of the user who created this aquarium. */
     private Long ownerId;
 
+    /** Verification/moderation marker - see {@link Aquarium#getVerified()}. */
+    private String verified;
+
     /**
      * Maps an {@link Aquarium} entity to its response representation.
      *
@@ -61,6 +64,7 @@ public class AquariumResponseDTO {
                 .description(aquarium.getDescription())
                 .imageUrl(aquarium.getImageUrl())
                 .ownerId(aquarium.getOwnerId())
+                .verified(aquarium.getVerified())
                 .build();
     }
 }

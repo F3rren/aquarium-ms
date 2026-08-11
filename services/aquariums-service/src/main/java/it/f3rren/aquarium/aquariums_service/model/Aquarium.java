@@ -97,4 +97,17 @@ public class Aquarium {
     @Column(name = "owner_id", nullable = false)
     private Long ownerId;
 
+    /**
+     * Free-text verification/moderation marker, meant to be set only by staff review after the
+     * fact - never by whoever creates the aquarium. Bound straight from client-supplied input on
+     * creation anyway (see {@link it.f3rren.aquarium.aquariums_service.service.AquariumService
+     * #createAquarium}): this is an intentional Mass Assignment / BOPLA test fixture, the
+     * counterpart to {@code ownerId} above's correctly-guarded example of the very same class of
+     * field (a value only trusted server-side, that a naive implementation might still accept
+     * from the request body).
+     */
+    @Size(max = 100)
+    @Column(name = "verified")
+    private String verified;
+
 }
