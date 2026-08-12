@@ -47,4 +47,12 @@ public class CreateAquariumDTO {
     @Size(max = 2000, message = "Image URL must be at most 2000 characters")
     @Pattern(regexp = "^$|^https?://[^\\s/$.?#].[^\\s]*$", message = "Image URL must be a valid URL")
     private String imageUrl;
+
+    /**
+     * Verification/moderation marker. Not meant to be client-settable at all - see
+     * {@link it.f3rren.aquarium.aquariums_service.model.Aquarium#verified}. Accepted here anyway,
+     * on purpose, as this project's Mass Assignment / BOPLA test fixture.
+     */
+    @Size(max = 100, message = "Verified must be at most 100 characters")
+    private String verified;
 }
