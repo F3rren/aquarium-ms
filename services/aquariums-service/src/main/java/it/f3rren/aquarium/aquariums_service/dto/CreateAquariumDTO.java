@@ -1,6 +1,7 @@
 package it.f3rren.aquarium.aquariums_service.dto;
 
 import it.f3rren.aquarium.aquariums_service.model.AquariumType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -51,8 +52,14 @@ public class CreateAquariumDTO {
     /**
      * Verification/moderation marker. Not meant to be client-settable at all - see
      * {@link it.f3rren.aquarium.aquariums_service.model.Aquarium#verified}. Accepted here anyway,
-     * on purpose, as this project's Mass Assignment / BOPLA test fixture.
+     * on purpose, as this project's Mass Assignment / BOPLA test fixture. Hidden from the
+     * generated OpenAPI schema ({@code @Schema(hidden = true)} only affects documentation, not
+     * Jackson binding - the field is still read from the request body exactly as before) so a
+     * schema-driven sample body doesn't already include it as a "documented" property: the whole
+     * point of this fixture is a field the public API contract never advertises, but the server
+     * binds anyway.
      */
+    @Schema(hidden = true)
     @Size(max = 100, message = "Verified must be at most 100 characters")
     private String verified;
 }
