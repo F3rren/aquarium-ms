@@ -15,7 +15,7 @@ import it.f3rren.aquarium.aquariums_service.exception.ForbiddenException;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
-import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
+import it.f3rren.aquarium.aquariums_service.repository.AquariumRepository;
 
 /**
  * Default implementation of {@link AquariumService}.
@@ -32,10 +32,10 @@ public class AquariumServiceImpl implements AquariumService {
 
     private static final Logger log = LoggerFactory.getLogger(AquariumServiceImpl.class);
 
-    private final IAquariumRepository aquariumRepository;
+    private final AquariumRepository aquariumRepository;
     private final AquariumEventPublisher eventPublisher;
 
-    public AquariumServiceImpl(IAquariumRepository aquariumRepository, AquariumEventPublisher eventPublisher) {
+    public AquariumServiceImpl(AquariumRepository aquariumRepository, AquariumEventPublisher eventPublisher) {
         this.aquariumRepository = aquariumRepository;
         this.eventPublisher = eventPublisher;
     }

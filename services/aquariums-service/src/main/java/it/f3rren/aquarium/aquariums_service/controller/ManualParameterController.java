@@ -24,7 +24,7 @@ import jakarta.validation.Valid;
  * @author F3rren
  */
 @RestController
-@RequestMapping("/aquariums")
+@RequestMapping("/aquariums/{id}/manual-parameters")
 @Tag(name = "Manual Parameters", description = "Proxy endpoints for manual parameter measurements")
 public class ManualParameterController {
 
@@ -41,7 +41,7 @@ public class ManualParameterController {
      * @param parameter Manual parameter data
      * @return ApiResponseDTO with the added parameter
      */
-    @PostMapping("/{id}/manual-parameters")
+    @PostMapping
     @Operation(summary = "Add manual parameter", description = "Record a new manual parameter measurement for an aquarium")
     public ResponseEntity<ApiResponseDTO<ManualParameterDTO>> addManualParameter(
             @PathVariable Long id,
@@ -55,7 +55,7 @@ public class ManualParameterController {
      * @param id Aquarium ID
      * @return ApiResponseDTO with the list of manual parameters
      */
-    @GetMapping("/{id}/manual-parameters")
+    @GetMapping
     @Operation(summary = "Get manual parameters", description = "Retrieve all manual parameter measurements for an aquarium")
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOManualParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<ManualParameterDTO>>> getManualParameters(@PathVariable Long id) {
@@ -68,7 +68,7 @@ public class ManualParameterController {
      * @param id Aquarium ID
      * @return ApiResponseDTO with the latest manual parameter
      */
-    @GetMapping("/{id}/manual-parameters/latest")
+    @GetMapping("/latest")
     @Operation(summary = "Get latest manual parameter", description = "Retrieve the most recent manual parameter measurement")
     public ResponseEntity<ApiResponseDTO<ManualParameterDTO>> getLatestManualParameter(@PathVariable Long id) {
         return ResponseEntity.ok(parametersClient.getLatestManualParameter(id));
@@ -82,7 +82,7 @@ public class ManualParameterController {
      * @param to   End datetime (ISO-8601); Spring converts automatically
      * @return ApiResponseDTO with the history
      */
-    @GetMapping("/{id}/manual-parameters/history")
+    @GetMapping("/history")
     @Operation(summary = "Get manual parameters history", description = "Retrieve historical manual parameter data")
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOManualParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<ManualParameterDTO>>> getManualParametersHistory(

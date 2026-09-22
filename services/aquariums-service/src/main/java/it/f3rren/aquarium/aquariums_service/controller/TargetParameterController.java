@@ -17,7 +17,7 @@ import jakarta.validation.Valid;
  * @author F3rren
  */
 @RestController
-@RequestMapping("/aquariums")
+@RequestMapping("/aquariums/{id}/target-parameters")
 @Tag(name = "Target Parameters", description = "Proxy endpoints for target parameter values")
 public class TargetParameterController {
 
@@ -33,7 +33,7 @@ public class TargetParameterController {
      * @param id Aquarium ID
      * @return ApiResponseDTO with the target parameters
      */
-    @GetMapping("/{id}/target-parameters")
+    @GetMapping
     @Operation(summary = "Get target parameters", description = "Retrieve the target parameter values for an aquarium")
     public ResponseEntity<ApiResponseDTO<TargetParameterDTO>> getTargetParameters(@PathVariable Long id) {
         return ResponseEntity.ok(parametersClient.getTargetParameters(id));
@@ -46,7 +46,7 @@ public class TargetParameterController {
      * @param targetParameter Target parameter values
      * @return ApiResponseDTO with the saved target parameters
      */
-    @PostMapping("/{id}/target-parameters")
+    @PostMapping
     @Operation(summary = "Save target parameters", description = "Set target parameter values for an aquarium")
     public ResponseEntity<ApiResponseDTO<TargetParameterDTO>> saveTargetParameters(
             @PathVariable Long id,

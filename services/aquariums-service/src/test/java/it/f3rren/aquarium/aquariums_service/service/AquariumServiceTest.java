@@ -27,7 +27,7 @@ import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
 import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
-import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
+import it.f3rren.aquarium.aquariums_service.repository.AquariumRepository;
 
 /**
  * Unit tests for AquariumService.
@@ -37,7 +37,7 @@ import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
 class AquariumServiceTest {
 
     @Mock
-    private IAquariumRepository aquariumRepository;
+    private AquariumRepository aquariumRepository;
 
     @Mock
     private AquariumEventPublisher eventPublisher;

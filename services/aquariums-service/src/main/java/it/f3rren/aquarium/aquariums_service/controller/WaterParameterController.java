@@ -27,7 +27,7 @@ import jakarta.validation.constraints.Min;
  * @author F3rren
  */
 @RestController
-@RequestMapping("/aquariums")
+@RequestMapping("/aquariums/{id}/water-parameters")
 @Validated
 @Tag(name = "Water Parameters", description = "Proxy endpoints for water parameter measurements")
 public class WaterParameterController {
@@ -47,7 +47,7 @@ public class WaterParameterController {
      * @param parameter Water parameter data
      * @return ApiResponseDTO with the added parameter
      */
-    @PostMapping("/{id}/water-parameters")
+    @PostMapping
     @Operation(summary = "Add water parameter", description = "Record a new water parameter measurement for an aquarium")
     public ResponseEntity<ApiResponseDTO<WaterParameterDTO>> addWaterParameter(
             @PathVariable Long id,
@@ -62,7 +62,7 @@ public class WaterParameterController {
      * @param limit Maximum number of results (1–100); validated via Bean Validation
      * @return ApiResponseDTO with the list of water parameters
      */
-    @GetMapping("/{id}/water-parameters")
+    @GetMapping
     @Operation(summary = "Get water parameters", description = "Retrieve water parameter measurements for an aquarium")
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOWaterParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<WaterParameterDTO>>> getWaterParameters(
@@ -77,7 +77,7 @@ public class WaterParameterController {
      * @param id Aquarium ID
      * @return ApiResponseDTO with the latest water parameter
      */
-    @GetMapping("/{id}/water-parameters/latest")
+    @GetMapping("/latest")
     @Operation(summary = "Get latest water parameter", description = "Retrieve the most recent water parameter measurement")
     public ResponseEntity<ApiResponseDTO<WaterParameterDTO>> getLatestWaterParameter(@PathVariable Long id) {
         return ResponseEntity.ok(parametersClient.getLatestWaterParameter(id));
@@ -92,7 +92,7 @@ public class WaterParameterController {
      * @param to     Optional end datetime (ISO-8601); Spring converts automatically
      * @return ApiResponseDTO with the history
      */
-    @GetMapping("/{id}/water-parameters/history")
+    @GetMapping("/history")
     @Operation(summary = "Get water parameters history", description = "Retrieve historical water parameter data")
     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponseDTOWaterParameterList.class)))
     public ResponseEntity<ApiResponseDTO<List<WaterParameterDTO>>> getWaterParametersHistory(
