@@ -11,7 +11,7 @@ import lombok.*;
  * always set server-side (injected from the path variable) and must not be
  * supplied by the caller.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Data
 @NoArgsConstructor

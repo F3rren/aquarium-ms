@@ -5,7 +5,7 @@ import lombok.*;
 /**
  * DTO for API responses.
  * @param <T> Type of data contained in the response
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Data
 @NoArgsConstructor

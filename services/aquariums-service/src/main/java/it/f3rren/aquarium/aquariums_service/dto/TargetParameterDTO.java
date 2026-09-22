@@ -6,7 +6,7 @@ import lombok.*;
  * Data Transfer Object for target parameters.
  * Represents the ideal parameter values set as targets for an aquarium.
  * Used by ParametersClient to communicate with the target-parameters microservice.
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Data
 @NoArgsConstructor

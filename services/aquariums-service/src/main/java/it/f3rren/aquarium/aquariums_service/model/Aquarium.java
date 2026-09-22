@@ -17,7 +17,7 @@ import org.hibernate.validator.constraints.URL;
  * <p>Mapped to the {@code aquariums} table. An aquarium is the central aggregate
  * around which water parameters, manual measurements, and target values are organized.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Entity
 @NoArgsConstructor

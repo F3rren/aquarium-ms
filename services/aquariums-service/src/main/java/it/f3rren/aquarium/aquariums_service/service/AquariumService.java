@@ -14,7 +14,7 @@ import it.f3rren.aquarium.aquariums_service.model.Aquarium;
  * Defines the contract for CRUD operations on aquariums.
  * Implementations are responsible for business logic and persistence.
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 public interface AquariumService {
 

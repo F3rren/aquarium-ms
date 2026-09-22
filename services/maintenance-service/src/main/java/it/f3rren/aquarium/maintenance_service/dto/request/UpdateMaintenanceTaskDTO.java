@@ -16,7 +16,7 @@ import it.f3rren.aquarium.maintenance_service.model.TaskPriority;
  * <p><strong>Null limitation:</strong> a {@code null} field means "no change" and the existing
  * value is preserved. Explicitly clearing an optional field requires a dedicated PATCH endpoint.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Getter
 @Setter

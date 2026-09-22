@@ -24,7 +24,7 @@ import it.f3rren.aquarium.aquariums_service.dto.ApiResponseDTO;
  * Global exception handler for the application.
  * It handles different exceptions and provides appropriate responses.
  * It also logs the error details.
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {

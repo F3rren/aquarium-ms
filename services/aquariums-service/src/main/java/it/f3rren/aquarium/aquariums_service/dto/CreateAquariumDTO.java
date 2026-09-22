@@ -9,7 +9,7 @@ import lombok.*;
  * DTO for creating a new aquarium.
  * This class is used to validate the input data when creating a new aquarium.
  * Lombok annotations are used to generate getters, setters, equals, hashCode, and toString methods.
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Data
 @NoArgsConstructor

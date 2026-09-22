@@ -11,7 +11,7 @@ import lombok.*;
  * value is preserved. Explicitly clearing an optional field (e.g. {@code notes}) requires a
  * dedicated PATCH endpoint.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Data
 @NoArgsConstructor

@@ -24,7 +24,7 @@ import java.util.List;
  * a Resilience4j {@link CircuitBreaker} and {@link Retry}, with a dedicated fallback
  * that returns a degraded-but-valid response instead of propagating the failure.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Component
 public class ParametersClient {

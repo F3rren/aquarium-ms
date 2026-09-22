@@ -25,7 +25,7 @@ import it.f3rren.aquarium.aquariums_service.repository.AquariumRepository;
  * checks before delete. All write operations are wrapped in a transaction; reads use
  * {@code readOnly = true} for performance.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Service
 public class AquariumServiceImpl implements AquariumService {

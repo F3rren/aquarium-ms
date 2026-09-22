@@ -13,7 +13,7 @@ import lombok.*;
  * "no change" and the existing value is preserved. If you need to clear an optional field
  * (e.g. {@code description} or {@code imageUrl}), a dedicated PATCH endpoint is required.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Data
 @NoArgsConstructor

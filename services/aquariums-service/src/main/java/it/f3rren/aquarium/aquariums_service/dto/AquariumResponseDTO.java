@@ -13,7 +13,7 @@ import lombok.*;
  * internal model changes do not affect the public interface.
  * Use the {@link #fromEntity(Aquarium)} factory method to construct instances.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Data
 @NoArgsConstructor

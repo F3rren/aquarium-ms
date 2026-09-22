@@ -14,7 +14,7 @@ import jakarta.validation.Valid;
  * Proxy controller for target parameter endpoints.
  * Delegates all operations to the parameters microservice via {@link ParametersClient}.
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @RestController
 @RequestMapping("/aquariums/{id}/target-parameters")

@@ -24,7 +24,7 @@ import jakarta.validation.constraints.Min;
  * Proxy controller for water parameter endpoints.
  * Delegates all operations to the parameters microservice via {@link ParametersClient}.
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @RestController
 @RequestMapping("/aquariums/{id}/water-parameters")

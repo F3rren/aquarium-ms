@@ -14,7 +14,7 @@ import lombok.*;
  * when recording a new measurement and as the response payload when reading
  * existing ones. The {@code aquariumId} field is always set server-side.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Data
 @NoArgsConstructor

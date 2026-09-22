@@ -13,7 +13,7 @@ import org.springframework.web.client.RestClient;
  * Configuration class for setting up REST clients for different parameter services.
  * Each RestClient is configured with a base URL from application properties
  * and can be injected into service classes for making HTTP requests.
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 @Configuration
 public class WebClientConfig {

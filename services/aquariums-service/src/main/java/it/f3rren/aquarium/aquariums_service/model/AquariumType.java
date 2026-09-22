@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * e.g. {@code "SALTWATER"}) and exposed over the REST API in lower case
  * (e.g. {@code "saltwater"}) to preserve the existing public contract.</p>
  *
- * @author F3rren
+ * @author Samuele Alessandro Di Silvestri
  */
 public enum AquariumType {
 
