@@ -17,13 +17,19 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Minimal login endpoint for the two fixed test identities used to exercise Sentinel's IDOR
- * module: plaintext-compares a username/password pair against env-configured test credentials
- * and issues a JWT carrying the matching user id as its subject. Deliberately not a general
- * user-management system - password hashing and self-service registration would be pointless
- * for two fixed seed accounts whose entire purpose is to be known, reproducible test identities.
+ * Minimal login endpoint for the two fixed test identities used to exercise
+ * Sentinel's IDOR
+ * module: plaintext-compares a username/password pair against env-configured
+ * test credentials
+ * and issues a JWT carrying the matching user id as its subject. Deliberately
+ * not a general
+ * user-management system - password hashing and self-service registration would
+ * be pointless
+ * for two fixed seed accounts whose entire purpose is to be known, reproducible
+ * test identities.
  * <p>
- * Also exposes {@link #listUsers}, an intentional BFLA test fixture - see its own javadoc.
+ * Also exposes {@link #listUsers}, an intentional BFLA test fixture - see its
+ * own javadoc.
  */
 @RestController
 public class AuthController {
@@ -37,8 +43,7 @@ public class AuthController {
             @Value("${auth.test-users.a.username:userA}") String usernameA,
             @Value("${auth.test-users.a.password}") String passwordA,
             @Value("${auth.test-users.b.username:userB}") String usernameB,
-            @Value("${auth.test-users.b.password}") String passwordB
-    ) {
+            @Value("${auth.test-users.b.password}") String passwordB) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.passwordsByUsername = Map.of(usernameA, passwordA, usernameB, passwordB);
         this.userIdsByUsername = Map.of(usernameA, "1", usernameB, "2");
@@ -60,20 +65,31 @@ public class AuthController {
     }
 
     /**
-     * Lists every known test identity (username + id). Reachable by any caller holding a valid
-     * JWT - checked here explicitly via {@link JwtTokenProvider#validateAndGetSubject}, the same
-     * way {@link it.f3rren.aquarium.gateway.filter.JwtAuthFilter} does for routed traffic,
-     * because that filter is a {@code GlobalFilter} and never sees locally-handled controller
+     * Lists every known test identity (username + id). Reachable by any caller
+     * holding a valid
+     * JWT - checked here explicitly via
+     * {@link JwtTokenProvider#validateAndGetSubject}, the same
+     * way {@link it.f3rren.aquarium.gateway.filter.JwtAuthFilter} does for routed
+     * traffic,
+     * because that filter is a {@code GlobalFilter} and never sees locally-handled
+     * controller
      * endpoints such as this one (the same reason {@code /auth/login} needs its own
-     * {@link it.f3rren.aquarium.gateway.filter.LoginRateLimitFilter} instead of relying on the
+     * {@link it.f3rren.aquarium.gateway.filter.LoginRateLimitFilter} instead of
+     * relying on the
      * gateway's general rate-limit filter).
      * <p>
-     * Deliberately does not check whether that identity is actually privileged to administer
-     * users - any authenticated identity, not just a genuine admin, can list them. This is an
-     * intentional BFLA (Broken Function Level Authorization) test fixture: the path looks like
-     * it should require an elevated role ("admin"), but nothing beyond ordinary authentication
-     * is enforced, so a security scan can demonstrate the difference between an endpoint that's
-     * merely authenticated and one that's actually authorized for the function it exposes.
+     * Deliberately does not check whether that identity is actually privileged to
+     * administer
+     * users - any authenticated identity, not just a genuine admin, can list them.
+     * This is an
+     * intentional BFLA (Broken Function Level Authorization) test fixture: the path
+     * looks like
+     * it should require an elevated role ("admin"), but nothing beyond ordinary
+     * authentication
+     * is enforced, so a security scan can demonstrate the difference between an
+     * endpoint that's
+     * merely authenticated and one that's actually authorized for the function it
+     * exposes.
      */
     @GetMapping("/admin/users")
     public ResponseEntity<Map<String, Object>> listUsers(

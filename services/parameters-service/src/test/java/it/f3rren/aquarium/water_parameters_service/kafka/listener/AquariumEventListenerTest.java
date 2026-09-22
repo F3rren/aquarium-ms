@@ -12,13 +12,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import it.f3rren.aquarium.parameters_service.kafka.event.AquariumEvent;
 import it.f3rren.aquarium.parameters_service.kafka.listener.AquariumEventListener;
-import it.f3rren.aquarium.parameters_service.repository.IParameterRepository;
+import it.f3rren.aquarium.parameters_service.repository.ParameterRepository;
 
 @ExtendWith(MockitoExtension.class)
 class AquariumEventListenerTest {
 
     @Mock
-    private IParameterRepository parameterRepository;
+    private ParameterRepository parameterRepository;
 
     @InjectMocks
     private AquariumEventListener listener;

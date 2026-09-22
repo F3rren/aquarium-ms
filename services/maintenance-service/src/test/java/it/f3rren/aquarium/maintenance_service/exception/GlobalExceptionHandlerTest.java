@@ -23,8 +23,8 @@ import it.f3rren.aquarium.maintenance_service.controller.ProductController;
 import it.f3rren.aquarium.maintenance_service.dto.request.CreateProductDTO;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
-import it.f3rren.aquarium.maintenance_service.service.IMaintenanceTaskService;
-import it.f3rren.aquarium.maintenance_service.service.IProductService;
+import it.f3rren.aquarium.maintenance_service.service.MaintenanceTaskService;
+import it.f3rren.aquarium.maintenance_service.service.ProductService;
 
 /**
  * Covers exception-handler branches not exercised by ProductControllerTest or MaintenanceTaskControllerTest.
@@ -39,10 +39,10 @@ class GlobalExceptionHandlerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IProductService productService;
+    private ProductService productService;
 
     @MockBean
-    private IMaintenanceTaskService taskService;
+    private MaintenanceTaskService taskService;
 
     @Nested
     @DisplayName("Generic Exception → 500")

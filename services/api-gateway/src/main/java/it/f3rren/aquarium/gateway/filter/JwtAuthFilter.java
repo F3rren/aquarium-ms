@@ -15,18 +15,28 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 /**
- * Deny-by-default authentication at the edge: every route requires a valid {@code Authorization:
- * Bearer <jwt>} unless its path is explicitly excluded (login itself, actuator, swagger/docs -
- * Sentinel's own discovery phase must stay anonymous even once a target requires auth for the
- * actual attack phase). This is the only place authentication is enforced - none of the seven
- * downstream services validate a token themselves; they trust the {@code X-User-Id} header this
- * filter injects, which is safe only because they are reachable exclusively through this gateway
+ * Deny-by-default authentication at the edge: every route requires a valid
+ * {@code Authorization:
+ * Bearer <jwt>} unless its path is explicitly excluded (login itself, actuator,
+ * swagger/docs -
+ * Sentinel's own discovery phase must stay anonymous even once a target
+ * requires auth for the
+ * actual attack phase). This is the only place authentication is enforced -
+ * none of the seven
+ * downstream services validate a token themselves; they trust the
+ * {@code X-User-Id} header this
+ * filter injects, which is safe only because they are reachable exclusively
+ * through this gateway
  * on the Docker network, never published on a host port directly.
  * <p>
- * Deliberately does NOT check resource ownership - only "is this caller authenticated at all".
- * Whether an authenticated identity is authorized on the *specific* resource it's requesting is
- * each downstream service's own concern (see aquariums-service, which enforces it on write
- * endpoints but not on {@code GET /aquariums/{id}} - the intentional IDOR test fixture).
+ * Deliberately does NOT check resource ownership - only "is this caller
+ * authenticated at all".
+ * Whether an authenticated identity is authorized on the *specific* resource
+ * it's requesting is
+ * each downstream service's own concern (see aquariums-service, which enforces
+ * it on write
+ * endpoints but not on {@code GET /aquariums/{id}} - the intentional IDOR test
+ * fixture).
  */
 @Component
 public class JwtAuthFilter implements GlobalFilter, Ordered {
@@ -59,7 +69,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return reject(exchange, "invalid-or-expired-token");
         }
 
-        // Never trust a client-supplied X-User-Id - strip it before setting our own, so a
+        // Never trust a client-supplied X-User-Id - strip it before setting our own, so
+        // a
         // caller cannot impersonate another user by simply adding the header itself.
         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                 .headers(headers -> headers.remove("X-User-Id"))

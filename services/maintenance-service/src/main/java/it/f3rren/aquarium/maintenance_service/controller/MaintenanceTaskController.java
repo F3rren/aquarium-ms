@@ -19,7 +19,7 @@ import it.f3rren.aquarium.maintenance_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
-import it.f3rren.aquarium.maintenance_service.service.IMaintenanceTaskService;
+import it.f3rren.aquarium.maintenance_service.service.MaintenanceTaskService;
 
 @Validated
 @RestController
@@ -27,9 +27,9 @@ import it.f3rren.aquarium.maintenance_service.service.IMaintenanceTaskService;
 @Tag(name = "MaintenanceTask", description = "API for managing maintenance tasks")
 public class MaintenanceTaskController {
 
-    private final IMaintenanceTaskService taskService;
+    private final MaintenanceTaskService taskService;
 
-    public MaintenanceTaskController(IMaintenanceTaskService taskService) {
+    public MaintenanceTaskController(MaintenanceTaskService taskService) {
         this.taskService = taskService;
     }
 

@@ -15,7 +15,6 @@ public class BotProtectionProperties {
     private List<String> blockedUserAgentPatterns = List.of(
             "curl/", "python-requests/", "Go-http-client/",
             "Java/", "Apache-HttpClient", "okhttp/",
-            "wget", "libwww-perl", "scrapy"
-    );
+            "wget", "libwww-perl", "scrapy");
     private List<String> excludedPaths = List.of("/actuator", "/swagger-ui", "/v3/api-docs");
 }

@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import it.f3rren.aquarium.target_parameter_service.kafka.event.AquariumEvent;
-import it.f3rren.aquarium.target_parameter_service.repository.ITargetParameterRepository;
+import it.f3rren.aquarium.target_parameter_service.repository.TargetParameterRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AquariumEventListenerTest {
 
     @Mock
-    private ITargetParameterRepository targetParameterRepository;
+    private TargetParameterRepository targetParameterRepository;
 
     @InjectMocks
     private AquariumEventListener listener;

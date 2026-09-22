@@ -19,12 +19,18 @@ import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Brute-force protection for {@code POST /auth/login}, keyed per client IP. Deliberately a plain
- * {@link WebFilter}, not a {@link org.springframework.cloud.gateway.filter.GlobalFilter} like
- * {@link RateLimitingFilter}: a {@code GlobalFilter} only wraps requests the gateway actually
- * routes to a backend, and {@code /auth/login} is handled locally by {@code AuthController} -
- * it never goes through that chain, so {@link RateLimitingFilter} never sees it no matter how
- * it's configured. A {@link WebFilter} runs for every request the reactive server receives,
+ * Brute-force protection for {@code POST /auth/login}, keyed per client IP.
+ * Deliberately a plain
+ * {@link WebFilter}, not a
+ * {@link org.springframework.cloud.gateway.filter.GlobalFilter} like
+ * {@link RateLimitingFilter}: a {@code GlobalFilter} only wraps requests the
+ * gateway actually
+ * routes to a backend, and {@code /auth/login} is handled locally by
+ * {@code AuthController} -
+ * it never goes through that chain, so {@link RateLimitingFilter} never sees it
+ * no matter how
+ * it's configured. A {@link WebFilter} runs for every request the reactive
+ * server receives,
  * routed or locally dispatched, which is what a login endpoint actually needs.
  */
 @Component
@@ -50,7 +56,8 @@ public class LoginRateLimitFilter implements WebFilter {
         }
 
         String ip = extractClientIp(exchange);
-        BucketEntry entry = bucketsByIp.computeIfAbsent(ip, k -> new BucketEntry(createBucket(), new long[]{System.nanoTime()}));
+        BucketEntry entry = bucketsByIp.computeIfAbsent(ip,
+                k -> new BucketEntry(createBucket(), new long[] { System.nanoTime() }));
         entry.lastAccessNano()[0] = System.nanoTime();
 
         if (entry.bucket().tryConsume(1)) {

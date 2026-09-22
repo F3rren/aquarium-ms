@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import it.f3rren.aquarium.species.dto.CoralResponseDTO;
 import it.f3rren.aquarium.species.dto.FishResponseDTO;
 import it.f3rren.aquarium.species.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.species.service.ISpeciesService;
+import it.f3rren.aquarium.species.service.SpeciesService;
 
 @WebMvcTest(SpeciesController.class)
 class SpeciesControllerTest {
@@ -26,7 +26,7 @@ class SpeciesControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ISpeciesService speciesService;
+    private SpeciesService speciesService;
 
     private FishResponseDTO sampleFish;
     private CoralResponseDTO sampleCoral;

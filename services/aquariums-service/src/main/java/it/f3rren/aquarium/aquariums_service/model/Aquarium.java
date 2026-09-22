@@ -91,7 +91,7 @@ public class Aquarium {
     /**
      * Id of the user who created this aquarium, taken from the gateway-injected
      * {@code X-User-Id} header - never accepted from client-supplied request bodies. Used to
-     * enforce ownership on write operations; see {@link it.f3rren.aquarium.aquariums_service.service.AquariumService}.
+     * enforce ownership on write operations; see {@link it.f3rren.aquarium.aquariums_service.service.AquariumServiceImpl}.
      */
     @NotNull
     @Column(name = "owner_id", nullable = false)
@@ -100,7 +100,7 @@ public class Aquarium {
     /**
      * Free-text verification/moderation marker, meant to be set only by staff review after the
      * fact - never by whoever creates the aquarium. Bound straight from client-supplied input on
-     * creation anyway (see {@link it.f3rren.aquarium.aquariums_service.service.AquariumService
+     * creation anyway (see {@link it.f3rren.aquarium.aquariums_service.service.AquariumServiceImpl
      * #createAquarium}): this is an intentional Mass Assignment / BOPLA test fixture, the
      * counterpart to {@code ownerId} above's correctly-guarded example of the very same class of
      * field (a value only trusted server-side, that a naive implementation might still accept

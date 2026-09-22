@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.TargetParameterResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.target_parameter_service.service.ITargetParameterService;
+import it.f3rren.aquarium.target_parameter_service.service.TargetParameterService;
 
 @WebMvcTest(TargetParameterController.class)
 class TargetParameterControllerTest {
@@ -32,7 +32,7 @@ class TargetParameterControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private ITargetParameterService targetParameterService;
+    private TargetParameterService targetParameterService;
 
     private TargetParameterResponseDTO sampleTargets;
 

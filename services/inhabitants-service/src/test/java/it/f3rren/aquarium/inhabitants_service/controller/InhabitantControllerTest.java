@@ -24,7 +24,7 @@ import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.UpdateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
-import it.f3rren.aquarium.inhabitants_service.service.IInhabitantService;
+import it.f3rren.aquarium.inhabitants_service.service.InhabitantService;
 
 @WebMvcTest(InhabitantController.class)
 class InhabitantControllerTest {
@@ -36,7 +36,7 @@ class InhabitantControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IInhabitantService inhabitantService;
+    private InhabitantService inhabitantService;
 
     private InhabitantDetailsDTO sampleInhabitant;
 

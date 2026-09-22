@@ -27,7 +27,7 @@ import it.f3rren.aquarium.inhabitants_service.dto.CreateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.InhabitantDetailsDTO;
 import it.f3rren.aquarium.inhabitants_service.dto.UpdateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
-import it.f3rren.aquarium.inhabitants_service.service.IInhabitantService;
+import it.f3rren.aquarium.inhabitants_service.service.InhabitantService;
 
 @Validated
 @RestController
@@ -35,9 +35,9 @@ import it.f3rren.aquarium.inhabitants_service.service.IInhabitantService;
 @Tag(name = "Inhabitant", description = "API for managing inhabitants")
 public class InhabitantController {
 
-    private final IInhabitantService inhabitantService;
+    private final InhabitantService inhabitantService;
 
-    public InhabitantController(IInhabitantService inhabitantService) {
+    public InhabitantController(InhabitantService inhabitantService) {
         this.inhabitantService = inhabitantService;
     }
 

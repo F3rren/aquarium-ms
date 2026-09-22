@@ -2,14 +2,14 @@ package it.f3rren.aquarium.maintenance_service.kafka.listener;
 
 import org.springframework.stereotype.Component;
 
-import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;
+import it.f3rren.aquarium.maintenance_service.repository.MaintenanceTaskRepository;
 
 @Component
 public class AquariumEventListener extends BaseAquariumEventListener {
 
-    private final IMaintenanceTaskRepository maintenanceTaskRepository;
+    private final MaintenanceTaskRepository maintenanceTaskRepository;
 
-    public AquariumEventListener(IMaintenanceTaskRepository maintenanceTaskRepository) {
+    public AquariumEventListener(MaintenanceTaskRepository maintenanceTaskRepository) {
         this.maintenanceTaskRepository = maintenanceTaskRepository;
     }
 

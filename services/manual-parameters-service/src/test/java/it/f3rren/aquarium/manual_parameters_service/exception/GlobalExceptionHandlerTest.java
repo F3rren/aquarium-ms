@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.f3rren.aquarium.manual_parameters_service.controller.ManualParameterController;
 import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.manual_parameters_service.service.IManualParameterService;
+import it.f3rren.aquarium.manual_parameters_service.service.ManualParameterService;
 
 /**
  * Covers exception-handler branches not exercised by ManualParameterControllerTest.
@@ -37,7 +37,7 @@ class GlobalExceptionHandlerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IManualParameterService manualParameterService;
+    private ManualParameterService manualParameterService;
 
     @Nested
     @DisplayName("IllegalArgumentException → 400")

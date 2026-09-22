@@ -31,10 +31,10 @@ public class RateLimitingFilter implements GlobalFilter, Ordered {
     private static final Logger logger = LoggerFactory.getLogger(RateLimitingFilter.class);
 
     private static final Set<HttpMethod> WRITE_METHODS = Set.of(
-            HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.PATCH
-    );
+            HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.PATCH);
 
-    private record BucketEntry(Bucket bucket, long[] lastAccessNano) {}
+    private record BucketEntry(Bucket bucket, long[] lastAccessNano) {
+    }
 
     private final ConcurrentHashMap<String, BucketEntry> generalBuckets = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, BucketEntry> writeBuckets = new ConcurrentHashMap<>();
@@ -92,15 +92,13 @@ public class RateLimitingFilter implements GlobalFilter, Ordered {
         if (isWrite) {
             limit = Bandwidth.classic(
                     props.getWriteCapacity(),
-                    Refill.greedy(props.getWriteRefillTokens(), Duration.ofSeconds(props.getWriteRefillSeconds()))
-            );
+                    Refill.greedy(props.getWriteRefillTokens(), Duration.ofSeconds(props.getWriteRefillSeconds())));
         } else {
             limit = Bandwidth.classic(
                     props.getGeneralCapacity(),
-                    Refill.greedy(props.getGeneralRefillTokens(), Duration.ofSeconds(props.getGeneralRefillSeconds()))
-            );
+                    Refill.greedy(props.getGeneralRefillTokens(), Duration.ofSeconds(props.getGeneralRefillSeconds())));
         }
-        return new BucketEntry(Bucket.builder().addLimit(limit).build(), new long[]{System.nanoTime()});
+        return new BucketEntry(Bucket.builder().addLimit(limit).build(), new long[] { System.nanoTime() });
     }
 
     private String extractClientIp(ServerWebExchange exchange) {
@@ -135,7 +133,8 @@ public class RateLimitingFilter implements GlobalFilter, Ordered {
         }
 
         if (removedGeneral > 0 || removedWrite > 0) {
-            logger.debug("Rate limit bucket cleanup: removed {} general, {} write entries", removedGeneral, removedWrite);
+            logger.debug("Rate limit bucket cleanup: removed {} general, {} write entries", removedGeneral,
+                    removedWrite);
         }
     }
 

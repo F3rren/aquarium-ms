@@ -33,8 +33,8 @@ import it.f3rren.aquarium.species.model.CoralFeeding;
 import it.f3rren.aquarium.species.model.CoralPlacement;
 import it.f3rren.aquarium.species.model.FlowRequirement;
 import it.f3rren.aquarium.species.model.LightRequirement;
-import it.f3rren.aquarium.species.repository.ICoralRepository;
-import it.f3rren.aquarium.species.repository.IFishRepository;
+import it.f3rren.aquarium.species.repository.CoralRepository;
+import it.f3rren.aquarium.species.repository.FishRepository;
 
 /**
  * End-to-end integration test for the species read API.
@@ -64,10 +64,10 @@ class SpeciesIntegrationTest {
     }
 
     @Autowired
-    private IFishRepository fishRepository;
+    private FishRepository fishRepository;
 
     @Autowired
-    private ICoralRepository coralRepository;
+    private CoralRepository coralRepository;
 
     @Autowired
     private TestRestTemplate restTemplate;

@@ -11,8 +11,11 @@ import java.util.List;
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
 
-    /** No default on purpose: a missing JWT_SECRET must fail startup, not sign tokens with a
-     *  weak, predictable key. See application.yml. */
+    /**
+     * No default on purpose: a missing JWT_SECRET must fail startup, not sign
+     * tokens with a
+     * weak, predictable key. See application.yml.
+     */
     private String secret;
     private long expirationMinutes = 60;
     private List<String> excludedPaths = List.of("/actuator", "/swagger-ui", "/v3/api-docs", "/auth/login");

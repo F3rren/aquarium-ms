@@ -26,20 +26,20 @@ import it.f3rren.aquarium.species.model.FishTemperament;
 import it.f3rren.aquarium.species.model.FlowRequirement;
 import it.f3rren.aquarium.species.model.LightRequirement;
 import it.f3rren.aquarium.species.model.WaterType;
-import it.f3rren.aquarium.species.repository.ICoralRepository;
-import it.f3rren.aquarium.species.repository.IFishRepository;
+import it.f3rren.aquarium.species.repository.CoralRepository;
+import it.f3rren.aquarium.species.repository.FishRepository;
 
 @ExtendWith(MockitoExtension.class)
 class SpeciesServiceTest {
 
     @Mock
-    private IFishRepository fishRepository;
+    private FishRepository fishRepository;
 
     @Mock
-    private ICoralRepository coralRepository;
+    private CoralRepository coralRepository;
 
     @InjectMocks
-    private SpeciesService speciesService;
+    private SpeciesServiceImpl speciesService;
 
     private final Fish sampleFish = new Fish(1L, "Clownfish", "Amphiprioninae", "Pomacentridae", 50, 11,
             Difficulty.EASY, true, FishTemperament.PEACEFUL, FishDiet.OMNIVORE, null, null, WaterType.MARINE);

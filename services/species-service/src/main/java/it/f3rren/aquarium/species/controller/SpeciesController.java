@@ -20,7 +20,7 @@ import it.f3rren.aquarium.species.dto.ApiResponseDTOFishList;
 import it.f3rren.aquarium.species.dto.ApiResponseDTO;
 import it.f3rren.aquarium.species.dto.CoralResponseDTO;
 import it.f3rren.aquarium.species.dto.FishResponseDTO;
-import it.f3rren.aquarium.species.service.ISpeciesService;
+import it.f3rren.aquarium.species.service.SpeciesService;
 
 @Validated
 @RestController
@@ -28,9 +28,9 @@ import it.f3rren.aquarium.species.service.ISpeciesService;
 @Tag(name = "Species", description = "API for managing fish and coral species")
 public class SpeciesController {
 
-    private final ISpeciesService speciesService;
+    private final SpeciesService speciesService;
 
-    public SpeciesController(ISpeciesService speciesService) {
+    public SpeciesController(SpeciesService speciesService) {
         this.speciesService = speciesService;
     }
 

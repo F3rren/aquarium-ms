@@ -18,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import it.f3rren.aquarium.target_parameter_service.controller.TargetParameterController;
-import it.f3rren.aquarium.target_parameter_service.service.ITargetParameterService;
+import it.f3rren.aquarium.target_parameter_service.service.TargetParameterService;
 
 /**
  * Covers exception-handler branches not exercised by TargetParameterControllerTest.
@@ -30,7 +30,7 @@ class GlobalExceptionHandlerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ITargetParameterService targetParameterService;
+    private TargetParameterService targetParameterService;
 
     @Nested
     @DisplayName("IllegalArgumentException → 400")

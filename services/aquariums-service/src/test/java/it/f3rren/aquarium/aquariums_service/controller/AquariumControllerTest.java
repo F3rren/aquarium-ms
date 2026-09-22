@@ -37,7 +37,7 @@ import it.f3rren.aquarium.aquariums_service.exception.ForbiddenException;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.model.AquariumType;
-import it.f3rren.aquarium.aquariums_service.service.IAquariumService;
+import it.f3rren.aquarium.aquariums_service.service.AquariumService;
 
 /**
  * Integration tests for the aquarium controller layer.
@@ -54,7 +54,7 @@ class AquariumControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IAquariumService aquariumService;
+    private AquariumService aquariumService;
 
     @MockBean
     private ParametersClient parametersClient;

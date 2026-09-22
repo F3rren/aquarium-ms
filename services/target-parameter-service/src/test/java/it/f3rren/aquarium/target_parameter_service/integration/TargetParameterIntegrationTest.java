@@ -28,7 +28,7 @@ import it.f3rren.aquarium.target_parameter_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.TargetParameterResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.kafka.listener.AquariumEventListener;
-import it.f3rren.aquarium.target_parameter_service.repository.ITargetParameterRepository;
+import it.f3rren.aquarium.target_parameter_service.repository.TargetParameterRepository;
 
 /**
  * End-to-end integration test for target parameter CRUD.
@@ -68,7 +68,7 @@ class TargetParameterIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private ITargetParameterRepository targetParameterRepository;
+    private TargetParameterRepository targetParameterRepository;
 
     @BeforeEach
     void setUp() {

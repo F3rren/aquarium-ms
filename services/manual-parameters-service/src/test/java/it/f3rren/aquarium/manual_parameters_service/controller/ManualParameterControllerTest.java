@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.dto.ManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.manual_parameters_service.service.IManualParameterService;
+import it.f3rren.aquarium.manual_parameters_service.service.ManualParameterService;
 
 @WebMvcTest(ManualParameterController.class)
 class ManualParameterControllerTest {
@@ -35,7 +35,7 @@ class ManualParameterControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IManualParameterService manualParameterService;
+    private ManualParameterService manualParameterService;
 
     private ManualParameterDTO sampleParameter;
 

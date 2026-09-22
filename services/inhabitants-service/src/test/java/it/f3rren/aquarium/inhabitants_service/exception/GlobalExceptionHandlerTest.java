@@ -22,7 +22,7 @@ import it.f3rren.aquarium.inhabitants_service.controller.InhabitantController;
 import it.f3rren.aquarium.inhabitants_service.dto.CreateInhabitantDTO;
 import it.f3rren.aquarium.inhabitants_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
-import it.f3rren.aquarium.inhabitants_service.service.IInhabitantService;
+import it.f3rren.aquarium.inhabitants_service.service.InhabitantService;
 
 /**
  * Covers exception-handler branches not exercised by InhabitantControllerTest.
@@ -37,7 +37,7 @@ class GlobalExceptionHandlerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IInhabitantService inhabitantService;
+    private InhabitantService inhabitantService;
 
     @Nested
     @DisplayName("Generic Exception → 500")

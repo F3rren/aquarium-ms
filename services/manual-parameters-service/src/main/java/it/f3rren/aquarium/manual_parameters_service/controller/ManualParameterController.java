@@ -18,7 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import it.f3rren.aquarium.manual_parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.dto.ManualParameterDTO;
-import it.f3rren.aquarium.manual_parameters_service.service.IManualParameterService;
+import it.f3rren.aquarium.manual_parameters_service.service.ManualParameterService;
 
 @Validated
 @RestController
@@ -26,9 +26,9 @@ import it.f3rren.aquarium.manual_parameters_service.service.IManualParameterServ
 @Tag(name = "ManualParameter", description = "API for managing manual parameters")
 public class ManualParameterController {
 
-    private final IManualParameterService manualParameterService;
+    private final ManualParameterService manualParameterService;
 
-    public ManualParameterController(IManualParameterService manualParameterService) {
+    public ManualParameterController(ManualParameterService manualParameterService) {
         this.manualParameterService = manualParameterService;
     }
 

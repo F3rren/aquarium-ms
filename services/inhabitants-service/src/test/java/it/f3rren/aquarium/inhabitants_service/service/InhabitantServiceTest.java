@@ -26,13 +26,13 @@ import it.f3rren.aquarium.inhabitants_service.model.Inhabitant;
 import it.f3rren.aquarium.inhabitants_service.model.InhabitantType;
 import it.f3rren.aquarium.inhabitants_service.client.SpeciesClient;
 import it.f3rren.aquarium.inhabitants_service.mapper.InhabitantMapper;
-import it.f3rren.aquarium.inhabitants_service.repository.IInhabitantRepository;
+import it.f3rren.aquarium.inhabitants_service.repository.InhabitantRepository;
 
 @ExtendWith(MockitoExtension.class)
 class InhabitantServiceTest {
 
     @Mock
-    private IInhabitantRepository inhabitantRepository;
+    private InhabitantRepository inhabitantRepository;
 
     @Mock
     private SpeciesClient speciesClient;
@@ -41,7 +41,7 @@ class InhabitantServiceTest {
     private InhabitantMapper inhabitantMapper = new InhabitantMapper();
 
     @InjectMocks
-    private InhabitantService inhabitantService;
+    private InhabitantServiceImpl inhabitantService;
 
     private Inhabitant sampleFishInhabitant;
     private Inhabitant sampleCoralInhabitant;

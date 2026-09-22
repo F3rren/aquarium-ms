@@ -2,14 +2,14 @@ package it.f3rren.aquarium.target_parameter_service.kafka.listener;
 
 import org.springframework.stereotype.Component;
 
-import it.f3rren.aquarium.target_parameter_service.repository.ITargetParameterRepository;
+import it.f3rren.aquarium.target_parameter_service.repository.TargetParameterRepository;
 
 @Component
 public class AquariumEventListener extends BaseAquariumEventListener {
 
-    private final ITargetParameterRepository targetParameterRepository;
+    private final TargetParameterRepository targetParameterRepository;
 
-    public AquariumEventListener(ITargetParameterRepository targetParameterRepository) {
+    public AquariumEventListener(TargetParameterRepository targetParameterRepository) {
         this.targetParameterRepository = targetParameterRepository;
     }
 

@@ -17,10 +17,14 @@ import java.util.Date;
 import java.util.Optional;
 
 /**
- * Issues and validates the gateway's own JWTs (HS256). The raw {@code jwt.secret} is hashed
- * with SHA-256 before use as the signing key, rather than used directly: HS256 requires a key
- * of at least 256 bits, and hashing guarantees that length regardless of how long a value an
- * operator actually sets for the secret, avoiding a confusing {@code WeakKeyException} at
+ * Issues and validates the gateway's own JWTs (HS256). The raw
+ * {@code jwt.secret} is hashed
+ * with SHA-256 before use as the signing key, rather than used directly: HS256
+ * requires a key
+ * of at least 256 bits, and hashing guarantees that length regardless of how
+ * long a value an
+ * operator actually sets for the secret, avoiding a confusing
+ * {@code WeakKeyException} at
  * startup for a shorter (but still reasonable) dev secret.
  */
 @Component

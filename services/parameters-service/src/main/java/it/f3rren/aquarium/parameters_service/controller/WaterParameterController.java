@@ -22,7 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import it.f3rren.aquarium.parameters_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
 import it.f3rren.aquarium.parameters_service.dto.ParameterDTO;
-import it.f3rren.aquarium.parameters_service.service.IParameterService;
+import it.f3rren.aquarium.parameters_service.service.ParameterService;
 
 @Validated
 @RestController
@@ -30,9 +30,9 @@ import it.f3rren.aquarium.parameters_service.service.IParameterService;
 @Tag(name = "WaterParameter", description = "API for managing water parameters")
 public class WaterParameterController {
 
-    private final IParameterService parameterService;
+    private final ParameterService parameterService;
 
-    public WaterParameterController(IParameterService parameterService) {
+    public WaterParameterController(ParameterService parameterService) {
         this.parameterService = parameterService;
     }
 

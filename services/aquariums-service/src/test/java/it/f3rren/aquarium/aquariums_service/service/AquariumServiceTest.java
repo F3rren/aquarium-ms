@@ -43,7 +43,7 @@ class AquariumServiceTest {
     private AquariumEventPublisher eventPublisher;
 
     @InjectMocks
-    private AquariumService aquariumService;
+    private AquariumServiceImpl aquariumService;
 
     private Aquarium sampleAquarium;
 

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
 
-public interface IManualParameterRepository extends JpaRepository<ManualParameter, Long> {
+public interface ManualParameterRepository extends JpaRepository<ManualParameter, Long> {
 
     List<ManualParameter> findByAquariumIdOrderByMeasuredAtDesc(Long aquariumId);
 

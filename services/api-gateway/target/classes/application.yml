@@ -109,7 +109,7 @@ spring:
 
       globalcors:
         corsConfigurations:
-          '[/**]':
+          "[/**]":
             allowedOrigins: "${CORS_ALLOWED_ORIGINS:http://localhost:3000}"
             allowedMethods:
               - GET
@@ -129,6 +129,13 @@ springdoc:
     enabled: ${SWAGGER_ENABLED:false}
     path: /swagger-ui.html
     urls:
+      # The gateway's own locally-generated spec (no routing/rewrite needed, unlike the
+      # downstream entries below) - documents AuthController's endpoints (/auth/login,
+      # /admin/users). Listed explicitly here because a security scanner following this
+      # aggregator otherwise never discovers endpoints that live on the gateway itself
+      # rather than behind it.
+      - name: api-gateway
+        url: /v3/api-docs
       - name: aquariums-service
         url: /aquariums-service/v3/api-docs
       - name: inhabitants-service

@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
 import it.f3rren.aquarium.parameters_service.dto.ParameterDTO;
 import it.f3rren.aquarium.parameters_service.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.parameters_service.service.IParameterService;
+import it.f3rren.aquarium.parameters_service.service.ParameterService;
 
 @WebMvcTest(WaterParameterController.class)
 class WaterParameterControllerTest {
@@ -35,7 +35,7 @@ class WaterParameterControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IParameterService parameterService;
+    private ParameterService parameterService;
 
     private ParameterDTO sampleParameter;
 

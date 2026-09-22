@@ -2,14 +2,14 @@ package it.f3rren.aquarium.inhabitants_service.kafka.listener;
 
 import org.springframework.stereotype.Component;
 
-import it.f3rren.aquarium.inhabitants_service.repository.IInhabitantRepository;
+import it.f3rren.aquarium.inhabitants_service.repository.InhabitantRepository;
 
 @Component
 public class AquariumEventListener extends BaseAquariumEventListener {
 
-    private final IInhabitantRepository inhabitantRepository;
+    private final InhabitantRepository inhabitantRepository;
 
-    public AquariumEventListener(IInhabitantRepository inhabitantRepository) {
+    public AquariumEventListener(InhabitantRepository inhabitantRepository) {
         this.inhabitantRepository = inhabitantRepository;
     }
 

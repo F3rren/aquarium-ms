@@ -25,19 +25,19 @@ import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundExceptio
 import it.f3rren.aquarium.maintenance_service.mapper.ProductMapper;
 import it.f3rren.aquarium.maintenance_service.model.Product;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
-import it.f3rren.aquarium.maintenance_service.repository.IProductRepository;
+import it.f3rren.aquarium.maintenance_service.repository.ProductRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
     @Mock
-    private IProductRepository productRepository;
+    private ProductRepository productRepository;
 
     @Spy
     private ProductMapper productMapper = new ProductMapper();
 
     @InjectMocks
-    private ProductService productService;
+    private ProductServiceImpl productService;
 
     private Product sampleProduct;
 

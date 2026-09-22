@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    
-    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
-    
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+    <springProperty scope="context" name="springAppName" source="spring.application.name" />
+
     <!-- Console Appender with JSON format -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
@@ -19,13 +19,13 @@
             </fieldNames>
         </encoder>
     </appender>
-    
+
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="CONSOLE" />
     </root>
-    
-    <logger name="it.f3rren.aquarium" level="INFO"/>
-    <logger name="org.springframework.web" level="INFO"/>
-    <logger name="org.hibernate" level="WARN"/>
-    <logger name="org.springframework.boot" level="INFO"/>
+
+    <logger name="it.f3rren.aquarium" level="INFO" />
+    <logger name="org.springframework.web" level="INFO" />
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.springframework.boot" level="INFO" />
 </configuration>

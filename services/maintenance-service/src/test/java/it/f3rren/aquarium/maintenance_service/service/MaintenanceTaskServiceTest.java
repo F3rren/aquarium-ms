@@ -24,19 +24,19 @@ import it.f3rren.aquarium.maintenance_service.mapper.MaintenanceTaskMapper;
 import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
 import it.f3rren.aquarium.maintenance_service.model.TaskFrequency;
 import it.f3rren.aquarium.maintenance_service.model.TaskPriority;
-import it.f3rren.aquarium.maintenance_service.repository.IMaintenanceTaskRepository;
+import it.f3rren.aquarium.maintenance_service.repository.MaintenanceTaskRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MaintenanceTaskServiceTest {
 
     @Mock
-    private IMaintenanceTaskRepository taskRepository;
+    private MaintenanceTaskRepository taskRepository;
 
     @Spy
     private MaintenanceTaskMapper taskMapper = new MaintenanceTaskMapper();
 
     @InjectMocks
-    private MaintenanceTaskService taskService;
+    private MaintenanceTaskServiceImpl taskService;
 
     private MaintenanceTask sampleTask;
 

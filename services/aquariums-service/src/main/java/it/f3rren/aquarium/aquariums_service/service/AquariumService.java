@@ -1,158 +1,76 @@
 package it.f3rren.aquarium.aquariums_service.service;
 
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.exception.ForbiddenException;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
-import it.f3rren.aquarium.aquariums_service.repository.IAquariumRepository;
 
 /**
- * Default implementation of {@link IAquariumService}.
- *
- * <p>Handles all business logic for aquarium lifecycle management: creation with input
- * sanitization (trim), partial updates via {@link java.util.Optional}, and existence
- * checks before delete. All write operations are wrapped in a transaction; reads use
- * {@code readOnly = true} for performance.</p>
+ * Service interface for managing {@link Aquarium} entities.
+ * Defines the contract for CRUD operations on aquariums.
+ * Implementations are responsible for business logic and persistence.
  *
  * @author F3rren
  */
-@Service
-public class AquariumService implements IAquariumService {
-
-    private static final Logger log = LoggerFactory.getLogger(AquariumService.class);
-
-    private final IAquariumRepository aquariumRepository;
-    private final AquariumEventPublisher eventPublisher;
-
-    public AquariumService(IAquariumRepository aquariumRepository, AquariumEventPublisher eventPublisher) {
-        this.aquariumRepository = aquariumRepository;
-        this.eventPublisher = eventPublisher;
-    }
+public interface AquariumService {
 
     /**
-     * Creates a new Aquarium entity.
-     * @param dto DTO containing Aquarium creation details.
-     * @param ownerId id of the user creating this aquarium.
-     * @return Created Aquarium entity.
+     * Creates a new aquarium from the given DTO, owned by the given user.
+     *
+     * @param dto     creation data
+     * @param ownerId id of the user creating this aquarium (from the gateway-injected
+     *                {@code X-User-Id} header, never from client-supplied request data)
+     * @return the persisted {@link Aquarium}
      */
-    @Transactional
-    public Aquarium createAquarium(CreateAquariumDTO dto, Long ownerId) {
-        Aquarium aquarium = new Aquarium();
-        aquarium.setName(dto.getName().trim());
-        aquarium.setVolume(dto.getVolume());
-        aquarium.setType(dto.getType());
-        aquarium.setDescription(dto.getDescription());
-        aquarium.setImageUrl(dto.getImageUrl());
-        aquarium.setOwnerId(ownerId);
-        // Intentional Mass Assignment / BOPLA fixture (see Aquarium#verified): bound directly
-        // from client input, with no check that the caller is actually authorized to set it.
-        aquarium.setVerified(dto.getVerified());
-
-        Aquarium saved = aquariumRepository.save(aquarium);
-        log.info("Aquarium created with ID: {}", saved.getId());
-
-        // The event publish must never compromise the committed write. A failure here
-        // is logged explicitly so the inconsistency is visible instead of silent.
-        try {
-            eventPublisher.publishCreated(saved.getId());
-        } catch (Exception ex) {
-            log.error("Failed to publish CREATED event for aquarium ID: {}", saved.getId(), ex);
-        }
-        return saved;
-    }
+    Aquarium createAquarium(CreateAquariumDTO dto, Long ownerId);
 
     /**
-     * Retrieves a paginated list of Aquarium entities.
-     * @param pageable pagination and sorting parameters.
-     * @return Page of Aquarium entities.
+     * Retrieves a paginated list of aquariums.
+     *
+     * @param pageable pagination and sorting parameters
+     * @return page of {@link Aquarium} entities
      */
-    @Transactional(readOnly = true)
-    public Page<Aquarium> getAllAquariums(Pageable pageable) {
-        return aquariumRepository.findAll(pageable);
-    }
+    Page<Aquarium> getAllAquariums(Pageable pageable);
 
     /**
-     * Retrieves an Aquarium entity by its ID.
-     * @param id ID of the Aquarium entity to retrieve.
-     * @return Aquarium entity with the specified ID.
-     * @throws ResourceNotFoundException if the Aquarium entity is not found.
+     * Retrieves a single aquarium by its ID.
+     * <p>
+     * Deliberately does not check ownership - anyone who can reach this endpoint (i.e. is
+     * authenticated at the gateway) can read any aquarium by id, regardless of who created it.
+     * This is an intentional IDOR test fixture: {@link #updateAquarium} and
+     * {@link #deleteAquarium} both enforce ownership, so a security scan against this API can
+     * demonstrate the difference between an endpoint that checks authorization and one that
+     * only checks authentication.
+     *
+     * @param id the aquarium ID
+     * @return the matching {@link Aquarium}
+     * @throws ResourceNotFoundException if no aquarium with the given ID exists
      */
-    @Transactional(readOnly = true)
-    public Aquarium getAquariumById(Long id) {
-        return aquariumRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Aquarium not found with ID: " + id));
-    }
+    Aquarium getAquariumById(Long id);
 
     /**
-     * Updates an Aquarium entity with the provided details.
-     * Only non-null fields in the DTO are applied (partial update).
-     * @param id ID of the Aquarium entity to update.
-     * @param dto DTO containing Aquarium update details.
-     * @param ownerId id of the caller; must match the aquarium's owner.
-     * @return Updated Aquarium entity.
-     * @throws ResourceNotFoundException if the Aquarium entity is not found.
-     * @throws ForbiddenException if the caller does not own the aquarium.
+     * Partially updates an existing aquarium. Only non-null fields in the DTO are applied.
+     *
+     * @param id      the aquarium ID
+     * @param dto     fields to update (null fields are ignored)
+     * @param ownerId id of the caller (from {@code X-User-Id}); must match the aquarium's owner
+     * @return the updated {@link Aquarium}
+     * @throws ResourceNotFoundException if no aquarium with the given ID exists
+     * @throws ForbiddenException        if the caller does not own the aquarium
      */
-    @Transactional
-    public Aquarium updateAquarium(Long id, UpdateAquariumDTO dto, Long ownerId) {
-        Aquarium existing = aquariumRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Aquarium not found with ID: " + id));
-        requireOwnership(existing, ownerId);
-
-        // Partial update: only non-null fields are applied, preserving existing values
-        Optional.ofNullable(dto.getName()).map(String::trim).ifPresent(existing::setName);
-        Optional.ofNullable(dto.getVolume()).ifPresent(existing::setVolume);
-        Optional.ofNullable(dto.getType()).ifPresent(existing::setType);
-        Optional.ofNullable(dto.getDescription()).ifPresent(existing::setDescription);
-        Optional.ofNullable(dto.getImageUrl()).ifPresent(existing::setImageUrl);
-
-        Aquarium updated = aquariumRepository.save(existing);
-        log.info("Aquarium updated with ID: {}", updated.getId());
-        return updated;
-    }
+    Aquarium updateAquarium(Long id, UpdateAquariumDTO dto, Long ownerId);
 
     /**
-     * Deletes an Aquarium entity by its ID.
-     * @param id ID of the Aquarium entity to delete.
-     * @param ownerId id of the caller; must match the aquarium's owner.
-     * @throws ResourceNotFoundException if the Aquarium entity is not found.
-     * @throws ForbiddenException if the caller does not own the aquarium.
+     * Deletes an aquarium by its ID.
+     *
+     * @param id      the aquarium ID
+     * @param ownerId id of the caller (from {@code X-User-Id}); must match the aquarium's owner
+     * @throws ResourceNotFoundException if no aquarium with the given ID exists
+     * @throws ForbiddenException        if the caller does not own the aquarium
      */
-    @Transactional
-    public void deleteAquarium(Long id, Long ownerId) {
-        Aquarium existing = aquariumRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Aquarium not found with ID: " + id));
-        requireOwnership(existing, ownerId);
-
-        aquariumRepository.deleteById(id);
-        log.info("Aquarium deleted with ID: {}", id);
-
-        // As with create, a publish failure must not hide the fact that the row was deleted.
-        try {
-            eventPublisher.publishDeleted(id);
-        } catch (Exception ex) {
-            log.error("Failed to publish DELETED event for aquarium ID: {}", id, ex);
-        }
-    }
-
-    /**
-     * Denies write access to an aquarium the caller doesn't own. {@link #getAquariumById}
-     * deliberately does not call this - see its javadoc.
-     */
-    private void requireOwnership(Aquarium aquarium, Long ownerId) {
-        if (!aquarium.getOwnerId().equals(ownerId)) {
-            throw new ForbiddenException("Aquarium " + aquarium.getId() + " is not owned by user " + ownerId);
-        }
-    }
+    void deleteAquarium(Long id, Long ownerId);
 }

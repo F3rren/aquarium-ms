@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import it.f3rren.aquarium.maintenance_service.model.MaintenanceTask;
 
-public interface IMaintenanceTaskRepository extends JpaRepository<MaintenanceTask, Long> {
+public interface MaintenanceTaskRepository extends JpaRepository<MaintenanceTask, Long> {
     
     List<MaintenanceTask> findByAquariumIdOrderByDueDateAsc(Long aquariumId);
     

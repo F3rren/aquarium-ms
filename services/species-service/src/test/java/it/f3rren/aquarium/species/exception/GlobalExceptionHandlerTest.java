@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import it.f3rren.aquarium.species.controller.SpeciesController;
 import it.f3rren.aquarium.species.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.species.service.ISpeciesService;
+import it.f3rren.aquarium.species.service.SpeciesService;
 
 /**
  * Covers exception-handler branches not exercised by SpeciesControllerTest.
@@ -28,7 +28,7 @@ class GlobalExceptionHandlerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ISpeciesService speciesService;
+    private SpeciesService speciesService;
 
     @Nested
     @DisplayName("IllegalArgumentException → 400")

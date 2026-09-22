@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import it.f3rren.aquarium.parameters_service.model.Parameter;
 
-public interface IParameterRepository extends JpaRepository<Parameter, Long> {
+public interface ParameterRepository extends JpaRepository<Parameter, Long> {
     
     List<Parameter> findByAquariumIdOrderByMeasuredAtDesc(Long aquariumId);
 

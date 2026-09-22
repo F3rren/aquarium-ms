@@ -21,17 +21,17 @@ import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
 import it.f3rren.aquarium.parameters_service.dto.ParameterDTO;
 import it.f3rren.aquarium.parameters_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.parameters_service.model.Parameter;
-import it.f3rren.aquarium.parameters_service.repository.IParameterRepository;
-import it.f3rren.aquarium.parameters_service.service.ParameterService;
+import it.f3rren.aquarium.parameters_service.repository.ParameterRepository;
+import it.f3rren.aquarium.parameters_service.service.ParameterServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class ParameterServiceTest {
 
     @Mock
-    private IParameterRepository parameterRepository;
+    private ParameterRepository parameterRepository;
 
     @InjectMocks
-    private ParameterService parameterService;
+    private ParameterServiceImpl parameterService;
 
     private Parameter sampleParameter;
 

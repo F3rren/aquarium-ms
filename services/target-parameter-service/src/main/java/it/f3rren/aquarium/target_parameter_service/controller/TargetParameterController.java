@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.f3rren.aquarium.target_parameter_service.dto.ApiResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.TargetParameterResponseDTO;
-import it.f3rren.aquarium.target_parameter_service.service.ITargetParameterService;
+import it.f3rren.aquarium.target_parameter_service.service.TargetParameterService;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 
@@ -18,9 +18,9 @@ import org.springframework.validation.annotation.Validated;
 @Tag(name = "TargetParameter", description = "API for managing target parameters")
 public class TargetParameterController {
 
-    private final ITargetParameterService targetParameterService;
+    private final TargetParameterService targetParameterService;
 
-    public TargetParameterController(ITargetParameterService targetParameterService) {
+    public TargetParameterController(TargetParameterService targetParameterService) {
         this.targetParameterService = targetParameterService;
     }
 

@@ -11,7 +11,7 @@ import it.f3rren.aquarium.maintenance_service.model.Product;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
 
 @Repository
-public interface IProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
     
     // Find by category
     List<Product> findByCategoryOrderByNameAsc(ProductCategory category);

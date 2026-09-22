@@ -25,7 +25,7 @@ import it.f3rren.aquarium.maintenance_service.dto.request.UpdateProductDTO;
 import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
-import it.f3rren.aquarium.maintenance_service.service.IProductService;
+import it.f3rren.aquarium.maintenance_service.service.ProductService;
 
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
@@ -37,7 +37,7 @@ class ProductControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IProductService productService;
+    private ProductService productService;
 
     private ProductDTO sampleProduct;
 

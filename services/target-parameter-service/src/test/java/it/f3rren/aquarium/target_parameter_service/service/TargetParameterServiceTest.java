@@ -16,16 +16,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import it.f3rren.aquarium.target_parameter_service.dto.SaveTargetParameterDTO;
 import it.f3rren.aquarium.target_parameter_service.dto.TargetParameterResponseDTO;
 import it.f3rren.aquarium.target_parameter_service.model.TargetParameter;
-import it.f3rren.aquarium.target_parameter_service.repository.ITargetParameterRepository;
+import it.f3rren.aquarium.target_parameter_service.repository.TargetParameterRepository;
 
 @ExtendWith(MockitoExtension.class)
 class TargetParameterServiceTest {
 
     @Mock
-    private ITargetParameterRepository targetParameterRepository;
+    private TargetParameterRepository targetParameterRepository;
 
     @InjectMocks
-    private TargetParameterService targetParameterService;
+    private TargetParameterServiceimpl targetParameterService;
 
     @Nested
     class GetTargetParameters {

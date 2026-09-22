@@ -22,16 +22,16 @@ import it.f3rren.aquarium.manual_parameters_service.dto.CreateManualParameterDTO
 import it.f3rren.aquarium.manual_parameters_service.dto.ManualParameterDTO;
 import it.f3rren.aquarium.manual_parameters_service.exception.ResourceNotFoundException;
 import it.f3rren.aquarium.manual_parameters_service.model.ManualParameter;
-import it.f3rren.aquarium.manual_parameters_service.repository.IManualParameterRepository;
+import it.f3rren.aquarium.manual_parameters_service.repository.ManualParameterRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ManualParameterServiceTest {
 
     @Mock
-    private IManualParameterRepository manualParameterRepository;
+    private ManualParameterRepository manualParameterRepository;
 
     @InjectMocks
-    private ManualParameterService manualParameterService;
+    private ManualParameterServiceImpl manualParameterService;
 
     private ManualParameter sampleParameter;
 

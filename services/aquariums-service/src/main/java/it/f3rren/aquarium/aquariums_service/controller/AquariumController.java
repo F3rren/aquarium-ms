@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import it.f3rren.aquarium.aquariums_service.dto.*;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
-import it.f3rren.aquarium.aquariums_service.service.IAquariumService;
+import it.f3rren.aquarium.aquariums_service.service.AquariumService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +25,8 @@ import org.springframework.validation.annotation.Validated;
 /**
  * Controller for CRUD operations on aquariums.
  * Parameter proxy endpoints are handled by dedicated controllers:
- * {@link WaterParameterController}, {@link ManualParameterController}, {@link TargetParameterController}.
+ * {@link WaterParameterController}, {@link ManualParameterController},
+ * {@link TargetParameterController}.
  *
  * @author f3rren
  */
@@ -35,14 +36,15 @@ import org.springframework.validation.annotation.Validated;
 @Tag(name = "Aquarium", description = "API for managing aquariums")
 public class AquariumController {
 
-    private final IAquariumService aquariumService;
+    private final AquariumService aquariumService;
 
-    public AquariumController(IAquariumService aquariumService) {
+    public AquariumController(AquariumService aquariumService) {
         this.aquariumService = aquariumService;
     }
 
     /**
-     * Retrieves aquariums with pagination. Defaults to page 0, size 20, sorted by id.
+     * Retrieves aquariums with pagination. Defaults to page 0, size 20, sorted by
+     * id.
      *
      * @param pageable pagination and sorting parameters
      * @return ResponseEntity containing a paginated list of aquariums
@@ -62,10 +64,10 @@ public class AquariumController {
                 "page", page.getNumber(),
                 "size", page.getSize(),
                 "totalElements", page.getTotalElements(),
-                "totalPages", page.getTotalPages()
-        );
+                "totalPages", page.getTotalPages());
 
-        return ResponseEntity.ok(new ApiResponseDTO<>(true, "Aquariums retrieved successfully", aquariums, paginationMeta));
+        return ResponseEntity
+                .ok(new ApiResponseDTO<>(true, "Aquariums retrieved successfully", aquariums, paginationMeta));
     }
 
     /**
@@ -76,19 +78,23 @@ public class AquariumController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "Get aquarium by ID", description = "Retrieve details of a specific aquarium")
+
     public ResponseEntity<ApiResponseDTO<AquariumResponseDTO>> getAquariumById(@PathVariable Long id) {
         Aquarium aquarium = aquariumService.getAquariumById(id);
 
         return ResponseEntity.ok(ApiResponseDTO.success("Aquarium retrieved successfully",
                 AquariumResponseDTO.fromEntity(aquarium)));
+                
     }
 
     /**
-     * Creates a new aquarium, owned by the caller identified by the gateway-injected
+     * Creates a new aquarium, owned by the caller identified by the
+     * gateway-injected
      * {@code X-User-Id} header.
      *
-     * @param ownerId id of the authenticated caller (from the gateway, never client-supplied JSON)
-     * @param dto Aquarium details to be created
+     * @param ownerId id of the authenticated caller (from the gateway, never
+     *                client-supplied JSON)
+     * @param dto     Aquarium details to be created
      * @return ResponseEntity containing created aquarium details
      */
     @PostMapping
@@ -107,7 +113,8 @@ public class AquariumController {
      * Updates an existing aquarium. Only the owner may update it.
      *
      * @param id      ID of the aquarium to update
-     * @param ownerId id of the authenticated caller; must match the aquarium's owner
+     * @param ownerId id of the authenticated caller; must match the aquarium's
+     *                owner
      * @param dto     Updated aquarium details
      * @return ResponseEntity containing updated aquarium details
      */
@@ -127,7 +134,8 @@ public class AquariumController {
      * Deletes an aquarium by its ID. Only the owner may delete it.
      *
      * @param id      ID of the aquarium to delete
-     * @param ownerId id of the authenticated caller; must match the aquarium's owner
+     * @param ownerId id of the authenticated caller; must match the aquarium's
+     *                owner
      * @return 204 No Content on success
      */
     @DeleteMapping("/{id}")

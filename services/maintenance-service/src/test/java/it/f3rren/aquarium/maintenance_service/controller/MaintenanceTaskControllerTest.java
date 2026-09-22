@@ -23,7 +23,7 @@ import it.f3rren.aquarium.maintenance_service.dto.request.CreateMaintenanceTaskD
 import it.f3rren.aquarium.maintenance_service.dto.request.UpdateMaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.dto.response.MaintenanceTaskDTO;
 import it.f3rren.aquarium.maintenance_service.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.maintenance_service.service.IMaintenanceTaskService;
+import it.f3rren.aquarium.maintenance_service.service.MaintenanceTaskService;
 
 @WebMvcTest(MaintenanceTaskController.class)
 class MaintenanceTaskControllerTest {
@@ -35,7 +35,7 @@ class MaintenanceTaskControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IMaintenanceTaskService taskService;
+    private MaintenanceTaskService taskService;
 
     private MaintenanceTaskDTO sampleTask;
 

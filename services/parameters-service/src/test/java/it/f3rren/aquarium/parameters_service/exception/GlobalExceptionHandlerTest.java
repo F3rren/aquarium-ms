@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.f3rren.aquarium.parameters_service.controller.WaterParameterController;
 import it.f3rren.aquarium.parameters_service.dto.CreateParameterDTO;
 import it.f3rren.aquarium.parameters_service.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.parameters_service.service.IParameterService;
+import it.f3rren.aquarium.parameters_service.service.ParameterService;
 
 /**
  * Covers exception-handler branches not exercised by WaterParameterControllerTest.
@@ -37,7 +37,7 @@ class GlobalExceptionHandlerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private IParameterService parameterService;
+    private ParameterService parameterService;
 
     @Nested
     @DisplayName("IllegalArgumentException → 400")

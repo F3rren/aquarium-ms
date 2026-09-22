@@ -24,7 +24,7 @@ import it.f3rren.aquarium.maintenance_service.dto.request.QuantityChangeDTO;
 import it.f3rren.aquarium.maintenance_service.dto.request.UpdateProductDTO;
 import it.f3rren.aquarium.maintenance_service.dto.response.ProductDTO;
 import it.f3rren.aquarium.maintenance_service.model.ProductCategory;
-import it.f3rren.aquarium.maintenance_service.service.IProductService;
+import it.f3rren.aquarium.maintenance_service.service.ProductService;
 
 
 @Validated
@@ -33,9 +33,9 @@ import it.f3rren.aquarium.maintenance_service.service.IProductService;
 @Tag(name = "Product", description = "API for managing aquarium products")
 public class ProductController {
 
-    private final IProductService productService;
+    private final ProductService productService;
 
-    public ProductController(IProductService productService) {
+    public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
