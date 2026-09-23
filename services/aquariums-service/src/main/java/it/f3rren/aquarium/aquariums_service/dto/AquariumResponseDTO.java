@@ -6,15 +6,15 @@ import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.model.AquariumType;
 import lombok.*;
 
-/**
- * Read-only DTO returned by all aquarium endpoints.
- *
- * <p>Decouples the API contract from the {@link Aquarium} entity so that
- * internal model changes do not affect the public interface.
- * Use the {@link #fromEntity(Aquarium)} factory method to construct instances.</p>
- *
- * @author Samuele Alessandro Di Silvestri
- */
+ /**
+  * Read-only DTO returned by all aquarium endpoints.
+  *
+  * <p>Decouples the API contract from the {@link Aquarium} entity so that
+  * internal model changes do not affect the public interface.
+  * Use the {@link #fromEntity(Aquarium)} factory method to construct instances.</p>
+  *
+  * @author Samuele Alessandro Di Silvestri
+  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -45,8 +45,8 @@ public class AquariumResponseDTO {
     /** Id of the user who created this aquarium. */
     private Long ownerId;
 
-    /** Verification/moderation marker - see {@link Aquarium#getVerified()}. */
-    private String verified;
+    /** Verification/moderation marker - see {@link Aquarium#isVerified()}. */
+    private boolean verified;
 
     /**
      * Maps an {@link Aquarium} entity to its response representation.
@@ -64,7 +64,7 @@ public class AquariumResponseDTO {
                 .description(aquarium.getDescription())
                 .imageUrl(aquarium.getImageUrl())
                 .ownerId(aquarium.getOwnerId())
-                .verified(aquarium.getVerified())
+                .verified(aquarium.isVerified())
                 .build();
     }
 }

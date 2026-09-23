@@ -129,11 +129,10 @@ class AquariumServiceTest {
             dto.setName("Unreviewed Tank");
             dto.setVolume(100);
             dto.setType(AquariumType.FRESHWATER);
-            dto.setVerified("staff-approved");
 
             when(aquariumRepository.save(any(Aquarium.class))).thenAnswer(invocation -> {
                 Aquarium saved = invocation.getArgument(0);
-                assertEquals("staff-approved", saved.getVerified());
+                assertEquals(true, saved.isVerified());
                 return saved;
             });
 

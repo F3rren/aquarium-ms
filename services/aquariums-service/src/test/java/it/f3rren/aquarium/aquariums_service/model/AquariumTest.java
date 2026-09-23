@@ -86,7 +86,7 @@ class AquariumTest {
                     "A reef aquarium",
                     "https://example.com/reef.jpg",
                     7L,
-                    "staff-approved"
+                    true
             );
 
             assertEquals(1L, aquarium.getId());
@@ -97,7 +97,7 @@ class AquariumTest {
             assertEquals("A reef aquarium", aquarium.getDescription());
             assertEquals("https://example.com/reef.jpg", aquarium.getImageUrl());
             assertEquals(7L, aquarium.getOwnerId());
-            assertEquals("staff-approved", aquarium.getVerified());
+            assertEquals("staff-approved", aquarium.isVerified());
         }
     }
 }

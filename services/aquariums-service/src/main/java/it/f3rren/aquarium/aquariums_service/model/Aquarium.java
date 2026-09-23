@@ -48,7 +48,6 @@ public class Aquarium {
      * Water volume in liters. Used to contextualize dosing and parameter targets.
      * Must be at least 1.
      */
-    @NotNull
     @Min(1)
     @Column(name = "volume")
     private int volume;
@@ -106,8 +105,7 @@ public class Aquarium {
      * field (a value only trusted server-side, that a naive implementation might still accept
      * from the request body).
      */
-    @Size(max = 100)
-    @Column(name = "verified")
-    private String verified;
+    @Column(name = "verified", nullable = false)
+    private boolean verified = false;
 
 }
