@@ -49,13 +49,15 @@ class AquariumServiceTest {
 
     @BeforeEach
     void setUp() {
-        sampleAquarium = new Aquarium();
-        sampleAquarium.setId(1L);
-        sampleAquarium.setName("Reef Tank");
-        sampleAquarium.setVolume(200);
-        sampleAquarium.setType(AquariumType.SALTWATER);
-        sampleAquarium.setDescription("A beautiful reef aquarium");
-        sampleAquarium.setOwnerId(1L);
+        sampleAquarium = Aquarium.builder()
+            .id(1L)
+            .name("Reef Tank")
+            .volume(200)
+            .type(AquariumType.SALTWATER)
+            .description("A beautiful reef aquarium")
+            .ownerId(1L)
+            .verified(false)
+            .build();
     }
 
     // ========================
@@ -129,14 +131,14 @@ class AquariumServiceTest {
             dto.setName("Unreviewed Tank");
             dto.setVolume(100);
             dto.setType(AquariumType.FRESHWATER);
-
+            
             when(aquariumRepository.save(any(Aquarium.class))).thenAnswer(invocation -> {
                 Aquarium saved = invocation.getArgument(0);
-                assertEquals(true, saved.isVerified());
+                assertEquals(false, saved.isVerified());
                 return saved;
             });
 
-            aquariumService.createAquarium(dto, 1L);
+            aquariumService.createAquarium(dto, 5L);
             verify(aquariumRepository).save(any(Aquarium.class));
         }
     }
@@ -304,7 +306,7 @@ class AquariumServiceTest {
 
             aquariumService.deleteAquarium(1L, 1L);
 
-            verify(aquariumRepository, times(1)).deleteById(1L);
+            verify(aquariumRepository).delete(sampleAquarium);
         }
 
         @Test
@@ -315,7 +317,7 @@ class AquariumServiceTest {
             assertThrows(ResourceNotFoundException.class,
                     () -> aquariumService.deleteAquarium(99L, 1L));
 
-            verify(aquariumRepository, never()).deleteById(any());
+            verify(aquariumRepository, never()).delete(any());
         }
 
         @Test

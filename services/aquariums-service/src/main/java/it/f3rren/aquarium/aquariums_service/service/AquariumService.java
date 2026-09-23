@@ -66,7 +66,7 @@ public interface AquariumService {
 
     /**
      * Deletes an aquarium by its ID.
-     *
+     * 
      * @param id      the aquarium ID
      * @param ownerId id of the caller (from {@code X-User-Id}); must match the aquarium's owner
      * @throws ResourceNotFoundException if no aquarium with the given ID exists

@@ -14,7 +14,6 @@ import it.f3rren.aquarium.aquariums_service.dto.CreateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.dto.UpdateAquariumDTO;
 import it.f3rren.aquarium.aquariums_service.exception.ForbiddenException;
 import it.f3rren.aquarium.aquariums_service.exception.ResourceNotFoundException;
-import it.f3rren.aquarium.aquariums_service.kafka.publisher.AquariumEventPublisher;
 import it.f3rren.aquarium.aquariums_service.model.Aquarium;
 import it.f3rren.aquarium.aquariums_service.repository.AquariumRepository;
 
@@ -88,7 +87,7 @@ public class AquariumServiceImpl implements AquariumService {
      * @return Aquarium entity with the specified ID.
      * @throws ResourceNotFoundException if the Aquarium entity is not found.
      */
-    @Override 
+    @Override
     @Transactional(readOnly = true)
     public Aquarium getAquariumById(Long id) {
 
@@ -143,11 +142,9 @@ public class AquariumServiceImpl implements AquariumService {
             Long ownerId) {
 
         Aquarium existing = aquariumRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Aquarium not found with ID: "
-                                        + id
-                        ));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Aquarium not found with ID: "
+                                + id));
 
         requireOwnership(existing, ownerId);
 

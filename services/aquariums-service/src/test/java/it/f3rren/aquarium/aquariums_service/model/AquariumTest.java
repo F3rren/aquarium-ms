@@ -97,7 +97,7 @@ class AquariumTest {
             assertEquals("A reef aquarium", aquarium.getDescription());
             assertEquals("https://example.com/reef.jpg", aquarium.getImageUrl());
             assertEquals(7L, aquarium.getOwnerId());
-            assertEquals("staff-approved", aquarium.isVerified());
+            assertEquals(true, aquarium.isVerified());
         }
     }
 }
